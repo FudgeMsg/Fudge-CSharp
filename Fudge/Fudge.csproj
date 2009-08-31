@@ -48,6 +48,7 @@
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />
     <Compile Include="FudgeMsgField.cs" />
+    <Compile Include="FudgeMsgFormatter.cs" />
     <Compile Include="FudgeRuntimeException.cs" />
     <Compile Include="FudgeStreamDecoder.cs" />
     <Compile Include="FudgeStreamEncoder.cs" />

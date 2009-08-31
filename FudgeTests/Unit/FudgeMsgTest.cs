@@ -45,7 +45,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             return msg;
         }
 
-        protected static FudgeMsg CreateMessageAllOrdinals()
+        protected internal static FudgeMsg CreateMessageAllOrdinals()
         {
             FudgeMsg msg = new FudgeMsg();
 

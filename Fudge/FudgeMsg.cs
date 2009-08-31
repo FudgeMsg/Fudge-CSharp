@@ -190,7 +190,7 @@ namespace OpenGamma.Fudge
             List<IFudgeField> results = new List<IFudgeField>();
             foreach (FudgeMsgField field in fields)
             {
-                if (object.Equals(name, field.Name))        // TODO: 20090831 (t0rx): Why ObjectEquals in Fudge-Java?
+                if (name == field.Name)
                 {
                     results.Add(field);
                 }
@@ -202,7 +202,7 @@ namespace OpenGamma.Fudge
         {
             foreach (FudgeMsgField field in fields)
             {
-                if (object.Equals(name, field.Name))        // TODO: 20090831 (t0rx): Why ObjectEquals in Fudge-Java?
+                if (name == field.Name)
                 {
                     return field;
                 }

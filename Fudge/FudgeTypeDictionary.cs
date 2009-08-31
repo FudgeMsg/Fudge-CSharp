@@ -82,7 +82,6 @@ namespace OpenGamma.Fudge
 
         static FudgeTypeDictionary()
         {
-            // TODO: 20090830 (t0rx): Add array types
             Instance.AddType(PrimitiveFieldTypes.BooleanType);
             Instance.AddType(PrimitiveFieldTypes.ByteType);
             Instance.AddType(PrimitiveFieldTypes.ShortType);
