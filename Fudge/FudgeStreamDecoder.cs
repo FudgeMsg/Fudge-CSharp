@@ -24,7 +24,10 @@ namespace OpenGamma.Fudge
 
         public static FudgeMsg ReadMsg(BinaryReader br, ITaxonomyResolver taxonomyResolver) //throws IOException
         {
-            return ReadMsg(br, id => taxonomyResolver.ResolveTaxonomy(id));
+            if (taxonomyResolver == null)
+                return ReadMsg(br, (TaxonomyResolver)null);
+            else
+                return ReadMsg(br, id => taxonomyResolver.ResolveTaxonomy(id));
         }
 
         public static FudgeMsg ReadMsg(BinaryReader br, TaxonomyResolver taxonomyResolver) //throws IOException

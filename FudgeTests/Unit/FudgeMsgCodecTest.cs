@@ -65,7 +65,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         }
 
         // REVIEW kirk 2009-08-21 -- This should be moved to a utility class.
-        protected static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
+        protected internal static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
         {
             var expectedIter = expectedMsg.GetAllFields().GetEnumerator();
             var actualIter = actualMsg.GetAllFields().GetEnumerator();

@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />
     <Compile Include="FudgeMsgField.cs" />
