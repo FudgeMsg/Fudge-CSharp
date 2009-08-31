@@ -34,35 +34,44 @@ namespace OpenGamma.Fudge
             sizeCache = new SizeCache(this);
         }
 
-        //  public FudgeMsg(FudgeMsg other) {
-        //    if(other == null) {
-        //      throw new NullPointerException("Cannot initialize from a null other FudgeMsg");
-        //    }
-        //    initializeFromByteArray(other.toByteArray());
-        //  }
+        public FudgeMsg(FudgeMsg other)
+        {
+            if (other == null)
+            {
+                throw new ArgumentNullException("Cannot initialize from a null other FudgeMsg");
+            }
+            InitializeFromByteArray(other.ToByteArray());
+        }
 
-        //  public FudgeMsg(byte[] byteArray, FudgeTaxonomy taxonomy) {
-        //    initializeFromByteArray(byteArray);
-        //  }
+        public FudgeMsg(byte[] byteArray, IFudgeTaxonomy taxonomy)
+        {
+            InitializeFromByteArray(byteArray);
+        }
 
-        //  protected void initializeFromByteArray(byte[] byteArray) {
-        //    ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
-        //    DataInputStream is = new DataInputStream(bais);
-        //    FudgeMsg other;
-        //    try {
-        //      other = FudgeStreamDecoder.readMsg(is);
-        //    } catch (IOException e) {
-        //      throw new RuntimeException("IOException thrown using ByteArrayInputStream", e);
-        //    }
-        //    _fields.addAll(other._fields);
-        //  }
+        protected void InitializeFromByteArray(byte[] byteArray)
+        {
+            MemoryStream stream = new MemoryStream(byteArray);
+            BinaryReader bw = new BinaryReader(stream);
+            FudgeMsg other;
+            try
+            {
+                other = FudgeStreamDecoder.ReadMsg(bw);
+            }
+            catch (IOException e)
+            {
+                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO: 20090831 (t0rx): This is just RuntimeException in Fudge-Java
+            }
+            fields.AddRange(other.fields);
+        }
 
-        //  public void add(FudgeField field) {
-        //    if(field == null) {
-        //      throw new NullPointerException("Cannot add an empty field");
-        //    }
-        //    _fields.add(new FudgeMsgField(field));
-        //  }
+        public void Add(IFudgeField field)
+        {
+            if (field == null)
+            {
+                throw new ArgumentNullException("Cannot add an empty field");
+            }
+            fields.Add(new FudgeMsgField(field));
+        }
 
         public void Add(object value, string name)
         {
@@ -151,39 +160,46 @@ namespace OpenGamma.Fudge
             return fields.AsReadOnly();
         }
 
-        //  public FudgeField getByIndex(int index) {
-        //    if(index < 0) {
-        //      throw new ArrayIndexOutOfBoundsException("Cannot specify a negative index into a FudgeMsg.");
-        //    }
-        //    if(index >= _fields.size()) {
-        //      return null;
-        //    }
-        //    return _fields.get(index);
-        //  }
+        public IFudgeField GetByIndex(int index)
+        {
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException("Cannot specify a negative index into a FudgeMsg.");
+            }
+            if (index >= fields.Count)
+            {
+                return null;
+            }
+            return fields[index];
+        }
 
-        //  // REVIEW kirk 2009-08-16 -- All of these getters are currently extremely unoptimized.
-        //  // There may be an option required if we have a lot of random access to the field content
-        //  // to speed things up by building an index.
+        // REVIEW kirk 2009-08-16 -- All of these getters are currently extremely unoptimized.
+        // there may be an option required if we have a lot of random access to the field content
+        // to speed things up by building an index.
+        public IList<IFudgeField> GetAllByOrdinal(short ordinal)
+        {
+            List<IFudgeField> result = new List<IFudgeField>();
+            foreach (FudgeMsgField field in fields)
+            {
+                if (ordinal == field.Ordinal)
+                {
+                    result.Add(field);
+                }
+            }
+            return result;
+        }
 
-        //  public List<FudgeField> getAllByOrdinal(short ordinal) {
-        //    List<FudgeField> fields = new ArrayList<FudgeField>();
-        //    for(FudgeMsgField field : _fields) {
-        //      if((field.getOrdinal() != null) && (ordinal == field.getOrdinal())) {
-        //        fields.add(field);
-        //      }
-        //    }
-        //    return fields;
-        //  }
-
-
-        //  public FudgeField getByOrdinal(short ordinal) {
-        //    for(FudgeMsgField field : _fields) {
-        //      if((field.getOrdinal() != null) && (ordinal == field.getOrdinal())) {
-        //        return field;
-        //      }
-        //    }
-        //    return null;
-        //  }
+        public IFudgeField GetByOrdinal(short ordinal)
+        {
+            foreach (FudgeMsgField field in fields)
+            {
+                if (ordinal == field.Ordinal)
+                {
+                    return field;
+                }
+            }
+            return null;
+        }
 
         public List<IFudgeField> GetAllByName(string name)
         {

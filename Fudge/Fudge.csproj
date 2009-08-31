@@ -60,6 +60,8 @@
     <Compile Include="SizeCache.cs" />
     <Compile Include="Taxon\IFudgeTaxonomy.cs" />
     <Compile Include="Taxon\IFudgeTaxonomyResolver.cs" />
+    <Compile Include="Taxon\ImmutableMapTaxonomyResolver.cs" />
+    <Compile Include="Taxon\MapFudgeTaxonomy.cs" />
     <Compile Include="Types\ByteArrayFieldType.cs" />
     <Compile Include="Types\DoubleArrayFieldType.cs" />
     <Compile Include="Types\FloatArrayFieldType.cs" />
