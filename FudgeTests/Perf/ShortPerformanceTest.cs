@@ -35,6 +35,8 @@ namespace OpenGamma.Fudge.Tests.Perf
             for (int i = 0; i < HOT_SPOT_WARMUP_CYCLES; i++)
             {
                 FudgeCycle(true, false);
+                FudgeCycle(false, true);
+                FudgeCycle(true, true);
                 SerializationCycle();
             }
         }
@@ -50,6 +52,7 @@ namespace OpenGamma.Fudge.Tests.Perf
             long startTime = 0;
             long endTime = 0;
 
+            Console.Out.WriteLine("Starting Fudge names only.");
             startTime = DateTime.Now.Ticks / 10000;
             for (int i = 0; i < nCycles; i++)
             {
@@ -58,7 +61,10 @@ namespace OpenGamma.Fudge.Tests.Perf
             endTime = DateTime.Now.Ticks / 10000;
             long fudgeDeltaNamesOnly = endTime - startTime;
             double fudgeSplitNamesOnly = ConvertToCyclesPerSecond(nCycles, fudgeDeltaNamesOnly);
+            Console.Out.WriteLine("GCing...");
+            System.GC.Collect();
 
+            Console.Out.WriteLine("Starting Fudge ordinals only.");
             startTime = DateTime.Now.Ticks / 10000;
             for (int i = 0; i < nCycles; i++)
             {
@@ -67,7 +73,10 @@ namespace OpenGamma.Fudge.Tests.Perf
             endTime = DateTime.Now.Ticks / 10000;
             long fudgeDeltaOrdinalsOnly = endTime - startTime;
             double fudgeSplitOrdinalsOnly = ConvertToCyclesPerSecond(nCycles, fudgeDeltaOrdinalsOnly);
+            Console.Out.WriteLine("GCing...");
+            System.GC.Collect();
 
+            Console.Out.WriteLine("Starting Fudge names and ordinals.");
             startTime = DateTime.Now.Ticks / 10000;
             for (int i = 0; i < nCycles; i++)
             {
@@ -76,7 +85,10 @@ namespace OpenGamma.Fudge.Tests.Perf
             endTime = DateTime.Now.Ticks / 10000;
             long fudgeDeltaBoth = endTime - startTime;
             double fudgeSplitBoth = ConvertToCyclesPerSecond(nCycles, fudgeDeltaBoth);
+            Console.Out.WriteLine("GCing...");
+            System.GC.Collect();
 
+            Console.Out.WriteLine("Starting Java Serialization.");
             startTime = DateTime.Now.Ticks / 10000;
             for (int i = 0; i < nCycles; i++)
             {
@@ -85,6 +97,8 @@ namespace OpenGamma.Fudge.Tests.Perf
             endTime = DateTime.Now.Ticks / 10000;
             long serializationDelta = endTime - startTime;
             double serializationSplit = ConvertToCyclesPerSecond(nCycles, serializationDelta);
+            Console.Out.WriteLine("GCing...");
+            System.GC.Collect();
 
             StringBuilder sb = new StringBuilder();
             sb.Append("For ").Append(nCycles).Append(" cycles");

@@ -29,9 +29,11 @@ namespace OpenGamma.Fudge.Types
             return value.GetSize(taxonomy);
         }
 
-        public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize, IFudgeTaxonomy taxonomy) //throws IOException
+        public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            return FudgeStreamDecoder.ReadMsg(input, id => taxonomy);
+            // REVIEW kirk 2009-09-01 -- This is right. We have to use the same taxonomy,
+            // so the parent taxonomy resolver will be fixed up later on.
+            return FudgeStreamDecoder.ReadMsg(input);
         }
 
         public override void WriteValue(BinaryWriter output, FudgeMsg value, IFudgeTaxonomy taxonomy, short taxonomyId) //throws IOException

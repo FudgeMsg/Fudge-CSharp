@@ -41,24 +41,27 @@ namespace OpenGamma.Fudge
             int size = br.ReadInt32();
             nRead += 4;
 
-            IFudgeTaxonomy taxonomy = (taxonomyResolver == null) ? null : taxonomyResolver(taxonomyId);
-
             FudgeMsg msg = new FudgeMsg();
             for (int i = 0; i < nFields; i++)
             {
-                nRead += ReadField(br, msg, taxonomy);
+                nRead += ReadField(br, msg);
             }
 
             if ((size > 0) && (nRead != size))
             {
                 throw new FudgeRuntimeException("Expected to read " + size + " but only had " + nRead + " in message.");      // TODO: 20090831 (t0rx): This is just RuntimeException in Fudge-Java
             }
-            return msg;
-        }
 
-        public static int ReadField(BinaryReader br, FudgeMsg msg) //throws IOException
-        {
-            return ReadField(br, msg, null);
+            if (taxonomyResolver != null)
+            {
+                IFudgeTaxonomy taxonomy = taxonomyResolver(taxonomyId);
+                if (taxonomy != null)
+                {
+                    msg.SetNamesFromTaxonomy(taxonomy);
+                }
+            }
+
+            return msg;
         }
 
         /// <summary>
@@ -66,7 +69,7 @@ namespace OpenGamma.Fudge
         /// </summary>
         /// <param name="?"></param>
         /// <returns>The number of bytes read.</returns>
-        public static int ReadField(BinaryReader br, FudgeMsg msg, IFudgeTaxonomy taxonomy) //throws IOException
+        public static int ReadField(BinaryReader br, FudgeMsg msg) //throws IOException
         {
             CheckInputStream(br);
             int nRead = 0;
@@ -100,10 +103,6 @@ namespace OpenGamma.Fudge
                 name = ModifiedUTF8Util.ReadString(br, nameSize);
                 nRead += nameSize;
             }
-            else if (hasOrdinal && taxonomy != null)
-            {
-                name = taxonomy.GetFieldName(ordinal.Value);
-            }
 
             FudgeFieldType type = FudgeTypeDictionary.Instance.GetByTypeId(typeId);
             if (type == null)
@@ -126,7 +125,7 @@ namespace OpenGamma.Fudge
                 }
 
             }
-            object fieldValue = ReadFieldValue(br, type, varSize, taxonomy);
+            object fieldValue = ReadFieldValue(br, type, varSize);
             if (fixedWidth)
             {
                 nRead += type.FixedSize;
@@ -141,7 +140,7 @@ namespace OpenGamma.Fudge
             return nRead;
         }
 
-        public static object ReadFieldValue(BinaryReader br, FudgeFieldType type, int varSize, IFudgeTaxonomy taxonomy) //throws IOException
+        public static object ReadFieldValue(BinaryReader br, FudgeFieldType type, int varSize) //throws IOException
         {
             Debug.Assert(type != null);
             Debug.Assert(br != null);
@@ -165,7 +164,7 @@ namespace OpenGamma.Fudge
                     return br.ReadDouble();
             }
 
-            return type.ReadValue(br, varSize, taxonomy);
+            return type.ReadValue(br, varSize);
         }
 
         protected static void CheckInputStream(BinaryReader br)

@@ -22,16 +22,14 @@ namespace OpenGamma.Fudge
     /// expensive in CPU and memory usage than just holding the original byte array,
     /// but lookups are substantially faster.
     /// </summary>
-    public class FudgeMsg : ISizeComputable
+    public class FudgeMsg : FudgeEncodingObject
     {
         // TODO: 20090830 (t0rx): Finish porting FudgeMsg
 
-        private readonly SizeCache sizeCache;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
         public FudgeMsg()
         {
-            sizeCache = new SizeCache(this);
         }
 
         public FudgeMsg(FudgeMsg other)
@@ -284,14 +282,7 @@ namespace OpenGamma.Fudge
             return stream.ToArray();
         }
 
-        public int GetSize(IFudgeTaxonomy taxonomy)
-        {
-            return sizeCache.GetSize(taxonomy);
-        }
-
-        #region ISizeComputable Members
-
-        public int ComputeSize(OpenGamma.Fudge.Taxon.IFudgeTaxonomy taxonomy)
+        public override int ComputeSize(IFudgeTaxonomy taxonomy)
         {
             int size = 0;
             // Message prefix
@@ -302,8 +293,6 @@ namespace OpenGamma.Fudge
             }
             return size;
         }
-
-        #endregion
 
         // Primitive Queries:
         public double? GetDouble(string fieldName)
@@ -500,13 +489,44 @@ namespace OpenGamma.Fudge
         {
             foreach (FudgeMsgField field in fields)
             {
-                if ((ordinal == field.Ordinal)
+                if (field.Ordinal == null)
+                    continue;
+
+                if ((field.Ordinal == ordinal)
                   && (field.Type.TypeId == typeId))
                 {
                     return field.Value;
                 }
             }
             return null;
+        }
+
+        public void SetNamesFromTaxonomy(IFudgeTaxonomy taxonomy)
+        {
+            if (taxonomy == null)
+            {
+                return;
+            }
+            for (int i = 0; i < fields.Count; i++)
+            {
+                FudgeMsgField field = fields[i];
+                if ((field.Ordinal != null) && (field.Name == null))
+                {
+                    string nameFromTaxonomy = taxonomy.GetFieldName(field.Ordinal.Value);
+                    if (nameFromTaxonomy == null)
+                    {
+                        continue;
+                    }
+                    FudgeMsgField replacementField = new FudgeMsgField(field.Type, field.Value, nameFromTaxonomy, field.Ordinal);
+                    fields[i] = replacementField;
+                }
+
+                if (field.Value is FudgeMsg)
+                {
+                    FudgeMsg subMsg = (FudgeMsg)field.Value;
+                    subMsg.SetNamesFromTaxonomy(taxonomy);
+                }
+            }
         }
 
         /// <summary>

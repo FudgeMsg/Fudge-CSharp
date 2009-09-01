@@ -118,7 +118,7 @@ namespace OpenGamma.Fudge
 
         public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy, short taxonomyId);
 
-        public abstract object ReadValue(BinaryReader input, int dataSize, IFudgeTaxonomy taxonomy);
+        public abstract object ReadValue(BinaryReader input, int dataSize);
     }
 
     /// <summary>Unlike in Fudge-Java, here we have to have a generic type inheriting from the non-generic base type, as C# doesn't support MyClass<?></summary>
@@ -149,7 +149,7 @@ namespace OpenGamma.Fudge
             }
         }
 
-        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize, IFudgeTaxonomy taxonomy) //throws IOException
+        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             // TODO: 20090830 (t0rx): In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
@@ -170,9 +170,9 @@ namespace OpenGamma.Fudge
             WriteValue(output, (TValue)value, taxonomy, taxonomyId);
         }
 
-        public sealed override object ReadValue(BinaryReader input, int dataSize, IFudgeTaxonomy taxonomy)
+        public sealed override object ReadValue(BinaryReader input, int dataSize)
         {
-            return ReadTypedValue(input, dataSize, taxonomy);
+            return ReadTypedValue(input, dataSize);
         }
         #endregion
     }

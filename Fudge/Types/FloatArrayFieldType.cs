@@ -29,7 +29,7 @@ namespace OpenGamma.Fudge.Types
             return value.Length * 4;
         }
 
-        public override float[] ReadTypedValue(BinaryReader input, int dataSize, IFudgeTaxonomy taxonomy) //throws IOException
+        public override float[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             int nFloats = dataSize / 4;
             float[] result = new float[nFloats];

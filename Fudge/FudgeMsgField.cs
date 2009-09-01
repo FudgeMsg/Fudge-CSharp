@@ -11,14 +11,13 @@ using OpenGamma.Fudge.Taxon;
 
 namespace OpenGamma.Fudge
 {
-    public class FudgeMsgField : IFudgeField, ISizeComputable
+    public class FudgeMsgField : FudgeEncodingObject, IFudgeField
     {
         // TODO: 20090830 (t0rx): Finish porting FudgeMsgField
         private readonly FudgeFieldType type;
         private readonly object value;
         private readonly string name;
         private readonly short? ordinal;
-        private readonly SizeCache sizeCache;
 
         public FudgeMsgField(FudgeFieldType type, object value, string name, short? ordinal)
         {
@@ -30,8 +29,7 @@ namespace OpenGamma.Fudge
             this.value = value;
             this.name = name;
             this.ordinal = ordinal;
-            this.sizeCache = new SizeCache(this);
-        }
+       }
 
         public FudgeMsgField(IFudgeField field)
             : this(field.Type, field.Value, field.Name, field.Ordinal)
@@ -104,14 +102,7 @@ namespace OpenGamma.Fudge
         //    return sb.toString();
         //  }
 
-        public int GetSize(IFudgeTaxonomy taxonomy)
-        {
-            return sizeCache.GetSize(taxonomy);
-        }
-
-        #region ISizeComputable Members
-
-        public int ComputeSize(OpenGamma.Fudge.Taxon.IFudgeTaxonomy taxonomy)
+        public override int ComputeSize(IFudgeTaxonomy taxonomy)
         {
             int size = 0;
             // Field prefix
@@ -159,7 +150,5 @@ namespace OpenGamma.Fudge
             }
             return size;
         }
-
-        #endregion
     }
 }
