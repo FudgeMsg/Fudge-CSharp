@@ -72,6 +72,10 @@ namespace OpenGamma.Fudge
         public const byte SHORT_TYPE_ID = 2;
         public const byte INT_TYPE_ID = 3;
         public const byte LONG_TYPE_ID = 4;
+        public const byte SHORT_ARRAY_TYPE_ID = 5;
+        public const byte INT_ARRAY_TYPE_ID = 6;
+        public const byte LONG_ARRAY_TYPE_ID = 7;
+        public const byte INDICATOR_TYPE_ID = 8;
         public const byte FLOAT_TYPE_ID = 17;           // We use the name Float rather than Single to be consistent with Fudge-Java
         public const byte FLOAT_ARRAY_TYPE_ID = 18;
         public const byte DOUBLE_TYPE_ID = 19;
@@ -88,6 +92,10 @@ namespace OpenGamma.Fudge
             Instance.AddType(PrimitiveFieldTypes.IntType);
             Instance.AddType(PrimitiveFieldTypes.LongType);
             Instance.AddType(PrimitiveFieldTypes.FloatType);
+            Instance.AddType(ShortArrayFieldType.Instance);
+            Instance.AddType(IntArrayFieldType.Instance);
+            Instance.AddType(LongArrayFieldType.Instance);
+            Instance.AddType(IndicatorFieldType.Instance);
             Instance.AddType(FloatArrayFieldType.Instance);
             Instance.AddType(PrimitiveFieldTypes.DoubleType);
             Instance.AddType(DoubleArrayFieldType.Instance);

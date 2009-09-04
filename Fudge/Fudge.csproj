@@ -63,9 +63,14 @@
     <Compile Include="Taxon\ImmutableMapTaxonomyResolver.cs" />
     <Compile Include="Taxon\MapFudgeTaxonomy.cs" />
     <Compile Include="Types\ByteArrayFieldType.cs" />
+    <Compile Include="Types\LongArrayFieldType.cs" />
+    <Compile Include="Types\ShortArrayFieldType.cs" />
+    <Compile Include="Types\IntArrayFieldType.cs" />
     <Compile Include="Types\DoubleArrayFieldType.cs" />
     <Compile Include="Types\FloatArrayFieldType.cs" />
     <Compile Include="Types\FudgeMsgFieldType.cs" />
+    <Compile Include="Types\IndicatorFieldType.cs" />
+    <Compile Include="Types\IndicatorType.cs" />
     <Compile Include="Types\PrimitiveFieldTypes.cs" />
     <Compile Include="Types\StringFieldType.cs" />
   </ItemGroup>

@@ -26,16 +26,16 @@ namespace OpenGamma.Fudge.Types
 
         public override int GetVariableSize(double[] value, IFudgeTaxonomy taxonomy)
         {
-            return value.Length * 4;
+            return value.Length * 8;
         }
 
         public override double[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            int nFloats = dataSize / 4;
-            double[] result = new double[nFloats];
-            for (int i = 0; i < nFloats; i++)
+            int nDoubles = dataSize / 8;
+            double[] result = new double[nDoubles];
+            for (int i = 0; i < nDoubles; i++)
             {
-                result[i] = input.ReadSingle();
+                result[i] = input.ReadDouble();
             }
             return result;
         }

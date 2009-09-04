@@ -41,6 +41,11 @@ namespace OpenGamma.Fudge.Tests.Unit
 
             msg.Add(new float[24], "float array");
             msg.Add(new double[273], "double array");
+            msg.Add(new short[32], "short array");
+            msg.Add(new int[83], "int array");
+            msg.Add(new long[873], "long array");
+
+            msg.Add(IndicatorType.Instance, "indicator");
 
             return msg;
         }
@@ -106,6 +111,9 @@ namespace OpenGamma.Fudge.Tests.Unit
             Assert.Equal(true, field.Value);
             Assert.Equal("boolean", field.Name);
             Assert.Null(field.Ordinal);
+
+            // Check the indicator type specially
+            Assert.Same(IndicatorType.Instance, msg.GetValue("indicator"));
         }
 
         [Fact]
