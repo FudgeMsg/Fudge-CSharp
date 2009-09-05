@@ -81,7 +81,7 @@ namespace OpenGamma.Fudge.Tests.Unit
                 if (expectedField.Value.GetType().IsArray)
                 {
                     Assert.Equal(expectedField.Value.GetType(), actualField.Value.GetType());
-                    // TODO wyliekir 2009-08-19 -- Check something better.
+                    Assert.Equal(expectedField.Value, actualField.Value);       // XUnit will check all values in the arrays
                 }
                 else if (expectedField.Value is FudgeMsg)
                 {
