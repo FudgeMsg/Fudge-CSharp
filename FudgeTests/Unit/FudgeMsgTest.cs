@@ -19,7 +19,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             FudgeMsg msg = new FudgeMsg();
 
             msg.Add(true, "boolean");
-            msg.Add((object)false, "Boolean");
+            msg.Add((object)true, "Boolean");
             msg.Add((byte)5, "byte");
             msg.Add((object)((byte)5), "Byte");
             short shortValue = ((short)byte.MaxValue) + 5;
@@ -55,7 +55,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             FudgeMsg msg = new FudgeMsg();
 
             msg.Add(true, (short)1);
-            msg.Add((object)(false), (short)2);
+            msg.Add((object)(true), (short)2);
             msg.Add((byte)5, (short)3);
             msg.Add((object)((byte)5), (short)4);
             short shortValue = ((short)byte.MaxValue) + 5;
@@ -98,7 +98,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             field = msg.GetByName("Boolean");
             Assert.NotNull(field);
             Assert.Equal(PrimitiveFieldTypes.BooleanType, field.Type);
-            Assert.Equal((object)false, field.Value);
+            Assert.Equal((object)true, field.Value);
             Assert.Equal("Boolean", field.Name);
             Assert.Null(field.Ordinal);
 
@@ -124,7 +124,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             List<IFudgeField> fields = null;
 
             // Now add a second by name.
-            msg.Add(false, "boolean");
+            msg.Add(true, "boolean");
 
             field = msg.GetByName("boolean");
             Assert.NotNull(field);
@@ -146,7 +146,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             field = fields[1];
             Assert.NotNull(field);
             Assert.Equal(PrimitiveFieldTypes.BooleanType, field.Type);
-            Assert.Equal(false, field.Value);
+            Assert.Equal(true, field.Value);
             Assert.Equal("boolean", field.Name);
             Assert.Null(field.Ordinal);
         }
@@ -184,12 +184,12 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = CreateMessageAllNames();
 
-            Assert.Null(msg.GetByte("int"));
-            Assert.Null(msg.GetShort("int"));
-            Assert.Null(msg.GetInt("byte"));
-            Assert.Null(msg.GetLong("int"));
-            Assert.Null(msg.GetFloat("double"));
-            Assert.Null(msg.GetDouble("float"));
+            Assert.Throws<OverflowException>(() => msg.GetByte("int"));
+            Assert.Throws<OverflowException>(() => msg.GetShort("int"));
+            Assert.Equal(5, msg.GetInt("byte"));
+            Assert.Equal(((long)short.MaxValue) + 5, msg.GetLong("int"));
+            Assert.Equal(0.27362f, msg.GetFloat("double"));
+            Assert.Equal(0.5, msg.GetDouble("float"));
         }
 
         [Fact]
@@ -211,26 +211,26 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = CreateMessageAllNames();
 
-            Assert.Equal((long?)((byte)5), msg.GetAsLong("byte"));
-            Assert.Equal((long?)((byte)5), msg.GetAsLong("Byte"));
+            Assert.Equal((long?)((byte)5), msg.GetLong("byte"));
+            Assert.Equal((long?)((byte)5), msg.GetLong("Byte"));
 
 
             short shortValue = ((short)byte.MaxValue) + 5;
-            Assert.Equal((long?)(shortValue), msg.GetAsLong("short"));
-            Assert.Equal((long?)(shortValue), msg.GetAsLong("Short"));
+            Assert.Equal((long?)(shortValue), msg.GetLong("short"));
+            Assert.Equal((long?)(shortValue), msg.GetLong("Short"));
 
             int intValue = ((int)short.MaxValue) + 5;
-            Assert.Equal((long?)(intValue), msg.GetAsLong("int"));
-            Assert.Equal((long?)(intValue), msg.GetAsLong("Integer"));
+            Assert.Equal((long?)(intValue), msg.GetLong("int"));
+            Assert.Equal((long?)(intValue), msg.GetLong("Integer"));
 
             long longValue = ((long)int.MaxValue) + 5;
-            Assert.Equal((long?)(longValue), msg.GetAsLong("long"));
-            Assert.Equal((long?)(longValue), msg.GetAsLong("Long"));
+            Assert.Equal((long?)(longValue), msg.GetLong("long"));
+            Assert.Equal((long?)(longValue), msg.GetLong("Long"));
 
-            Assert.Equal((long?)(0), msg.GetAsLong("float"));
-            Assert.Equal((long?)(0), msg.GetAsLong("Float"));
-            Assert.Equal((long?)(0), msg.GetAsLong("double"));
-            Assert.Equal((long?)(0), msg.GetAsLong("Double"));
+            Assert.Equal((long?)(0), msg.GetLong("float"));
+            Assert.Equal((long?)(0), msg.GetLong("Float"));
+            Assert.Equal((long?)(0), msg.GetLong("double"));
+            Assert.Equal((long?)(0), msg.GetLong("Double"));
         }
 
         [Fact]
@@ -282,12 +282,12 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = CreateMessageAllOrdinals();
 
-            Assert.Null(msg.GetByte((short)7));
-            Assert.Null(msg.GetShort((short)7));
-            Assert.Null(msg.GetInt((short)9));
-            Assert.Null(msg.GetLong((short)7));
-            Assert.Null(msg.GetFloat((short)13));
-            Assert.Null(msg.GetDouble((short)11));
+            Assert.Throws<OverflowException>(()=>msg.GetByte(7));
+            Assert.Throws<OverflowException>(() => msg.GetShort(7));
+            Assert.Throws<OverflowException>(() => msg.GetInt(9));
+            Assert.Equal(((long)short.MaxValue) + 5, msg.GetLong(7));
+            Assert.Equal(0.27362f, msg.GetFloat(13));
+            Assert.Equal(0.5, msg.GetDouble(11));
         }
 
         [Fact]
@@ -309,25 +309,25 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = CreateMessageAllOrdinals();
 
-            Assert.Equal((long)((byte)5), msg.GetAsLong((short)3));
-            Assert.Equal((long)((byte)5), msg.GetAsLong((short)4));
+            Assert.Equal((long)((byte)5), msg.GetLong((short)3));
+            Assert.Equal((long)((byte)5), msg.GetLong((short)4));
 
             short shortValue = ((short)byte.MaxValue) + 5;
-            Assert.Equal((long)(shortValue), msg.GetAsLong((short)5));
-            Assert.Equal((long)(shortValue), msg.GetAsLong((short)6));
+            Assert.Equal((long)(shortValue), msg.GetLong((short)5));
+            Assert.Equal((long)(shortValue), msg.GetLong((short)6));
 
             int intValue = ((int)short.MaxValue) + 5;
-            Assert.Equal((long)(intValue), msg.GetAsLong((short)7));
-            Assert.Equal((long)(intValue), msg.GetAsLong((short)8));
+            Assert.Equal((long)(intValue), msg.GetLong((short)7));
+            Assert.Equal((long)(intValue), msg.GetLong((short)8));
 
             long longValue = ((long)int.MaxValue) + 5;
-            Assert.Equal(longValue, msg.GetAsLong((short)9));
-            Assert.Equal(longValue, msg.GetAsLong((short)10));
+            Assert.Equal(longValue, msg.GetLong((short)9));
+            Assert.Equal(longValue, msg.GetLong((short)10));
 
-            Assert.Equal(0, msg.GetAsLong((short)11));
-            Assert.Equal(0, msg.GetAsLong((short)12));
-            Assert.Equal(0, msg.GetAsLong((short)13));
-            Assert.Equal(0, msg.GetAsLong((short)14));
+            Assert.Equal(0, msg.GetLong((short)11));
+            Assert.Equal(0, msg.GetLong((short)12));
+            Assert.Equal(0, msg.GetLong((short)13));
+            Assert.Equal(0, msg.GetLong((short)14));
         }
 
         [Fact]
@@ -339,15 +339,51 @@ namespace OpenGamma.Fudge.Tests.Unit
             Assert.True(bytes.Length > 10);
         }
 
-        /* TODO t0rx 2009-08-31 -- I reckon this should pass
         [Fact]
-        public void SmallLongComesOut()
+        public void LongInLongOut()
         {
             FudgeMsg msg = new FudgeMsg();
 
             msg.Add((long)5, "test");
             Assert.Equal((long)5, msg.GetLong("test"));
         }
-         */
+
+        [Fact]
+        public void IndicatorBehaviour()
+        {
+            FudgeMsg inputMsg = new FudgeMsg();
+
+            inputMsg.Add(false, 1);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(1).Value);
+            Assert.Equal(false, inputMsg.GetBoolean(1));
+
+            inputMsg.Add((byte)0, 2);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(2).Value);
+            Assert.Equal((byte)0, inputMsg.GetByte(2));
+
+            inputMsg.Add((short)0, 3);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(3).Value);
+            Assert.Equal((short)0, inputMsg.GetShort(3));
+
+            inputMsg.Add((int)0, 4);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(4).Value);
+            Assert.Equal((int)0, inputMsg.GetInt(4));
+
+            inputMsg.Add((long)0, 5);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(5).Value);
+            Assert.Equal((long)0, inputMsg.GetLong(5));
+
+            inputMsg.Add(0.0f, 6);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(6).Value);
+            Assert.Equal(0.0f, inputMsg.GetFloat(6));
+
+            inputMsg.Add(0.0, 7);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(7).Value);
+            Assert.Equal(0.0, inputMsg.GetDouble(7));
+            
+            inputMsg.Add("", 8);
+            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(8).Value);
+            Assert.Equal("", inputMsg.GetString(8));
+        }
     }
 }
