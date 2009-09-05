@@ -225,7 +225,7 @@ namespace OpenGamma.Fudge.Util
             return byteCount;
         }
 
-        // TODO: 20090830 (t0rx): Is there an existing C# exception that is more appropriate?
+        // TODO t0rx 2009-08-30 -- Is there an existing C# exception that is more appropriate?
         public class UTFDataFormatException : Exception
         {
             public UTFDataFormatException(string message)

@@ -30,7 +30,7 @@ namespace OpenGamma.Fudge
                 }
                 return noTaxonomySize;
             }
-            lock (this)     // TODO: 20090901 (t0rx): Should this lock something internal in case someone else has us locked?
+            lock (this)     // TODO t0rx 2009-09-01 -- Should this lock something internal in case someone else has us locked?
             {
                 if (sizesByTaxonomy == null)
                 {

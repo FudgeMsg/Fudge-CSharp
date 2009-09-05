@@ -126,7 +126,7 @@ namespace OpenGamma.Fudge
     [Serializable]
     public class FudgeFieldType<TValue> : FudgeFieldType
     {
-        // TODO: 20090830 (t0rx): Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
+        // TODO t0rx 2009-08-30 -- Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
 
         public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize) : base(typeId, typeof(TValue), isVariableSize, fixedSize)
         {
@@ -151,7 +151,7 @@ namespace OpenGamma.Fudge
 
         public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            // TODO: 20090830 (t0rx): In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
+            // TODO t0rx 2009-08-30 -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
             {
                 throw new NotSupportedException("This method must be overridden for variable size types.");

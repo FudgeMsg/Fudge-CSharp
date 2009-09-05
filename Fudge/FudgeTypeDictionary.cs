@@ -16,8 +16,8 @@ namespace OpenGamma.Fudge
     {
         public static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
 
-        private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];                                                // TODO: 20090830 (t0rx): Double-check volatile gives desired behaviour
-        private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // TODO: 20090830 (t0rx): In Fudge-Java this is ConcurrentHashMap
+        private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];                                                // TODO t0rx 2009-08-30 -- Double-check volatile gives desired behaviour
+        private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // TODO t0rx 2009-08-30 -- In Fudge-Java this is ConcurrentHashMap
 
         public void AddType(FudgeFieldType type, params Type[] alternativeTypes)
         {

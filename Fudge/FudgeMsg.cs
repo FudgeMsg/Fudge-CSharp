@@ -24,7 +24,7 @@ namespace OpenGamma.Fudge
     /// </summary>
     public class FudgeMsg : FudgeEncodingObject
     {
-        // TODO: 20090830 (t0rx): Finish porting FudgeMsg
+        // TODO t0rx 2009-08-30 -- Finish porting FudgeMsg
 
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
@@ -57,7 +57,7 @@ namespace OpenGamma.Fudge
             }
             catch (IOException e)
             {
-                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO: 20090831 (t0rx): This is just RuntimeException in Fudge-Java
+                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO t0rx 2009-08-31 -- This is just RuntimeException in Fudge-Java
             }
             fields.AddRange(other.fields);
         }
@@ -108,7 +108,7 @@ namespace OpenGamma.Fudge
                 case FudgeTypeDictionary.SHORT_TYPE_ID:
                 case FudgeTypeDictionary.INT_TYPE_ID:
                 case FudgeTypeDictionary.LONG_TYPE_ID:
-                    long valueAsLong = System.Convert.ToInt64(value);                  // TODO: 20090831 (t0rx): Not sure how fast this is
+                    long valueAsLong = System.Convert.ToInt64(value);
                     if ((valueAsLong >= byte.MinValue) && (valueAsLong <= byte.MaxValue))
                     {
                         value = (byte)valueAsLong;
@@ -153,7 +153,7 @@ namespace OpenGamma.Fudge
         /// order for those fields.
         /// </summary>
         /// <returns></returns>
-        public IList<FudgeMsgField> GetAllFields()      // TODO: 20090830 (t0rx): This should be IList<IFudgeField>, but we can't do this in .net 3.5, so is this OK?
+        public IList<FudgeMsgField> GetAllFields()      // TODO t0rx 2009-08-30 -- This should be IList<IFudgeField>, but we can't do this in .net 3.5, so is this OK?
         {
             return fields.AsReadOnly();
         }
@@ -275,9 +275,9 @@ namespace OpenGamma.Fudge
             }
             catch (IOException e)
             {
-                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO: 20090830 (t0rx): In Fudge-Java this is just a RuntimeException
+                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
             }
-            // TODO: 20090830 (t0rx): Could also get an ObjectDisposedException from the BinaryWriter...
+            // TODO t0rx 2009-08-30 -- Could also get an ObjectDisposedException from the BinaryWriter...
 
             return stream.ToArray();
         }

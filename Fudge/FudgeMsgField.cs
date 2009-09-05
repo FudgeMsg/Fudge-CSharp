@@ -13,7 +13,7 @@ namespace OpenGamma.Fudge
 {
     public class FudgeMsgField : FudgeEncodingObject, IFudgeField
     {
-        // TODO: 20090830 (t0rx): Finish porting FudgeMsgField
+        // TODO t0rx 2009-08-30 -- Finish porting FudgeMsgField
         private readonly FudgeFieldType type;
         private readonly object value;
         private readonly string name;

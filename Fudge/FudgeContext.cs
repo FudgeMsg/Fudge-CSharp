@@ -36,8 +36,6 @@ namespace OpenGamma.Fudge
     /// </summary>
     public class FudgeContext
     {
-        // TODO: 20090831 (t0rx): Finish porting FudgeContext
-
         private ITaxonomyResolver taxonomyResolver;
 
         public ITaxonomyResolver TaxonomyResolver

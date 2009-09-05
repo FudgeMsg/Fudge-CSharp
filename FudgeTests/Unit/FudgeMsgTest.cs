@@ -234,7 +234,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         }
 
         [Fact]
-        public void AsQueriesToLongNoNames()        // TODO: 20090831 (t0rx): This test doesn't make sense
+        public void AsQueriesToLongNoNames()        // TODO t0rx 2009-08-31 -- This test from Fudge-Java doesn't make sense
         {
             FudgeMsg msg = CreateMessageAllNames();
 
@@ -339,7 +339,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             Assert.True(bytes.Length > 10);
         }
 
-        /* TODO: 20090831 (t0rx): I reckon this should pass
+        /* TODO t0rx 2009-08-31 -- I reckon this should pass
         [Fact]
         public void SmallLongComesOut()
         {
