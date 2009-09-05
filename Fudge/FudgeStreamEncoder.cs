@@ -115,7 +115,7 @@ namespace OpenGamma.Fudge
                 }
                 bw.Write((byte)utf8size);
                 nWritten++;
-                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw);
+                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw.BaseStream);
             }
             nWritten += WriteFieldValue(bw, type, value, valueSize, taxonomy, taxonomyId);
             return nWritten;

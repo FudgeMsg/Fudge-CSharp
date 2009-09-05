@@ -100,7 +100,7 @@ namespace OpenGamma.Fudge
             {
                 int nameSize = br.ReadByte();
                 nRead++;
-                name = ModifiedUTF8Util.ReadString(br, nameSize);
+                name = ModifiedUTF8Util.ReadString(br.BaseStream, nameSize);
                 nRead += nameSize;
             }
 
