@@ -11,9 +11,12 @@ using OpenGamma.Fudge.Taxon;
 
 namespace OpenGamma.Fudge
 {
-    public class FudgeMsgField : FudgeEncodingObject, IFudgeField
+    /// <summary>
+    /// A concrete implementation of <see cref="IFudgeField"/> suitable for inclusion in
+    /// a pre-constructed <see cref="FudgeMsg"/> or a stream of data.
+    /// </summary>
+    public class FudgeMsgField : FudgeEncodingObject, IFudgeField, ICloneable
     {
-        // TODO t0rx 2009-08-30 -- Finish porting FudgeMsgField
         private readonly FudgeFieldType type;
         private readonly object value;
         private readonly string name;
@@ -60,47 +63,41 @@ namespace OpenGamma.Fudge
 
         #endregion
 
-        ///**
-        // * A concrete implementation of {@link FudgeField} suitable for inclusion in
-        // * a pre-constructed {@link FudgeMsg} or a stream of data.
-        // *
-        // * @author kirk
-        // */
-        //public class FudgeMsgField implements FudgeField, Serializable, Cloneable, SizeComputable {
-        //  @SuppressWarnings("unchecked")
+        #region ICloneable Members
 
-        //  @Override
-        //  public FudgeMsgField clone() {
-        //    Object cloned;
-        //    try {
-        //      cloned = super.clone();
-        //    } catch (CloneNotSupportedException e) {
-        //      throw new RuntimeException("This can't happen.");
-        //    }
-        //    return (FudgeMsgField) cloned;
-        //  }
+        public virtual object Clone()
+        {
+            return MemberwiseClone();
+        }
 
-        //  @Override
-        //  public String toString() {
-        //    StringBuilder sb = new StringBuilder();
-        //    sb.append("Field[");
-        //    if(_name != null) {
-        //      sb.append(_name);
-        //      if(_ordinal == null) {
-        //        sb.append(":");
-        //      } else {
-        //        sb.append(",");
-        //      }
-        //    }
-        //    if(_ordinal != null) {
-        //      sb.append(_ordinal).append(":");
-        //    }
+        #endregion
 
-        //    sb.append(_type);
-        //    sb.append("-").append(_value);
-        //    sb.append("]");
-        //    return sb.toString();
-        //  }
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Field[");
+            if (name != null)
+            {
+                sb.Append(name);
+                if (ordinal == null)
+                {
+                    sb.Append(":");
+                }
+                else
+                {
+                    sb.Append(",");
+                }
+            }
+            if (ordinal != null)
+            {
+                sb.Append(ordinal).Append(":");
+            }
+
+            sb.Append(type);
+            sb.Append("-").Append(value);
+            sb.Append("]");
+            return sb.ToString();
+        }
 
         public override int ComputeSize(IFudgeTaxonomy taxonomy)
         {
