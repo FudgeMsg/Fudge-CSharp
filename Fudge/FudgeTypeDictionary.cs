@@ -16,8 +16,8 @@ namespace OpenGamma.Fudge
     {
         public static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
 
-        private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];                                                // TODO t0rx 2009-08-30 -- Double-check volatile gives desired behaviour
-        private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // TODO t0rx 2009-08-30 -- In Fudge-Java this is ConcurrentHashMap
+        private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
+        private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // Also used as synchronisation lock
 
         public void AddType(FudgeFieldType type, params Type[] alternativeTypes)
         {
@@ -25,7 +25,7 @@ namespace OpenGamma.Fudge
             {
                 throw new ArgumentNullException("Must not provide a null FudgeFieldType to add.");
             }
-            lock (this)
+            lock (typesByCSharpType)
             {
                 int newLength = Math.Max(type.TypeId + 1, typesById.Length);
                 var newArray = new FudgeFieldType[newLength];
@@ -33,10 +33,10 @@ namespace OpenGamma.Fudge
                 newArray[type.TypeId] = type;
                 typesById = newArray;
 
-                typesByCSharpType.Add(type.CSharpType, type);
+                typesByCSharpType[type.CSharpType] = type;
                 foreach (Type alternativeType in alternativeTypes)
                 {
-                    typesByCSharpType.Add(alternativeType, type);
+                    typesByCSharpType[alternativeType] = type;
                 }
             }
         }
@@ -48,9 +48,11 @@ namespace OpenGamma.Fudge
                 return null;
             }
             FudgeFieldType result;
-            if (!typesByCSharpType.TryGetValue(csharpType, out result))
-                return null;
-
+            lock (typesByCSharpType)
+            {
+                if (!typesByCSharpType.TryGetValue(csharpType, out result))
+                    return null;
+            }
             return result;
         }
 
@@ -60,7 +62,6 @@ namespace OpenGamma.Fudge
             {
                 return null;
             }
-
             return typesById[typeId];
         }
 
