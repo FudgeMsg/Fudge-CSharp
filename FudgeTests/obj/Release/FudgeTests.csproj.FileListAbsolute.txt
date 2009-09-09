@@ -1,0 +1,9 @@
+C:\OpenGamma\Fudge-CSharp\FudgeTests\bin\Release\FudgeTests.dll
+C:\OpenGamma\Fudge-CSharp\FudgeTests\bin\Release\FudgeTests.pdb
+C:\OpenGamma\Fudge-CSharp\FudgeTests\bin\Release\Fudge.dll
+C:\OpenGamma\Fudge-CSharp\FudgeTests\bin\Release\xunit.dll
+C:\OpenGamma\Fudge-CSharp\FudgeTests\bin\Release\Fudge.pdb
+C:\OpenGamma\Fudge-CSharp\FudgeTests\obj\Release\ResolveAssemblyReference.cache
+C:\OpenGamma\Fudge-CSharp\FudgeTests\obj\Release\FudgeTests.dll
+C:\OpenGamma\Fudge-CSharp\FudgeTests\obj\Release\FudgeTests.pdb
+C:\OpenGamma\Fudge-CSharp\FudgeTests\bin\Release\RabbitMQ.Client.dll

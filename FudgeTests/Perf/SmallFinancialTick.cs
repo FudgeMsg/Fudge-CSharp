@@ -26,5 +26,28 @@ namespace OpenGamma.Fudge.Tests.Perf
         {
             Timestamp = long.MaxValue - short.MaxValue;
         }
+
+        public bool Equals(SmallFinancialTick t)
+        {
+            return t.Bid == this.Bid &&
+                   t.Ask == this.Ask &&
+                   t.BidVolume == this.BidVolume &&
+                   t.AskVolume == this.AskVolume &&
+                   t.Timestamp == this.Timestamp;
+        }
+
+        public override bool Equals(Object obj)
+        {
+            if (obj is SmallFinancialTick)
+            {
+                return Equals((SmallFinancialTick)obj);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Bid.GetHashCode();
+        }
     }
 }
