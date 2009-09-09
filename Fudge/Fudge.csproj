@@ -75,6 +75,8 @@
     <Compile Include="Types\IndicatorType.cs" />
     <Compile Include="Types\PrimitiveFieldTypes.cs" />
     <Compile Include="Types\StringFieldType.cs" />
+    <Compile Include="Types\UnknownFudgeFieldType.cs" />
+    <Compile Include="UnknownFudgeFieldValue.cs" />
     <Compile Include="Util\BinaryNBOReader.cs" />
     <Compile Include="Util\BinaryNBOWriter.cs" />
     <Compile Include="Util\FudgeBinaryReader.cs" />

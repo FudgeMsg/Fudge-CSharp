@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenGamma.Fudge.Types;
+using System.Diagnostics;
 
 namespace OpenGamma.Fudge
 {
@@ -17,6 +18,7 @@ namespace OpenGamma.Fudge
         public static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
 
         private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
+        private volatile UnknownFudgeFieldType[] unknownTypesById = new UnknownFudgeFieldType[0];
         private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // Also used as synchronisation lock
 
         public void AddType(FudgeFieldType type, params Type[] alternativeTypes)
@@ -56,6 +58,11 @@ namespace OpenGamma.Fudge
             return result;
         }
 
+        /// <summary>
+        /// Obtain a <em>known</em> type by the type ID specified.
+        /// For processing unhandled variable-width field types, this method will return
+        /// <c>null</c>, and <see cref="GetUnknownType(int)"/> should be used if unhandled-type
+        /// processing is desired.        /// </summary>
         public FudgeFieldType GetByTypeId(int typeId)
         {
             if (typeId >= typesById.Length)
@@ -63,6 +70,26 @@ namespace OpenGamma.Fudge
                 return null;
             }
             return typesById[typeId];
+        }
+
+        public UnknownFudgeFieldType GetUnknownType(int typeId)
+        {
+            int newLength = Math.Max(typeId + 1, unknownTypesById.Length);
+            if ((unknownTypesById.Length < newLength) || (unknownTypesById[typeId] == null))
+            {
+                lock (unknownTypesById)
+                {
+                    if ((unknownTypesById.Length < newLength) || (unknownTypesById[typeId] == null))
+                    {
+                        UnknownFudgeFieldType[] newArray = new UnknownFudgeFieldType[newLength];
+                        unknownTypesById.CopyTo(newArray, 0);
+                        newArray[typeId] = new UnknownFudgeFieldType(typeId);
+                        unknownTypesById = newArray;
+                    }
+                }
+            }
+            Debug.Assert(unknownTypesById[typeId] != null);
+            return unknownTypesById[typeId];
         }
 
         // --------------------------

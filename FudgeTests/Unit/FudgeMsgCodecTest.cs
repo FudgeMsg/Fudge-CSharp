@@ -64,6 +64,15 @@ namespace OpenGamma.Fudge.Tests.Unit
             AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
+        [Fact]
+        public void Unknown()
+        {
+            FudgeMsg inputMsg = new FudgeMsg();
+            inputMsg.Add(new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200)), "unknown");
+            FudgeMsg outputMsg = CycleMessage(inputMsg);
+            AssertAllFieldsMatch(inputMsg, outputMsg);
+        }
+
         // REVIEW kirk 2009-08-21 -- This should be moved to a utility class.
         protected internal static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
         {
@@ -88,6 +97,15 @@ namespace OpenGamma.Fudge.Tests.Unit
                     Assert.True(actualField.Value is FudgeMsg);
                     AssertAllFieldsMatch((FudgeMsg)expectedField.Value,
                         (FudgeMsg)actualField.Value);
+                }
+                else if (expectedField.Value is UnknownFudgeFieldValue)
+                {
+                    Assert.IsType<UnknownFudgeFieldValue>(actualField.Value);
+                    UnknownFudgeFieldValue expectedValue = (UnknownFudgeFieldValue)expectedField.Value;
+                    UnknownFudgeFieldValue actualValue = (UnknownFudgeFieldValue)actualField.Value;
+                    Assert.Equal(expectedField.Type.TypeId, actualField.Type.TypeId);
+                    Assert.Equal(expectedValue.Type.TypeId, actualField.Type.TypeId);
+                    Assert.Equal(expectedValue.Contents, actualValue.Contents);
                 }
                 else
                 {

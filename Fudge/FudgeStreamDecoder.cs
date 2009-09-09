@@ -105,8 +105,11 @@ namespace OpenGamma.Fudge
             FudgeFieldType type = FudgeTypeDictionary.Instance.GetByTypeId(typeId);
             if (type == null)
             {
-                // REVIEW kirk 2009-08-18 -- Is this the right behavior?
-                throw new FudgeRuntimeException("Unable to locate a FudgeFieldType for type id " + typeId + " for field " + ordinal + ":" + name);        // TODO t0rx 2009-08-31 -- In Fudge-Java this is just a RuntimeException
+                if (fixedWidth)
+                {
+                    throw new FudgeRuntimeException("Unknown fixed width type " + typeId + " for field " + ordinal + ":" + name + " cannot be handled.");       // TODO t0rx 2009-09-09 -- In Fudge-Java this is just RuntimeException
+                }
+                type = FudgeTypeDictionary.Instance.GetUnknownType(typeId);
             }
             int varSize = 0;
             if (!fixedWidth)
