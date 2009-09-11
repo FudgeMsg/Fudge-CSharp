@@ -179,8 +179,12 @@ namespace OpenGamma.Fudge
                         bw.Write((int)valueSize);
                         nWritten = valueSize + 4;
                     }
-                    type.WriteValue(bw, value, taxonomy, taxonomyId);
                 }
+                else
+                {
+                    nWritten = type.FixedSize;
+                }
+                type.WriteValue(bw, value, taxonomy, taxonomyId);
             }
             return nWritten;
         }

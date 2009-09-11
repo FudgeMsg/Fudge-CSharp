@@ -177,6 +177,10 @@ namespace OpenGamma.Fudge
             {
                 throw new ArgumentNullException("Cannot determine type for null value.");
             }
+            if (value is byte[])
+            {
+                return ByteArrayFieldType.GetBestMatch((byte[])value);
+            }
             FudgeFieldType type = FudgeTypeDictionary.Instance.GetByCSharpType(value.GetType());
             if ((type == null) && (value is UnknownFudgeFieldValue))
             {

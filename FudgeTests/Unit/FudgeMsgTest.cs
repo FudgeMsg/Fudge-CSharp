@@ -81,6 +81,23 @@ namespace OpenGamma.Fudge.Tests.Unit
             return msg;
         }
 
+        protected static FudgeMsg CreateMessageAllByteArrayLengths()
+        {
+            FudgeMsg msg = new FudgeMsg();
+            msg.Add(new byte[4], "byte[4]");
+            msg.Add(new byte[8], "byte[8]");
+            msg.Add(new byte[16], "byte[16]");
+            msg.Add(new byte[20], "byte[20]");
+            msg.Add(new byte[32], "byte[32]");
+            msg.Add(new byte[64], "byte[64]");
+            msg.Add(new byte[128], "byte[128]");
+            msg.Add(new byte[256], "byte[256]");
+            msg.Add(new byte[512], "byte[512]");
+
+            msg.Add(new byte[28], "byte[28]");
+            return msg;
+        }
+
         [Fact]
         public void LookupByNameSingleValue()
         {
@@ -384,6 +401,23 @@ namespace OpenGamma.Fudge.Tests.Unit
             inputMsg.Add("", 8);
             Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(8).Value);
             Assert.Equal("", inputMsg.GetString(8));
+        }
+
+        [Fact]
+        public void FixedLengthByteArrays()
+        {
+            FudgeMsg msg = CreateMessageAllByteArrayLengths();
+            Assert.Same(ByteArrayFieldType.Length4Instance, msg.GetByName("byte[4]").Type);
+            Assert.Same(ByteArrayFieldType.Length8Instance, msg.GetByName("byte[8]").Type);
+            Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("byte[16]").Type);
+            Assert.Same(ByteArrayFieldType.Length20Instance, msg.GetByName("byte[20]").Type);
+            Assert.Same(ByteArrayFieldType.Length32Instance, msg.GetByName("byte[32]").Type);
+            Assert.Same(ByteArrayFieldType.Length64Instance, msg.GetByName("byte[64]").Type);
+            Assert.Same(ByteArrayFieldType.Length128Instance, msg.GetByName("byte[128]").Type);
+            Assert.Same(ByteArrayFieldType.Length256Instance, msg.GetByName("byte[256]").Type);
+            Assert.Same(ByteArrayFieldType.Length512Instance, msg.GetByName("byte[512]").Type);
+
+            Assert.Same(ByteArrayFieldType.VariableSizedInstance, msg.GetByName("byte[28]").Type);
         }
     }
 }

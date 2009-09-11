@@ -126,6 +126,18 @@ namespace OpenGamma.Fudge
 
         static FudgeTypeDictionary()
         {
+            // We have to add the fixed width byte array types first, so that the last
+            // one can override.
+            Instance.AddType(ByteArrayFieldType.Length4Instance);
+            Instance.AddType(ByteArrayFieldType.Length8Instance);
+            Instance.AddType(ByteArrayFieldType.Length16Instance);
+            Instance.AddType(ByteArrayFieldType.Length20Instance);
+            Instance.AddType(ByteArrayFieldType.Length32Instance);
+            Instance.AddType(ByteArrayFieldType.Length64Instance);
+            Instance.AddType(ByteArrayFieldType.Length128Instance);
+            Instance.AddType(ByteArrayFieldType.Length256Instance);
+            Instance.AddType(ByteArrayFieldType.Length512Instance);    
+
             Instance.AddType(PrimitiveFieldTypes.BooleanType);
             Instance.AddType(PrimitiveFieldTypes.ByteType);
             Instance.AddType(PrimitiveFieldTypes.ShortType);
@@ -139,7 +151,7 @@ namespace OpenGamma.Fudge
             Instance.AddType(FloatArrayFieldType.Instance);
             Instance.AddType(PrimitiveFieldTypes.DoubleType);
             Instance.AddType(DoubleArrayFieldType.Instance);
-            Instance.AddType(ByteArrayFieldType.Instance);
+            Instance.AddType(ByteArrayFieldType.VariableSizedInstance);
             Instance.AddType(StringFieldType.Instance);
             Instance.AddType(FudgeMsgFieldType.Instance);
         }
