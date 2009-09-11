@@ -95,22 +95,34 @@ namespace OpenGamma.Fudge
         // --------------------------
         // STANDARD FUDGE FIELD TYPES
         // --------------------------
-        public const byte BOOLEAN_TYPE_ID = 0;
-        public const byte BYTE_TYPE_ID = 1;
-        public const byte SHORT_TYPE_ID = 2;
-        public const byte INT_TYPE_ID = 3;
-        public const byte LONG_TYPE_ID = 4;
-        public const byte SHORT_ARRAY_TYPE_ID = 5;
-        public const byte INT_ARRAY_TYPE_ID = 6;
-        public const byte LONG_ARRAY_TYPE_ID = 7;
-        public const byte INDICATOR_TYPE_ID = 8;
-        public const byte FLOAT_TYPE_ID = 17;           // We use the name Float rather than Single to be consistent with Fudge-Java
-        public const byte FLOAT_ARRAY_TYPE_ID = 18;
-        public const byte DOUBLE_TYPE_ID = 19;
-        public const byte DOUBLE_ARRAY_TYPE_ID = 20;
-        public const byte BYTE_ARRAY_TYPE_ID = 21;
-        public const byte STRING_TYPE_ID = 22;
-        public const byte FUDGE_MSG_TYPE_ID = 23;
+        public const byte INDICATOR_TYPE_ID = 0;
+        public const byte BOOLEAN_TYPE_ID = 1;
+        public const byte BYTE_TYPE_ID = 2;
+        public const byte SHORT_TYPE_ID = 3;
+        public const byte INT_TYPE_ID = 4;
+        public const byte LONG_TYPE_ID = 5;
+        public const byte BYTE_ARRAY_TYPE_ID = 6;
+        public const byte SHORT_ARRAY_TYPE_ID = 7;
+        public const byte INT_ARRAY_TYPE_ID = 8;
+        public const byte LONG_ARRAY_TYPE_ID = 9;
+        public const byte FLOAT_TYPE_ID = 10;
+        public const byte DOUBLE_TYPE_ID = 11;
+        public const byte FLOAT_ARRAY_TYPE_ID = 12;
+        public const byte DOUBLE_ARRAY_TYPE_ID = 13;
+        public const byte STRING_TYPE_ID = 14;
+        // Indicators for controlling stack-based sub-message expressions:
+        public const byte FUDGE_MSG_TYPE_ID = 15;
+        public const byte END_FUDGE_MSG_TYPE_ID = 16;
+        // The fixed-width byte arrays:
+        public const byte BYTE_ARR_4_TYPE_ID = 17;
+        public const byte BYTE_ARR_8_TYPE_ID = 18;
+        public const byte BYTE_ARR_16_TYPE_ID = 19;
+        public const byte BYTE_ARR_20_TYPE_ID = 20;
+        public const byte BYTE_ARR_32_TYPE_ID = 21;
+        public const byte BYTE_ARR_64_TYPE_ID = 22;
+        public const byte BYTE_ARR_128_TYPE_ID = 23;
+        public const byte BYTE_ARR_256_TYPE_ID = 24;
+        public const byte BYTE_ARR_512_TYPE_ID = 25;
 
         static FudgeTypeDictionary()
         {
