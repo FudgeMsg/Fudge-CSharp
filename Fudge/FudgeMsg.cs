@@ -108,64 +108,8 @@ namespace OpenGamma.Fudge
                 throw new ArgumentNullException("Cannot add a field without a type specified.");
             }
 
-            // Adjust integral values to the lowest possible representation.
-            switch (type.TypeId)
-            {
-                case FudgeTypeDictionary.BOOLEAN_TYPE_ID:
-                    if (!(bool)value)
-                    {
-                        value = IndicatorType.Instance;
-                        type = IndicatorFieldType.Instance;
-                    }
-                    break;
-                case FudgeTypeDictionary.BYTE_TYPE_ID:
-                case FudgeTypeDictionary.SHORT_TYPE_ID:
-                case FudgeTypeDictionary.INT_TYPE_ID:
-                case FudgeTypeDictionary.LONG_TYPE_ID:
-                    long valueAsLong = System.Convert.ToInt64(value);
-                    if (valueAsLong == 0)
-                    {
-                        value = IndicatorType.Instance;
-                        type = IndicatorFieldType.Instance;
-                    }
-                    else if ((valueAsLong >= byte.MinValue) && (valueAsLong <= byte.MaxValue))
-                    {
-                        value = (byte)valueAsLong;
-                        type = PrimitiveFieldTypes.ByteType;
-                    }
-                    else if ((valueAsLong >= short.MinValue) && (valueAsLong <= short.MaxValue))
-                    {
-                        value = (short)valueAsLong;
-                        type = PrimitiveFieldTypes.ShortType;
-                    }
-                    else if ((valueAsLong >= int.MinValue) && (valueAsLong <= int.MaxValue))
-                    {
-                        value = (int)valueAsLong;
-                        type = PrimitiveFieldTypes.IntType;
-                    }
-                    break;
-                case FudgeTypeDictionary.DOUBLE_TYPE_ID:
-                    if ((double)value == 0.0)
-                    {
-                        value = IndicatorType.Instance;
-                        type = IndicatorFieldType.Instance;
-                    }
-                    break;
-                case FudgeTypeDictionary.FLOAT_TYPE_ID:
-                    if ((float)value == 0.0f)
-                    {
-                        value = IndicatorType.Instance;
-                        type = IndicatorFieldType.Instance;
-                    }
-                    break;
-                case FudgeTypeDictionary.STRING_TYPE_ID:
-                    if ((string)value == "")
-                    {
-                        value = IndicatorType.Instance;
-                        type = IndicatorFieldType.Instance;
-                    }
-                    break;
-            }
+            // Adjust values to the lowest possible representation.
+            value = type.Minimize(value, ref type);
 
             FudgeMsgField field = new FudgeMsgField(type, value, name, ordinal);
             fields.Add(field);
