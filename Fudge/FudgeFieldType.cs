@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using OpenGamma.Fudge.Taxon;
 using System.IO;
+using OpenGamma.Fudge.Types;
 
 namespace OpenGamma.Fudge
 {
@@ -91,6 +92,22 @@ namespace OpenGamma.Fudge
         public virtual object Minimize(object value, ref FudgeFieldType type)
         {
             return value;
+        }
+
+        /// <summary>
+        /// Converts a value of another type to on of this field type, if possible.
+        /// </summary>
+        /// <remarks>
+        /// Override this to provide custom conversions.  The default behaviour is to use the default .net conversions.
+        /// </remarks>
+        /// <param name="value">Value to convert.</param>
+        /// <returns>Converted value.</returns>
+        /// <exception cref="InvalidCastException">Thrown if the value cannot be converted</exception>
+        public virtual object ConvertValueFrom(object value)
+        {
+            // TODO t0rx 2009-09-12 -- Should we return null rather than throwing an exception?  This would be consistent with FudgeMsg.GetLong, etc.
+
+            return Convert.ChangeType(value, csharpType);
         }
 
         public override bool Equals(object obj)

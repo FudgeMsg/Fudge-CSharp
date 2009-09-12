@@ -251,6 +251,15 @@ namespace OpenGamma.Fudge.Tests.Unit
         }
 
         [Fact]
+        public void GetValueTyped()
+        {
+            FudgeMsg msg = CreateMessageAllNames();
+            long longValue = ((long)int.MaxValue) + 5;
+            Assert.Equal(longValue, msg.GetValue<long>("long"));
+            Assert.Equal(5, msg.GetValue<long>("byte"));
+        } 
+
+        [Fact]
         public void AsQueriesToLongNoNames()        // TODO t0rx 2009-08-31 -- This test from Fudge-Java doesn't make sense
         {
             FudgeMsg msg = CreateMessageAllNames();
@@ -418,6 +427,31 @@ namespace OpenGamma.Fudge.Tests.Unit
             Assert.Same(ByteArrayFieldType.Length512Instance, msg.GetByName("byte[512]").Type);
 
             Assert.Same(ByteArrayFieldType.VariableSizedInstance, msg.GetByName("byte[28]").Type);
+        }
+
+        [Fact]
+        public void Minimization()
+        {
+            FudgeMsg msg = new FudgeMsg();
+            msg.Add(17, "int?");
+
+            Assert.Same(PrimitiveFieldTypes.ByteType, msg.GetByName("int?").Type);
+        }
+
+        [Fact]
+        public void SecondaryTypes()
+        {
+            var guidType = new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray());
+            FudgeTypeDictionary.Instance.AddType(guidType);
+
+            Guid guid = Guid.NewGuid();
+            FudgeMsg msg = new FudgeMsg();
+            msg.Add(guid, "guid");
+
+            Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("guid").Type);
+
+            Guid guid2 = msg.GetValue<Guid>("guid");
+            Assert.Equal(guid, guid2);
         }
     }
 }

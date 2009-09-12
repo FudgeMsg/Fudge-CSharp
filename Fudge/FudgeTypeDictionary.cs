@@ -29,11 +29,14 @@ namespace OpenGamma.Fudge
             }
             lock (typesByCSharpType)
             {
-                int newLength = Math.Max(type.TypeId + 1, typesById.Length);
-                var newArray = new FudgeFieldType[newLength];
-                typesById.CopyTo(newArray, 0);
-                newArray[type.TypeId] = type;
-                typesById = newArray;
+                if (!(type is ISecondaryFieldType))       // TODO t0rx 2009-09-12 -- Don't like this as a way of testing
+                {
+                    int newLength = Math.Max(type.TypeId + 1, typesById.Length);
+                    var newArray = new FudgeFieldType[newLength];
+                    typesById.CopyTo(newArray, 0);
+                    newArray[type.TypeId] = type;
+                    typesById = newArray;
+                }
 
                 typesByCSharpType[type.CSharpType] = type;
                 foreach (Type alternativeType in alternativeTypes)

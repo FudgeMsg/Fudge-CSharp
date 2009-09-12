@@ -229,6 +229,17 @@ namespace OpenGamma.Fudge
             return null;
         }
 
+        public T GetValue<T>(string name)
+        {
+            return (T)GetValue(name, typeof(T));
+        }
+
+        public object GetValue(string name, Type type)
+        {
+            object value = GetValue(name);
+            return ConvertType(value, type);
+        }
+
         public object GetValue(short ordinal)
         {
             foreach (FudgeMsgField field in fields)
@@ -239,6 +250,17 @@ namespace OpenGamma.Fudge
                 }
             }
             return null;
+        }
+
+        public T GetValue<T>(short ordinal)
+        {
+            return (T)GetValue(ordinal, typeof(T));
+        }
+
+        public object GetValue(short ordinal, Type type)
+        {
+            object value = GetValue(ordinal);
+            return ConvertType(value, type);
         }
 
         public object GetValue(string name, short? ordinal)
@@ -255,6 +277,17 @@ namespace OpenGamma.Fudge
                 }
             }
             return null;
+        }
+
+        public T GetValue<T>(string name, short? ordinal)
+        {
+            return (T)GetValue(name, ordinal, typeof(T));
+        }
+
+        public object GetValue(string name, short? ordinal, Type type)
+        {
+            object value = GetValue(name, ordinal);
+            return ConvertType(value, type);
         }
 
         public byte[] ToByteArray()
@@ -544,6 +577,21 @@ namespace OpenGamma.Fudge
                     subMsg.SetNamesFromTaxonomy(taxonomy);
                 }
             }
+        }
+
+        private object ConvertType(object value, Type type)
+        {
+            if (value == null) return null;
+
+            if (!type.IsAssignableFrom(value.GetType()))
+            {
+                FudgeFieldType fieldType = FudgeTypeDictionary.Instance.GetByCSharpType(type);
+                if (fieldType == null)
+                    throw new InvalidCastException("No registered field type for " + type.Name);
+
+                value = fieldType.ConvertValueFrom(value);
+            }
+            return value;
         }
     }
 }
