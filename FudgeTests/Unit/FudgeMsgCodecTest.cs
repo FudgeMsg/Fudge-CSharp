@@ -18,6 +18,8 @@ namespace OpenGamma.Fudge.Tests.Unit
     /// </summary>
     public class FudgeMsgCodecTest
     {
+        private readonly Random random = new Random();
+
         [Fact]
         public void AllNames()
         {
@@ -69,6 +71,34 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg inputMsg = new FudgeMsg();
             inputMsg.Add(new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200)), "unknown");
+            FudgeMsg outputMsg = CycleMessage(inputMsg);
+            AssertAllFieldsMatch(inputMsg, outputMsg);
+        }
+
+
+        protected byte[] CreateRandomArray(int length)
+        {
+            byte[] bytes = new byte[length];
+            random.NextBytes(bytes);
+            return bytes;
+        }
+
+        [Fact]
+        public void FixedWidthByteArrays()
+        {
+            FudgeMsg inputMsg = new FudgeMsg();
+            inputMsg.Add(CreateRandomArray(4), "byte[4]");
+            inputMsg.Add(CreateRandomArray(8), "byte[8]");
+            inputMsg.Add(CreateRandomArray(16), "byte[16]");
+            inputMsg.Add(CreateRandomArray(20), "byte[20]");
+            inputMsg.Add(CreateRandomArray(32), "byte[32]");
+            inputMsg.Add(CreateRandomArray(64), "byte[64]");
+            inputMsg.Add(CreateRandomArray(128), "byte[128]");
+            inputMsg.Add(CreateRandomArray(256), "byte[256]");
+            inputMsg.Add(CreateRandomArray(512), "byte[512]");
+
+            inputMsg.Add(CreateRandomArray(28), "byte[28]");
+
             FudgeMsg outputMsg = CycleMessage(inputMsg);
             AssertAllFieldsMatch(inputMsg, outputMsg);
         }
