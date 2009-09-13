@@ -58,6 +58,8 @@
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeStreamEncoderTest.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
+    <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fudge\Fudge.csproj">

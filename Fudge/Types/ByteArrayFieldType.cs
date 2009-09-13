@@ -38,27 +38,6 @@ namespace OpenGamma.Fudge.Types
         {
         }
 
-        public static ByteArrayFieldType GetBestMatch(byte[] array)
-        {
-            if (array == null)
-            {
-                return VariableSizedInstance;
-            }
-            switch (array.Length)
-            {
-                case 4: return Length4Instance;
-                case 8: return Length8Instance;
-                case 16: return Length16Instance;
-                case 20: return Length20Instance;
-                case 32: return Length32Instance;
-                case 64: return Length64Instance;
-                case 128: return Length128Instance;
-                case 256: return Length256Instance;
-                case 512: return Length512Instance;
-                default: return VariableSizedInstance;
-            }
-        }
-
         public override int GetVariableSize(byte[] value, IFudgeTaxonomy taxonomy)
         {
             return value.Length;
@@ -85,6 +64,71 @@ namespace OpenGamma.Fudge.Types
                 }
             }
             output.Write(value);
+        }
+
+        public override object Minimize(object value, ref FudgeFieldType type)
+        {
+            if (value == null) return value;
+
+            byte[] array = value as byte[];
+            if (array == null)
+                throw new ArgumentException("value must be a byte array");
+
+            // Any size can be minimized to Indicator
+            if (array.Length == 0)
+            {
+                type = IndicatorFieldType.Instance;
+                return IndicatorType.Instance;
+            }
+
+            if (!IsVariableSize)
+            {
+                // We're already fixed, so no further minimization possible
+                return value;
+            }
+
+            switch (array.Length)
+            {
+                case 4:
+                    type = Length4Instance;
+                    break;
+                case 8:
+                    type = Length8Instance;
+                    break;
+                case 16:
+                    type = Length16Instance;
+                    break;
+                case 20:
+                    type = Length20Instance;
+                    break;
+                case 32: 
+                    type = Length32Instance;
+                    break;
+                case 64:
+                    type = Length64Instance;
+                    break;
+                case 128: 
+                    type = Length128Instance;
+                    break;
+                case 256: 
+                    type = Length256Instance;
+                    break;
+                case 512: 
+                    type = Length512Instance;
+                    break;
+                default:
+                    // Have to use variable-sized
+                    break;
+            }
+            return value;
+        }
+
+        public override object ConvertValueFrom(object value)
+        {
+            if (value == IndicatorType.Instance)
+                return new byte[0];
+
+            return base.ConvertValueFrom(value);
         }
     }
 }
