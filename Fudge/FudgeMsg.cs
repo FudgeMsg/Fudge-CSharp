@@ -22,9 +22,15 @@ namespace OpenGamma.Fudge
     /// expensive in CPU and memory usage than just holding the original byte array,
     /// but lookups are substantially faster.
     /// </summary>
+    /// <remarks>
+    /// The various <c>Get*()</c> methods will return <c>null</c> if the field is not
+    /// found, and otherwise use standard conversions to map between types, throwing
+    /// <see cref="InvalidCastException"/> and <see cref="OverFlowException"/> as
+    /// appropriate.
+    /// </remarks>
     public class FudgeMsg : FudgeEncodingObject
     {
-        // TODO: 20090830 (t0rx): Finish porting FudgeMsg
+        // TODO t0rx 2009-08-30 -- Finish porting FudgeMsg
 
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
@@ -57,7 +63,7 @@ namespace OpenGamma.Fudge
             }
             catch (IOException e)
             {
-                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO: 20090831 (t0rx): This is just RuntimeException in Fudge-Java
+                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO t0rx 2009-08-31 -- This is just RuntimeException in Fudge-Java
             }
             fields.AddRange(other.fields);
         }
@@ -102,30 +108,8 @@ namespace OpenGamma.Fudge
                 throw new ArgumentNullException("Cannot add a field without a type specified.");
             }
 
-            // Adjust integral values to the lowest possible representation.
-            switch (type.TypeId)
-            {
-                case FudgeTypeDictionary.SHORT_TYPE_ID:
-                case FudgeTypeDictionary.INT_TYPE_ID:
-                case FudgeTypeDictionary.LONG_TYPE_ID:
-                    long valueAsLong = System.Convert.ToInt64(value);                  // TODO: 20090831 (t0rx): Not sure how fast this is
-                    if ((valueAsLong >= byte.MinValue) && (valueAsLong <= byte.MaxValue))
-                    {
-                        value = (byte)valueAsLong;
-                        type = PrimitiveFieldTypes.ByteType;
-                    }
-                    else if ((valueAsLong >= short.MinValue) && (valueAsLong <= short.MaxValue))
-                    {
-                        value = (short)valueAsLong;
-                        type = PrimitiveFieldTypes.ShortType;
-                    }
-                    else if ((valueAsLong >= int.MinValue) && (valueAsLong <= int.MaxValue))
-                    {
-                        value = (int)valueAsLong;
-                        type = PrimitiveFieldTypes.IntType;
-                    }
-                    break;
-            }
+            // Adjust values to the lowest possible representation.
+            value = type.Minimize(value, ref type);
 
             FudgeMsgField field = new FudgeMsgField(type, value, name, ordinal);
             fields.Add(field);
@@ -138,6 +122,11 @@ namespace OpenGamma.Fudge
                 throw new ArgumentNullException("Cannot determine type for null value.");
             }
             FudgeFieldType type = FudgeTypeDictionary.Instance.GetByCSharpType(value.GetType());
+            if ((type == null) && (value is UnknownFudgeFieldValue))
+            {
+                UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
+                type = unknownValue.Type;
+            }
             return type;
         }
 
@@ -153,7 +142,7 @@ namespace OpenGamma.Fudge
         /// order for those fields.
         /// </summary>
         /// <returns></returns>
-        public IList<FudgeMsgField> GetAllFields()      // TODO: 20090830 (t0rx): This should be IList<IFudgeField>, but we can't do this in .net 3.5, so is this OK?
+        public IList<FudgeMsgField> GetAllFields()      // TODO t0rx 2009-08-30 -- This should be IList<IFudgeField>, but we can't do this in .net 3.5, so is this OK?
         {
             return fields.AsReadOnly();
         }
@@ -236,6 +225,17 @@ namespace OpenGamma.Fudge
             return null;
         }
 
+        public T GetValue<T>(string name)
+        {
+            return (T)GetValue(name, typeof(T));
+        }
+
+        public object GetValue(string name, Type type)
+        {
+            object value = GetValue(name);
+            return ConvertType(value, type);
+        }
+
         public object GetValue(short ordinal)
         {
             foreach (FudgeMsgField field in fields)
@@ -246,6 +246,17 @@ namespace OpenGamma.Fudge
                 }
             }
             return null;
+        }
+
+        public T GetValue<T>(short ordinal)
+        {
+            return (T)GetValue(ordinal, typeof(T));
+        }
+
+        public object GetValue(short ordinal, Type type)
+        {
+            object value = GetValue(ordinal);
+            return ConvertType(value, type);
         }
 
         public object GetValue(string name, short? ordinal)
@@ -264,6 +275,17 @@ namespace OpenGamma.Fudge
             return null;
         }
 
+        public T GetValue<T>(string name, short? ordinal)
+        {
+            return (T)GetValue(name, ordinal, typeof(T));
+        }
+
+        public object GetValue(string name, short? ordinal, Type type)
+        {
+            object value = GetValue(name, ordinal);
+            return ConvertType(value, type);
+        }
+
         public byte[] ToByteArray()
         {
             MemoryStream stream = new MemoryStream(ComputeSize(null));
@@ -275,9 +297,9 @@ namespace OpenGamma.Fudge
             }
             catch (IOException e)
             {
-                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO: 20090830 (t0rx): In Fudge-Java this is just a RuntimeException
+                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
             }
-            // TODO: 20090830 (t0rx): Could also get an ObjectDisposedException from the BinaryWriter...
+            // TODO t0rx 2009-08-30 -- Could also get an ObjectDisposedException from the BinaryWriter...
 
             return stream.ToArray();
         }
@@ -295,181 +317,205 @@ namespace OpenGamma.Fudge
         }
 
         // Primitive Queries:
+
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>double</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>double</c></exception>
         public double? GetDouble(string fieldName)
         {
-            return (double?)GetFirstTypedValue(fieldName, FudgeTypeDictionary.DOUBLE_TYPE_ID);
+            return GetAsDoubleInternal(fieldName, null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>double</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>double</c></exception>
         public double? GetDouble(short ordinal)
         {
-            return (double?)GetFirstTypedValue(ordinal, FudgeTypeDictionary.DOUBLE_TYPE_ID);
+            return GetAsDoubleInternal(null, ordinal);
         }
 
-        //  public Double getAsDouble(String fieldName) {
-        //    return getAsDoubleInternal(fieldName, null);
-        //  }
+        protected double? GetAsDoubleInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToDouble(null);
+        }
 
-        //  public Double getAsDouble(short ordinal) {
-        //    return getAsDoubleInternal(null, ordinal);
-        //  }
-
-        //  protected Double getAsDoubleInternal(String fieldName, Short ordinal) {
-        //    Object value = getValue(fieldName, ordinal);
-        //    if(value instanceof Number) {
-        //      Number numberValue = (Number) value;
-        //      return numberValue.doubleValue();
-        //    }
-        //    return null;
-        //  }
-
-        // We use the name Float rather than Single to be consistent with Fudge-Java
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>float</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>float</c></exception>
         public float? GetFloat(string fieldName)
         {
-            return (float?)GetFirstTypedValue(fieldName, FudgeTypeDictionary.FLOAT_TYPE_ID);
+            return GetAsFloatInternal(fieldName, null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>float</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>float</c></exception>
         public float? GetFloat(short ordinal)
         {
-            return (float?)GetFirstTypedValue(ordinal, FudgeTypeDictionary.FLOAT_TYPE_ID);
+            return GetAsFloatInternal(null, ordinal);
         }
 
-        //  public Float getAsFloat(String fieldName) {
-        //    return getAsFloatInternal(fieldName, null);
-        //  }
+        protected float? GetAsFloatInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToSingle(null);
+        }
 
-        //  public Float getAsFloat(short ordinal) {
-        //    return getAsFloatInternal(null, ordinal);
-        //  }
-
-        //  protected Float getAsFloatInternal(String fieldName, Short ordinal) {
-        //    Object value = getValue(fieldName, ordinal);
-        //    if(value instanceof Number) {
-        //      Number numberValue = (Number) value;
-        //      return numberValue.floatValue();
-        //    }
-        //    return null;
-        //  }
-
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>long</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>long</c></exception>
         public long? GetLong(string fieldName)
-        {
-            return (long?)GetFirstTypedValue(fieldName, FudgeTypeDictionary.LONG_TYPE_ID);
-        }
-
-        public long? GetLong(short ordinal)
-        {
-            return (long?)GetFirstTypedValue(ordinal, FudgeTypeDictionary.LONG_TYPE_ID);
-        }
-
-        public long? GetAsLong(string fieldName)
         {
             return GetAsLongInternal(fieldName, null);
         }
 
-        public long? GetAsLong(short ordinal)
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>long</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>long</c></exception>
+        public long? GetLong(short ordinal)
         {
             return GetAsLongInternal(null, ordinal);
         }
 
         protected long? GetAsLongInternal(string fieldName, short? ordinal)
         {
-            object value = GetValue(fieldName, ordinal);
-            Number numberValue = Number.ToNumber(value);
-            if (numberValue != null)
-            {
-                return numberValue.LongValue;
-            }
-            return null;
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToInt64(null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to an <c>int</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within an <c>int</c></exception>
         public int? GetInt(string fieldName)
         {
-            return (int?)GetFirstTypedValue(fieldName, FudgeTypeDictionary.INT_TYPE_ID);
+            return GetAsIntInternal(fieldName, null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to an <c>int</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within an <c>int</c></exception>
         public int? GetInt(short ordinal)
         {
-            return (int?)GetFirstTypedValue(ordinal, FudgeTypeDictionary.INT_TYPE_ID);
+            return GetAsIntInternal(null, ordinal);
         }
 
-        //  public Integer getAsInt(String fieldName) {
-        //    return getAsIntInternal(fieldName, null);
-        //  }
+        protected int? GetAsIntInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToInt32(null);
+        }
 
-        //  public Integer getAsInt(short ordinal) {
-        //    return getAsIntInternal(null, ordinal);
-        //  }
-
-        //  protected Integer getAsIntInternal(String fieldName, Short ordinal) {
-        //    Object value = getValue(fieldName, ordinal);
-        //    if(value instanceof Number) {
-        //      Number numberValue = (Number) value;
-        //      return numberValue.intValue();
-        //    }
-        //    return null;
-        //  }
-
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>short</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>short</c></exception>
         public short? GetShort(string fieldName)
         {
-            return (short?)GetFirstTypedValue(fieldName, FudgeTypeDictionary.SHORT_TYPE_ID);
+            return GetAsShortInternal(fieldName, null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>short</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>short</c></exception>
         public short? GetShort(short ordinal)
         {
-            return (short?)GetFirstTypedValue(ordinal, FudgeTypeDictionary.SHORT_TYPE_ID);
+            return GetAsShortInternal(null, ordinal);
         }
 
-        //  public Short getAsShort(String fieldName) {
-        //    return getAsShortInternal(fieldName, null);
-        //  }
+        protected short? GetAsShortInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToInt16(null);
+        }
 
-        //  public Short getAsShort(short ordinal) {
-        //    return getAsShortInternal(null, ordinal);
-        //  }
-
-        //  protected Short getAsShortInternal(String fieldName, Short ordinal) {
-        //    Object value = getValue(fieldName, ordinal);
-        //    if(value instanceof Number) {
-        //      Number numberValue = (Number) value;
-        //      return numberValue.shortValue();
-        //    }
-        //    return null;
-        //  }
-
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
         public byte? GetByte(string fieldName)
         {
-            return (byte?)GetFirstTypedValue(fieldName, FudgeTypeDictionary.BYTE_TYPE_ID);
+            return GetAsByteInternal(fieldName, null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
         public byte? GetByte(short ordinal)
         {
-            return (byte?)GetFirstTypedValue(ordinal, FudgeTypeDictionary.BYTE_TYPE_ID);
+            return GetAsByteInternal(null, ordinal);
         }
 
-        //  public Byte getAsByte(String fieldName) {
-        //    return getAsByteInternal(fieldName, null);
-        //  }
+        protected byte? GetAsByteInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToByte(null);
+        }
 
-        //  public Byte getAsByte(short ordinal) {
-        //    return getAsByteInternal(null, ordinal);
-        //  }
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>bool</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>bool</c></exception>
+        public bool? GetBoolean(string fieldName)
+        {
+            return GetAsBooleanInternal(fieldName, null);
+        }
 
-        //  protected Byte getAsByteInternal(String fieldName, Short ordinal) {
-        //    Object value = getValue(fieldName, ordinal);
-        //    if(value instanceof Number) {
-        //      Number numberValue = (Number) value;
-        //      return numberValue.byteValue();
-        //    }
-        //    return null;
-        //  }
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>bool</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>bool</c></exception>
+        public bool? GetBoolean(short ordinal)
+        {
+            return GetAsBooleanInternal(null, ordinal);
+        }
 
+        protected bool? GetAsBooleanInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToBoolean(null);
+        }
+
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>string</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>string</c></exception>
         public string GetString(string fieldName)
         {
-            return (string)GetFirstTypedValue(fieldName, FudgeTypeDictionary.STRING_TYPE_ID);
+            return GetAsStringInternal(fieldName, null);
         }
 
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>string</c></exception>
+        /// <exception cref="OverflowException">Field value could not fit within a <c>string</c></exception>
         public string GetString(short ordinal)
         {
-            return (string)GetFirstTypedValue(ordinal, FudgeTypeDictionary.STRING_TYPE_ID);
+            return GetAsStringInternal(null, ordinal);
+        }
+
+        protected string GetAsStringInternal(string fieldName, short? ordinal)
+        {
+            IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToString(null);
         }
 
         protected object GetFirstTypedValue(string fieldName, int typeId)
@@ -529,104 +575,19 @@ namespace OpenGamma.Fudge
             }
         }
 
-        /// <summary>
-        /// Helps us simulate Number in Java
-        /// </summary>
-        private class Number
+        private object ConvertType(object value, Type type)
         {
-            private readonly long longVal;
-            private readonly double doubleVal;
-            private readonly bool isLong;
+            if (value == null) return null;
 
-            public Number(object o)
+            if (!type.IsAssignableFrom(value.GetType()))
             {
-            }
+                FudgeFieldType fieldType = FudgeTypeDictionary.Instance.GetByCSharpType(type);
+                if (fieldType == null)
+                    throw new InvalidCastException("No registered field type for " + type.Name);
 
-            private Number(long longVal, double doubleVal, bool isLong)
-            {
-                this.longVal = longVal;
-                this.doubleVal = doubleVal;
-                this.isLong = isLong;
+                value = fieldType.ConvertValueFrom(value);
             }
-
-            public static bool IsNumber(object o)
-            {
-                long? longVal;
-                double? doubleVal;
-                return TryCreate(o, out longVal, out doubleVal);
-            }
-
-            /// <summary>
-            /// Creates a <see cref="Number"/> instance if the given object is numerical, or returns <c>null</c> if not.
-            /// </summary>
-            /// <remarks>Using this method is more efficient than calling <see cref="IsNumber"/> and then constructing if valid.</remarks>
-            /// <param name="o">Object to manipulate</param>
-            /// <returns>A <see cref="Number"/> instance, or <c>Null</c> if the object is not numerical</returns>
-            public static Number ToNumber(object o)
-            {
-                long? longVal;
-                double? doubleVal;
-                if (!TryCreate(o, out longVal, out doubleVal))
-                {
-                    return null;
-                }
-                if (longVal.HasValue)
-                    return new Number(longVal.Value, 0.0, true);
-                else
-                    return new Number(0, doubleVal.Value, false);
-            }
-
-            public long LongValue
-            {
-                get { return isLong ? longVal : (long)doubleVal; }
-            }
-
-            private static bool TryCreate(object o, out long? longVal, out double? doubleVal)
-            {
-                longVal = null;
-                doubleVal = null;
-                if (o == null)
-                {
-                    return false;
-                }
-                TypeCode typeCode = Convert.GetTypeCode(o);
-                switch (typeCode)
-                {
-                    case TypeCode.Byte:
-                        longVal = (byte)o;
-                        return true;
-                    case TypeCode.Int16:
-                        longVal = (short)o;
-                        return true;
-                    case TypeCode.Int32:
-                        longVal = (long)(int)o;
-                        return true;
-                    case TypeCode.Int64:
-                        longVal = (long)o;
-                        return true;
-                    case TypeCode.SByte:
-                        longVal = (byte)o;
-                        return true;
-                    case TypeCode.UInt16:
-                        longVal = (long)(ushort)o;
-                        return true;
-                    case TypeCode.UInt32:
-                        longVal = (long)(uint)o;
-                        return true;
-                    case TypeCode.UInt64:
-                        longVal = (long)(ulong)o;
-                        return true;
-                    case TypeCode.Double:
-                        doubleVal = (double)o;
-                        return true;
-                    case TypeCode.Single:
-                        doubleVal = (float)o;
-                        return true;
-                    default:
-                        doubleVal = null;
-                        return false;
-                }
-            }
+            return value;
         }
     }
 }

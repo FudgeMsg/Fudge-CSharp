@@ -15,8 +15,6 @@ namespace OpenGamma.Fudge
 {
     public class FudgeStreamDecoder
     {
-        // TODO: 20090831 (t0rx): Finish porting FudgeStreamDecoder
-
         public static FudgeMsg ReadMsg(BinaryReader br) //throws IOException
         {
             return ReadMsg(br, (TaxonomyResolver)null);
@@ -49,7 +47,7 @@ namespace OpenGamma.Fudge
 
             if ((size > 0) && (nRead != size))
             {
-                throw new FudgeRuntimeException("Expected to read " + size + " but only had " + nRead + " in message.");      // TODO: 20090831 (t0rx): This is just RuntimeException in Fudge-Java
+                throw new FudgeRuntimeException("Expected to read " + size + " but only had " + nRead + " in message.");      // TODO t0rx 2009-08-31 -- This is just RuntimeException in Fudge-Java
             }
 
             if (taxonomyResolver != null)
@@ -100,15 +98,18 @@ namespace OpenGamma.Fudge
             {
                 int nameSize = br.ReadByte();
                 nRead++;
-                name = ModifiedUTF8Util.ReadString(br, nameSize);
+                name = ModifiedUTF8Util.ReadString(br.BaseStream, nameSize);
                 nRead += nameSize;
             }
 
             FudgeFieldType type = FudgeTypeDictionary.Instance.GetByTypeId(typeId);
             if (type == null)
             {
-                // REVIEW kirk 2009-08-18 -- Is this the right behavior?
-                throw new FudgeRuntimeException("Unable to locate a FudgeFieldType for type id " + typeId + " for field " + ordinal + ":" + name);        // TODO: 20090831 (t0rx): In Fudge-Java this is just a RuntimeException
+                if (fixedWidth)
+                {
+                    throw new FudgeRuntimeException("Unknown fixed width type " + typeId + " for field " + ordinal + ":" + name + " cannot be handled.");       // TODO t0rx 2009-09-09 -- In Fudge-Java this is just RuntimeException
+                }
+                type = FudgeTypeDictionary.Instance.GetUnknownType(typeId);
             }
             int varSize = 0;
             if (!fixedWidth)
@@ -117,11 +118,11 @@ namespace OpenGamma.Fudge
                 {
                     case 0: varSize = 0; break;
                     case 1: varSize = br.ReadByte(); nRead += 1; break;
-                    case 2: varSize = br.ReadInt16(); nRead += 2; break;      // TODO: 20090831 (t0rx): Review whether this should be signed or not
+                    case 2: varSize = br.ReadInt16(); nRead += 2; break;      // TODO t0rx 2009-08-31 -- Review whether this should be signed or not
                     // Yes, this is right. We only have 2 bits here.
                     case 3: varSize = br.ReadInt32(); nRead += 4; break;
                     default:
-                        throw new FudgeRuntimeException("Illegal number of bytes indicated for variable width encoding: " + varSizeBytes);        // TODO: 20090831 (t0rx): In Fudge-Java this is just a RuntimeException
+                        throw new FudgeRuntimeException("Illegal number of bytes indicated for variable width encoding: " + varSizeBytes);        // TODO t0rx 2009-08-31 -- In Fudge-Java this is just a RuntimeException
                 }
 
             }

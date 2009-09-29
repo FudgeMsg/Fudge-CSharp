@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +30,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -58,16 +60,30 @@
     <Compile Include="IFudgeField.cs" />
     <Compile Include="ModifiedUTF8Util.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Types\FudgeArrayFieldTypeBase.cs" />
+    <Compile Include="Types\SecondaryFieldType.cs" />
     <Compile Include="Taxon\IFudgeTaxonomy.cs" />
     <Compile Include="Taxon\IFudgeTaxonomyResolver.cs" />
     <Compile Include="Taxon\ImmutableMapTaxonomyResolver.cs" />
     <Compile Include="Taxon\MapFudgeTaxonomy.cs" />
     <Compile Include="Types\ByteArrayFieldType.cs" />
+    <Compile Include="Types\LongArrayFieldType.cs" />
+    <Compile Include="Types\ShortArrayFieldType.cs" />
+    <Compile Include="Types\IntArrayFieldType.cs" />
     <Compile Include="Types\DoubleArrayFieldType.cs" />
     <Compile Include="Types\FloatArrayFieldType.cs" />
     <Compile Include="Types\FudgeMsgFieldType.cs" />
+    <Compile Include="Types\IndicatorFieldType.cs" />
+    <Compile Include="Types\IndicatorType.cs" />
     <Compile Include="Types\PrimitiveFieldTypes.cs" />
     <Compile Include="Types\StringFieldType.cs" />
+    <Compile Include="Types\UnknownFudgeFieldType.cs" />
+    <Compile Include="UnknownFudgeFieldValue.cs" />
+    <Compile Include="Util\BinaryNBOReader.cs" />
+    <Compile Include="Util\BinaryNBOWriter.cs" />
+    <Compile Include="Util\FudgeBinaryReader.cs" />
+    <Compile Include="Util\FudgeBinaryWriter.cs" />
+    <Compile Include="Util\ModifiedUTF8Encoding.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

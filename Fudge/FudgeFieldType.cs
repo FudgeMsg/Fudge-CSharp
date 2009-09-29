@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using OpenGamma.Fudge.Taxon;
 using System.IO;
+using OpenGamma.Fudge.Types;
 
 namespace OpenGamma.Fudge
 {
@@ -78,6 +79,37 @@ namespace OpenGamma.Fudge
             }
         }
 
+        /// <summary>
+        /// Override <c>Minimize</c> where you wish to be able to reduce to a lower type as fields are added to messages.
+        /// </summary>
+        /// <remarks>
+        /// <c>Minimize</c> is used to reduce integers to their smallest form, but can also be used to convert
+        /// non-primitive types (e.g. GUID) to primitive ones (e.g. byte[16]) as they are added.
+        /// </remarks>
+        /// <param name="value">Value to reduce.</param>
+        /// <param name="type">Current field type - update this if you minimize to a different type.</param>
+        /// <returns>Minimized value.</returns>
+        public virtual object Minimize(object value, ref FudgeFieldType type)
+        {
+            return value;
+        }
+
+        /// <summary>
+        /// Converts a value of another type to on of this field type, if possible.
+        /// </summary>
+        /// <remarks>
+        /// Override this to provide custom conversions.  The default behaviour is to use the default .net conversions.
+        /// </remarks>
+        /// <param name="value">Value to convert.</param>
+        /// <returns>Converted value.</returns>
+        /// <exception cref="InvalidCastException">Thrown if the value cannot be converted</exception>
+        public virtual object ConvertValueFrom(object value)
+        {
+            // TODO t0rx 2009-09-12 -- Should we return null rather than throwing an exception?  This would be consistent with FudgeMsg.GetLong, etc.
+
+            return Convert.ChangeType(value, csharpType);
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == this)
@@ -103,7 +135,7 @@ namespace OpenGamma.Fudge
             return TypeId;
         }
 
-        protected string GenerateToString()
+        protected virtual string GenerateToString()
         {
             string str = string.Format("FudgeFieldType[{0}-{1}]", TypeId, CSharpType);
             return string.Intern(str);
@@ -121,15 +153,36 @@ namespace OpenGamma.Fudge
         public abstract object ReadValue(BinaryReader input, int dataSize);
     }
 
-    /// <summary>Unlike in Fudge-Java, here we have to have a generic type inheriting from the non-generic base type, as C# doesn't support MyClass<?></summary>
+    /// <summary>
+    /// <c>FudgeValueMinimizer</c> is used to reduce values to their most primitive form for encoding
+    /// </summary>
+    /// <remarks>
+    /// The minimizer may simply return the original value.  If it converts to another type then it should update the <c>type</c> parameter also.
+    /// </remarks>
+    /// <typeparam name="T">Type of value to minimize.</typeparam>
+    /// <param name="value">Value to minimize.</param>
+    /// <param name="type">Current <see cref="FudgeFieldType"/>, which may be updated by the minimizer.</param>
+    /// <returns>Minimized value.</returns>
+    public delegate object FudgeValueMinimizer<T>(T value, ref FudgeFieldType type);
+
+    /// <summary>Unlike in Fudge-Java, here we have to have a generic type inheriting from the non-generic base type, as C# doesn't support MyClass&lt;?&gt;</summary>
     /// <typeparam name="TValue"></typeparam>
     [Serializable]
     public class FudgeFieldType<TValue> : FudgeFieldType
     {
-        // TODO: 20090830 (t0rx): Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
+        // TODO t0rx 2009-08-30 -- Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
 
-        public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize) : base(typeId, typeof(TValue), isVariableSize, fixedSize)
+        private readonly FudgeValueMinimizer<TValue> minimizer;
+
+        public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize)
+            : this(typeId, isVariableSize, fixedSize, null)
         {
+        }
+
+        public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize, FudgeValueMinimizer<TValue> minimizer)
+            : base(typeId, typeof(TValue), isVariableSize, fixedSize)
+        {
+            this.minimizer = minimizer;
         }
 
         public virtual int GetVariableSize(TValue value, IFudgeTaxonomy taxonomy)
@@ -151,12 +204,22 @@ namespace OpenGamma.Fudge
 
         public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            // TODO: 20090830 (t0rx): In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
+            // TODO t0rx 2009-08-30 -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
             {
                 throw new NotSupportedException("This method must be overridden for variable size types.");
             }
             return default(TValue);
+        }
+
+        public override object Minimize(object value, ref FudgeFieldType type)
+        {
+            if (minimizer != null)
+            {
+                return minimizer((TValue)value, ref type);
+            }
+
+            return value;
         }
 
         #region Mapping from untyped into typed method calls

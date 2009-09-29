@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using OpenGamma.Fudge.Taxon;
 using System.IO;
+using OpenGamma.Fudge.Util;
 
 namespace OpenGamma.Fudge
 {
@@ -35,8 +36,6 @@ namespace OpenGamma.Fudge
     /// </summary>
     public class FudgeContext
     {
-        // TODO: 20090831 (t0rx): Finish porting FudgeContext
-
         private ITaxonomyResolver taxonomyResolver;
 
         public ITaxonomyResolver TaxonomyResolver
@@ -57,7 +56,7 @@ namespace OpenGamma.Fudge
             {
                 taxonomy = TaxonomyResolver.ResolveTaxonomy(taxonomyId.Value);
             }
-            BinaryWriter bw = new BinaryWriter(s);
+            BinaryWriter bw = new FudgeBinaryWriter(s);
             try
             {
                 FudgeStreamEncoder.WriteMsg(bw, msg, taxonomy, taxonomyId ?? 0);
@@ -70,7 +69,7 @@ namespace OpenGamma.Fudge
 
         public FudgeMsg Deserialize(Stream s)
         {
-            BinaryReader br = new BinaryReader(s);
+            BinaryReader br = new FudgeBinaryReader(s);
             FudgeMsg msg;
             try
             {

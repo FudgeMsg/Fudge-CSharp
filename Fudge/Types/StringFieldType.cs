@@ -17,6 +17,8 @@ namespace OpenGamma.Fudge.Types
     /// </summary>
     public class StringFieldType : FudgeFieldType<string>
     {
+        // Note that we ignore the encoder in the BinaryReader or BinaryWriter and just go for Modified UTF-8 anyway.
+        // This is because we don't have the writer when we are in GetVariableSize.
         public static readonly StringFieldType Instance = new StringFieldType();
 
         public StringFieldType()
@@ -31,12 +33,22 @@ namespace OpenGamma.Fudge.Types
 
         public override string ReadTypedValue(BinaryReader input, int dataSize)
         {
-            return ModifiedUTF8Util.ReadString(input, dataSize);
+            return ModifiedUTF8Util.ReadString(input.BaseStream, dataSize);
         }
 
         public override void WriteValue(BinaryWriter output, string value, IFudgeTaxonomy taxonomy, short taxonomyId)
         {
-            ModifiedUTF8Util.WriteModifiedUTF8(value, output);
+            ModifiedUTF8Util.WriteModifiedUTF8(value, output.BaseStream);
+        }
+
+        public override object Minimize(object value, ref FudgeFieldType type)
+        {
+            if ((string)value == "")
+            {
+                type = IndicatorFieldType.Instance;
+                value = IndicatorType.Instance;
+            }
+            return value;
         }
     }
 }

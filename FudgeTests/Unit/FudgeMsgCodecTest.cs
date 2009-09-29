@@ -18,6 +18,8 @@ namespace OpenGamma.Fudge.Tests.Unit
     /// </summary>
     public class FudgeMsgCodecTest
     {
+        private readonly Random random = new Random();
+
         [Fact]
         public void AllNames()
         {
@@ -64,6 +66,43 @@ namespace OpenGamma.Fudge.Tests.Unit
             AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
+        [Fact]
+        public void Unknown()
+        {
+            FudgeMsg inputMsg = new FudgeMsg();
+            inputMsg.Add(new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200)), "unknown");
+            FudgeMsg outputMsg = CycleMessage(inputMsg);
+            AssertAllFieldsMatch(inputMsg, outputMsg);
+        }
+
+
+        protected byte[] CreateRandomArray(int length)
+        {
+            byte[] bytes = new byte[length];
+            random.NextBytes(bytes);
+            return bytes;
+        }
+
+        [Fact]
+        public void FixedWidthByteArrays()
+        {
+            FudgeMsg inputMsg = new FudgeMsg();
+            inputMsg.Add(CreateRandomArray(4), "byte[4]");
+            inputMsg.Add(CreateRandomArray(8), "byte[8]");
+            inputMsg.Add(CreateRandomArray(16), "byte[16]");
+            inputMsg.Add(CreateRandomArray(20), "byte[20]");
+            inputMsg.Add(CreateRandomArray(32), "byte[32]");
+            inputMsg.Add(CreateRandomArray(64), "byte[64]");
+            inputMsg.Add(CreateRandomArray(128), "byte[128]");
+            inputMsg.Add(CreateRandomArray(256), "byte[256]");
+            inputMsg.Add(CreateRandomArray(512), "byte[512]");
+
+            inputMsg.Add(CreateRandomArray(28), "byte[28]");
+
+            FudgeMsg outputMsg = CycleMessage(inputMsg);
+            AssertAllFieldsMatch(inputMsg, outputMsg);
+        }
+
         // REVIEW kirk 2009-08-21 -- This should be moved to a utility class.
         protected internal static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
         {
@@ -81,13 +120,22 @@ namespace OpenGamma.Fudge.Tests.Unit
                 if (expectedField.Value.GetType().IsArray)
                 {
                     Assert.Equal(expectedField.Value.GetType(), actualField.Value.GetType());
-                    // TODO wyliekir 2009-08-19 -- Check something better.
+                    Assert.Equal(expectedField.Value, actualField.Value);       // XUnit will check all values in the arrays
                 }
                 else if (expectedField.Value is FudgeMsg)
                 {
                     Assert.True(actualField.Value is FudgeMsg);
                     AssertAllFieldsMatch((FudgeMsg)expectedField.Value,
                         (FudgeMsg)actualField.Value);
+                }
+                else if (expectedField.Value is UnknownFudgeFieldValue)
+                {
+                    Assert.IsType<UnknownFudgeFieldValue>(actualField.Value);
+                    UnknownFudgeFieldValue expectedValue = (UnknownFudgeFieldValue)expectedField.Value;
+                    UnknownFudgeFieldValue actualValue = (UnknownFudgeFieldValue)actualField.Value;
+                    Assert.Equal(expectedField.Type.TypeId, actualField.Type.TypeId);
+                    Assert.Equal(expectedValue.Type.TypeId, actualField.Type.TypeId);
+                    Assert.Equal(expectedValue.Contents, actualValue.Contents);
                 }
                 else
                 {

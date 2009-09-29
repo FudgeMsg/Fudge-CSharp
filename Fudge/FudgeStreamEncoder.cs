@@ -115,7 +115,7 @@ namespace OpenGamma.Fudge
                 }
                 bw.Write((byte)utf8size);
                 nWritten++;
-                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw);
+                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw.BaseStream);
             }
             nWritten += WriteFieldValue(bw, type, value, valueSize, taxonomy, taxonomyId);
             return nWritten;
@@ -160,22 +160,29 @@ namespace OpenGamma.Fudge
             }
             if (nWritten == 0)
             {
-                // This is correct. We read this using a .readUnsignedByte(), so we can go to
-                // 255 here.
-                if (valueSize <= 255)
+                if (type.IsVariableSize)
                 {
-                    bw.Write((byte)valueSize);
-                    nWritten = valueSize + 1;
-                }
-                else if (valueSize <= short.MaxValue)
-                {
-                    bw.Write((short)valueSize);
-                    nWritten = valueSize + 2;
+                    // This is correct. We read this using a .readUnsignedByte(), so we can go to
+                    // 255 here.
+                    if (valueSize <= 255)
+                    {
+                        bw.Write((byte)valueSize);
+                        nWritten = valueSize + 1;
+                    }
+                    else if (valueSize <= short.MaxValue)
+                    {
+                        bw.Write((short)valueSize);
+                        nWritten = valueSize + 2;
+                    }
+                    else
+                    {
+                        bw.Write((int)valueSize);
+                        nWritten = valueSize + 4;
+                    }
                 }
                 else
                 {
-                    bw.Write((int)valueSize);
-                    nWritten = valueSize + 4;
+                    nWritten = type.FixedSize;
                 }
                 type.WriteValue(bw, value, taxonomy, taxonomyId);
             }
