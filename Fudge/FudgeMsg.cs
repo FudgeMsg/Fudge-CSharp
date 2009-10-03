@@ -446,26 +446,26 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
-        public byte? GetByte(string fieldName)
+        public sbyte? GetSByte(string fieldName)
         {
-            return GetAsByteInternal(fieldName, null);
+            return GetAsSByteInternal(fieldName, null);
         }
 
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
-        public byte? GetByte(short ordinal)
+        public sbyte? GetSByte(short ordinal)
         {
-            return GetAsByteInternal(null, ordinal);
+            return GetAsSByteInternal(null, ordinal);
         }
 
-        protected byte? GetAsByteInternal(string fieldName, short? ordinal)
+        protected sbyte? GetAsSByteInternal(string fieldName, short? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
                 return null;
             else
-                return value.ToByte(null);
+                return value.ToSByte(null);
         }
 
         /// <returns>value, or <c>null</c> if field not found.</returns>

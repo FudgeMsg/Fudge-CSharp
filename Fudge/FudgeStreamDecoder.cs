@@ -151,8 +151,8 @@ namespace OpenGamma.Fudge
             {
                 case FudgeTypeDictionary.BOOLEAN_TYPE_ID:
                     return br.ReadBoolean();
-                case FudgeTypeDictionary.BYTE_TYPE_ID:
-                    return br.ReadByte();
+                case FudgeTypeDictionary.SBYTE_TYPE_ID:
+                    return br.ReadSByte();
                 case FudgeTypeDictionary.SHORT_TYPE_ID:
                     return br.ReadInt16();
                 case FudgeTypeDictionary.INT_TYPE_ID:

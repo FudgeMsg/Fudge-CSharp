@@ -14,7 +14,7 @@ namespace OpenGamma.Fudge.Types
     public static class PrimitiveFieldTypes
     {
         public static readonly FudgeFieldType<bool> BooleanType = new FudgeFieldType<bool>(FudgeTypeDictionary.BOOLEAN_TYPE_ID, false, 1, (bool b, ref FudgeFieldType t) => MinimizeBoolean(b, ref t));
-        public static readonly FudgeFieldType<byte> ByteType = new FudgeFieldType<byte>(FudgeTypeDictionary.BYTE_TYPE_ID, false, 1, (byte i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
+        public static readonly FudgeFieldType<sbyte> SByteType = new FudgeFieldType<sbyte>(FudgeTypeDictionary.SBYTE_TYPE_ID, false, 1, (sbyte i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<short> ShortType = new FudgeFieldType<short>(FudgeTypeDictionary.SHORT_TYPE_ID, false, 2, (short i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<int> IntType = new FudgeFieldType<int>(FudgeTypeDictionary.INT_TYPE_ID, false, 4, (int i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<long> LongType = new FudgeFieldType<long>(FudgeTypeDictionary.LONG_TYPE_ID, false, 8, (long i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
@@ -30,10 +30,10 @@ namespace OpenGamma.Fudge.Types
                 value = IndicatorType.Instance;
                 type = IndicatorFieldType.Instance;
             }
-            else if ((valueAsLong >= byte.MinValue) && (valueAsLong <= byte.MaxValue))
+            else if ((valueAsLong >= sbyte.MinValue) && (valueAsLong <= sbyte.MaxValue))
             {
-                value = (byte)valueAsLong;
-                type = PrimitiveFieldTypes.ByteType;
+                value = (sbyte)valueAsLong;
+                type = PrimitiveFieldTypes.SByteType;
             }
             else if ((valueAsLong >= short.MinValue) && (valueAsLong <= short.MaxValue))
             {

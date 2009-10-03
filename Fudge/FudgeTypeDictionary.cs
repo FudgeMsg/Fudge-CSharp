@@ -100,7 +100,7 @@ namespace OpenGamma.Fudge
         // --------------------------
         public const byte INDICATOR_TYPE_ID = 0;
         public const byte BOOLEAN_TYPE_ID = 1;
-        public const byte BYTE_TYPE_ID = 2;
+        public const byte SBYTE_TYPE_ID = 2;
         public const byte SHORT_TYPE_ID = 3;
         public const byte INT_TYPE_ID = 4;
         public const byte LONG_TYPE_ID = 5;
@@ -142,7 +142,7 @@ namespace OpenGamma.Fudge
             Instance.AddType(ByteArrayFieldType.Length512Instance);    
 
             Instance.AddType(PrimitiveFieldTypes.BooleanType);
-            Instance.AddType(PrimitiveFieldTypes.ByteType);
+            Instance.AddType(PrimitiveFieldTypes.SByteType);
             Instance.AddType(PrimitiveFieldTypes.ShortType);
             Instance.AddType(PrimitiveFieldTypes.IntType);
             Instance.AddType(PrimitiveFieldTypes.LongType);

@@ -53,6 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InterOp\FudgeInterOpTest.cs" />
     <Compile Include="Rabbit\RabbitTest.cs" />
     <Compile Include="Perf\SmallFinancialTick.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeStreamEncoderTest.cs" />
+    <Compile Include="Unit\FudgeTestUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />

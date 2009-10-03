@@ -133,8 +133,8 @@ namespace OpenGamma.Fudge
                     bw.Write((bool)value);
                     nWritten = 1;
                     break;
-                case FudgeTypeDictionary.BYTE_TYPE_ID:
-                    bw.Write((byte)value);
+                case FudgeTypeDictionary.SBYTE_TYPE_ID:
+                    bw.Write((sbyte)value);
                     nWritten = 1;
                     break;
                 case FudgeTypeDictionary.SHORT_TYPE_ID:
