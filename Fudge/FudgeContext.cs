@@ -59,7 +59,7 @@ namespace OpenGamma.Fudge
             BinaryWriter bw = new FudgeBinaryWriter(s);
             try
             {
-                FudgeStreamEncoder.WriteMsg(bw, msg, taxonomy, taxonomyId ?? 0);
+                FudgeStreamEncoder.WriteMsg(bw, new FudgeMsgEnvelope(msg), taxonomy, taxonomyId ?? 0);
             }
             catch (IOException e)
             {
@@ -67,19 +67,19 @@ namespace OpenGamma.Fudge
             }
         }
 
-        public FudgeMsg Deserialize(Stream s)
+        public FudgeMsgEnvelope Deserialize(Stream s)
         {
             BinaryReader br = new FudgeBinaryReader(s);
-            FudgeMsg msg;
+            FudgeMsgEnvelope envelope;
             try
             {
-                msg = FudgeStreamDecoder.ReadMsg(br, TaxonomyResolver);
+                envelope = FudgeStreamDecoder.ReadMsg(br, TaxonomyResolver);
             }
             catch (IOException e)
             {
                 throw new FudgeRuntimeException("Unable to deserialize FudgeMsg from input stream", e);
             }
-            return msg;
+            return envelope;
         }
     }
 }

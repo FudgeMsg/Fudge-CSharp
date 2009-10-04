@@ -148,7 +148,7 @@ namespace OpenGamma.Fudge
 
         public abstract int GetVariableSize(object value, IFudgeTaxonomy taxonomy);
 
-        public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy, short taxonomyId);
+        public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy);
 
         public abstract object ReadValue(BinaryReader input, int dataSize);
     }
@@ -194,7 +194,7 @@ namespace OpenGamma.Fudge
             return FixedSize;
         }
 
-        public virtual void WriteValue(BinaryWriter output, TValue value, IFudgeTaxonomy taxonomy, short taxonomyId) //throws IOException
+        public virtual void WriteValue(BinaryWriter output, TValue value, IFudgeTaxonomy taxonomy) //throws IOException
         {
             if (IsVariableSize)
             {
@@ -228,9 +228,9 @@ namespace OpenGamma.Fudge
             return GetVariableSize((TValue)value, taxonomy);
         }
 
-        public sealed override void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy, short taxonomyId)
+        public sealed override void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy)
         {
-            WriteValue(output, (TValue)value, taxonomy, taxonomyId);
+            WriteValue(output, (TValue)value, taxonomy);
         }
 
         public sealed override object ReadValue(BinaryReader input, int dataSize)

@@ -135,7 +135,7 @@ namespace OpenGamma.Fudge.Tests.Unit
 
             fileStream = new FileStream(fullPath, FileMode.Open);
             BinaryReader br = new FudgeBinaryReader(fileStream);
-            FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br);
+            FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br).Message;
             return outputMsg;
         }
     }

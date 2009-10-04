@@ -74,7 +74,7 @@ namespace OpenGamma.Fudge
             throw new NotSupportedException("Secondary type should never have to read a value, the wire type should handle this");
         }
 
-        public override void WriteValue(BinaryWriter output, T value, IFudgeTaxonomy taxonomy, short taxonomyId)
+        public override void WriteValue(BinaryWriter output, T value, IFudgeTaxonomy taxonomy)
         {
             throw new NotSupportedException("Secondary type should never have to write a value, the wire type should handle this");
         }

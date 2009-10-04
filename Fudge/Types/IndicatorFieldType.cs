@@ -26,7 +26,7 @@ namespace OpenGamma.Fudge.Types
             return IndicatorType.Instance;
         }
 
-        public override void WriteValue(BinaryWriter output, IndicatorType value, IFudgeTaxonomy taxonomy, short taxonomyId) //throws IOException
+        public override void WriteValue(BinaryWriter output, IndicatorType value, IFudgeTaxonomy taxonomy) //throws IOException
         {
             // Intentional no-op.
         }

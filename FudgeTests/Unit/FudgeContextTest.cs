@@ -88,8 +88,10 @@ namespace OpenGamma.Fudge.Tests.Unit
             byte[] content = outputStream.ToArray();
 
             MemoryStream inputStream = new MemoryStream(content);
-            FudgeMsg outputMsg = context.Deserialize(inputStream);
-            return outputMsg;
+            FudgeMsgEnvelope outputMsgEnvelope = context.Deserialize(inputStream);
+            Assert.NotNull(outputMsgEnvelope);
+            Assert.NotNull(outputMsgEnvelope.Message);
+            return outputMsgEnvelope.Message;
         }
     }
 }

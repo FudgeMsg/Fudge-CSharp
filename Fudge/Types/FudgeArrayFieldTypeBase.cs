@@ -42,7 +42,7 @@ namespace OpenGamma.Fudge.Types
             return result;
         }
 
-        public override void WriteValue(BinaryWriter output, T[] value, IFudgeTaxonomy taxonomy, short taxonomyId)  //throws IOException
+        public override void WriteValue(BinaryWriter output, T[] value, IFudgeTaxonomy taxonomy)  //throws IOException
         {
             foreach (T element in value)
             {

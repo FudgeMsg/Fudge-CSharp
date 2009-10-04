@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using OpenGamma.Fudge.Taxon;
 using System.IO;
+using System.Diagnostics;
 
 namespace OpenGamma.Fudge.Types
 {
@@ -31,14 +32,17 @@ namespace OpenGamma.Fudge.Types
 
         public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
+            FudgeMsg msg = new FudgeMsg();
             // REVIEW kirk 2009-09-01 -- This is right. We have to use the same taxonomy,
             // so the parent taxonomy resolver will be fixed up later on.
-            return FudgeStreamDecoder.ReadMsg(input);
+            int nRead = FudgeStreamDecoder.ReadMsgFields(input, null, msg);
+            Debug.Assert(dataSize == nRead, "Sub-message reading failed in size; envelope unpacking will throw exception in prod.");
+            return msg;
         }
 
-        public override void WriteValue(BinaryWriter output, FudgeMsg value, IFudgeTaxonomy taxonomy, short taxonomyId) //throws IOException
+        public override void WriteValue(BinaryWriter output, FudgeMsg value, IFudgeTaxonomy taxonomy) //throws IOException
         {
-            FudgeStreamEncoder.WriteMsg(output, value, taxonomy, taxonomyId);
+            FudgeStreamEncoder.WriteMsgFields(output, value, taxonomy);
         }
     }
 }

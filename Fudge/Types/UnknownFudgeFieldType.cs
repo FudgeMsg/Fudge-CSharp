@@ -36,7 +36,7 @@ namespace OpenGamma.Fudge.Types
             return new UnknownFudgeFieldValue(contents, this);
         }
 
-        public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value, IFudgeTaxonomy taxonomy, short taxonomyId)
+        public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value, IFudgeTaxonomy taxonomy)
         {
             output.Write(value.Contents);
         }

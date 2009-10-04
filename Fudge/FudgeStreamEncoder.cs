@@ -22,47 +22,64 @@ namespace OpenGamma.Fudge
 
         public static void WriteMsg(BinaryWriter bw, FudgeMsg msg) //throws IOException
         {
-            WriteMsg(bw, msg, null, (short)0);
+            WriteMsg(bw, new FudgeMsgEnvelope(msg));
         }
 
-        public static void WriteMsg(BinaryWriter bw, FudgeMsg msg, IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
+        public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope)// throws IOException
+        {
+            WriteMsg(bw, envelope, null, 0);
+        }
+
+        public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope, IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
         {
             CheckOutputStream(bw);
-            if (msg == null)
+            if (envelope == null)
             {
-                throw new ArgumentNullException("Must provide a message to output.");
+                throw new ArgumentNullException("envelope", "Must provide a message envelope to output.");
             }
             int nWritten = 0;
-            int msgSize = msg.GetSize(taxonomy);
-            nWritten += WriteMsgHeader(bw, taxonomyId, msg.GetNumFields(), msgSize);
-            foreach (IFudgeField field in msg.GetAllFields())
-            {
-                nWritten += WriteField(bw, field.Type, field.Value, field.Ordinal, field.Name, taxonomy, taxonomyId);
-            }
+            int msgSize = envelope.GetSize(taxonomy);
+            FudgeMsg msg = envelope.Message;
+            nWritten += WriteMsgEnvelopeHeader(bw, taxonomyId, msgSize, envelope.Version);
+            nWritten += WriteMsgFields(bw, msg, taxonomy);
             Debug.Assert(nWritten == msgSize, "Expected to write " + msgSize + " but actually wrote " + nWritten);
         }
 
-        public static int WriteMsgHeader(BinaryWriter bw, int taxonomy, short nFields, int messageSize)// throws IOException
+        public static int WriteMsgFields(BinaryWriter bw, FudgeMsg msg, IFudgeTaxonomy taxonomy) //throws IOException
+        {
+            int nWritten = 0;
+            foreach (IFudgeField field in msg.GetAllFields())
+            {
+                nWritten += WriteField(bw, field.Type, field.Value, field.Ordinal, field.Name, taxonomy);
+            }
+            nWritten += WriteFieldContents(bw, null, null, taxonomy, 0, false, FudgeTypeDictionary.END_FUDGE_MSG_TYPE_ID, null, null);
+            return nWritten;
+        }
+
+        public static int WriteMsgEnvelopeHeader(BinaryWriter bw, int taxonomy, int messageSize, int version)// throws IOException
         {
             CheckOutputStream(bw);
             int nWritten = 0;
-            bw.Write((short)taxonomy);
+
+            bw.Write((byte)0); // Processing Directives
+            nWritten += 1;
+            bw.Write((byte)version);
+            nWritten += 1;
+            bw.Write((short)taxonomy);      // TODO t0rx 2009-10-04 -- This should probably be ushort, but we'll need to change throughout and also support within the BinaryNBOWriter/reader
             nWritten += 2;
-            bw.Write((short)nFields);
-            nWritten += 2;
-            bw.Write((int)messageSize);
+            bw.Write(messageSize);
             nWritten += 4;
             return nWritten;
         }
 
         public static int WriteField(BinaryWriter bw, FudgeFieldType type, object value, short? ordinal, string name)// throws IOException
         {
-            return WriteField(bw, type, value, ordinal, name, null, (short)0);
+            return WriteField(bw, type, value, ordinal, name, null);
         }
 
         public static int WriteField(BinaryWriter bw, FudgeFieldType type,
               object value, short? ordinal, string name,
-              IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
+              IFudgeTaxonomy taxonomy)// throws IOException
         {
             CheckOutputStream(bw);
             if (type == null)
@@ -94,12 +111,19 @@ namespace OpenGamma.Fudge
                 }
             }
 
-            int nWritten = 0;
             int valueSize = type.IsVariableSize ? type.GetVariableSize(value, taxonomy) : type.FixedSize;
-            int fieldPrefix = ComposeFieldPrefix(!type.IsVariableSize, valueSize, (ordinal != null), (name != null));
+            int nWritten = WriteFieldContents(bw, value, type, taxonomy, valueSize, type.IsVariableSize, type.TypeId, ordinal, name);
+            return nWritten;
+        }
+
+        private static int WriteFieldContents(BinaryWriter bw, object value, FudgeFieldType type, IFudgeTaxonomy taxonomy, int valueSize, bool variableSize, int typeId, short? ordinal, string name)
+        {
+            int nWritten = 0;
+
+            int fieldPrefix = ComposeFieldPrefix(!variableSize, valueSize, (ordinal != null), (name != null));
             bw.Write((byte)fieldPrefix);
             nWritten++;
-            bw.Write((byte)type.TypeId);
+            bw.Write((byte)typeId);
             nWritten++;
             if (ordinal != null)
             {
@@ -117,11 +141,15 @@ namespace OpenGamma.Fudge
                 nWritten++;
                 nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw.BaseStream);
             }
-            nWritten += WriteFieldValue(bw, type, value, valueSize, taxonomy, taxonomyId);
+            if (value != null)
+            {
+                Debug.Assert(type != null);
+                nWritten += WriteFieldValue(bw, type, value, valueSize, taxonomy);
+            }
             return nWritten;
         }
 
-        protected static int WriteFieldValue(BinaryWriter bw, FudgeFieldType type, object value, int valueSize, IFudgeTaxonomy taxonomy, short taxonomyId) //throws IOException
+        protected static int WriteFieldValue(BinaryWriter bw, FudgeFieldType type, object value, int valueSize, IFudgeTaxonomy taxonomy) //throws IOException
         {
             // Note that we fast-path types for which at compile time we know how to handle
             // in an optimized way. This is because this particular method is known to
@@ -184,7 +212,7 @@ namespace OpenGamma.Fudge
                 {
                     nWritten = type.FixedSize;
                 }
-                type.WriteValue(bw, value, taxonomy, taxonomyId);
+                type.WriteValue(bw, value, taxonomy);
             }
             return nWritten;
         }

@@ -56,7 +56,7 @@ namespace OpenGamma.Fudge
         {
             MemoryStream stream = new MemoryStream(byteArray);
             BinaryReader bw = new BinaryReader(stream);
-            FudgeMsg other;
+            FudgeMsgEnvelope other;
             try
             {
                 other = FudgeStreamDecoder.ReadMsg(bw);
@@ -65,7 +65,7 @@ namespace OpenGamma.Fudge
             {
                 throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO t0rx 2009-08-31 -- This is just RuntimeException in Fudge-Java
             }
-            fields.AddRange(other.fields);
+            fields.AddRange(other.Message.fields);
         }
 
         public void Add(IFudgeField field)
@@ -307,12 +307,12 @@ namespace OpenGamma.Fudge
         public override int ComputeSize(IFudgeTaxonomy taxonomy)
         {
             int size = 0;
-            // Message prefix
-            size += 8;
             foreach (FudgeMsgField field in fields)
             {
                 size += field.GetSize(taxonomy);
             }
+            // The final end message virtual-field
+            size += 2;
             return size;
         }
 

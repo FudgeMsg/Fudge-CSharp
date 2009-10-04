@@ -155,8 +155,10 @@ namespace OpenGamma.Fudge.Tests.Unit
 
             MemoryStream stream2 = new MemoryStream(content);
             BinaryReader br = new BinaryReader(stream2);
-            FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br);
-            return outputMsg;
+            FudgeMsgEnvelope outputMsgEnvelope = FudgeStreamDecoder.ReadMsg(br);
+            Assert.NotNull(outputMsgEnvelope);
+            Assert.NotNull(outputMsgEnvelope.Message);
+            return outputMsgEnvelope.Message;
         }
     }
 }

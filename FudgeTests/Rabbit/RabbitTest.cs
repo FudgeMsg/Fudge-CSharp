@@ -62,7 +62,7 @@ namespace OpenGamma.Fudge.Tests.Rabbit
             byte[] payload = result.Body;
             MemoryStream inputstream = new MemoryStream(payload);
             BinaryReader br = new BinaryReader(inputstream);
-            return FudgeStreamDecoder.ReadMsg(br);
+            return FudgeStreamDecoder.ReadMsg(br).Message;
         }
 
         public static void LogConnClose(IConnection conn, ShutdownEventArgs reason)

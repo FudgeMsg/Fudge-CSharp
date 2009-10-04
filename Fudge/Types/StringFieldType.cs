@@ -36,7 +36,7 @@ namespace OpenGamma.Fudge.Types
             return ModifiedUTF8Util.ReadString(input.BaseStream, dataSize);
         }
 
-        public override void WriteValue(BinaryWriter output, string value, IFudgeTaxonomy taxonomy, short taxonomyId)
+        public override void WriteValue(BinaryWriter output, string value, IFudgeTaxonomy taxonomy)
         {
             ModifiedUTF8Util.WriteModifiedUTF8(value, output.BaseStream);
         }

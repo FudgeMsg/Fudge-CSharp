@@ -176,7 +176,7 @@ namespace OpenGamma.Fudge.Tests.Perf
 
             MemoryStream inputstream = new MemoryStream(data);
             BinaryReader br = new BinaryReader(inputstream);
-            msg = FudgeStreamDecoder.ReadMsg(br);
+            msg = FudgeStreamDecoder.ReadMsg(br).Message;
 
             tick = new SmallFinancialTick();
             if (useOrdinals)

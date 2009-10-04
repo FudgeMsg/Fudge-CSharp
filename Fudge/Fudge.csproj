@@ -51,6 +51,7 @@
     <Compile Include="FudgeEncodingObject.cs" />
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />
+    <Compile Include="FudgeMsgEnvelope.cs" />
     <Compile Include="FudgeMsgField.cs" />
     <Compile Include="FudgeMsgFormatter.cs" />
     <Compile Include="FudgeRuntimeException.cs" />
