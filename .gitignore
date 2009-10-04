@@ -1,0 +1,8 @@
+*~	
+
+# Ignore user option and built files
+*.suo
+*.csproj.user
+*/bin
+*/obj
+

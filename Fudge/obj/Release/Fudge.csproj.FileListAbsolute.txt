@@ -1,5 +1,0 @@
-C:\OpenGamma\Fudge-CSharp\Fudge\bin\Release\Fudge.dll
-C:\OpenGamma\Fudge-CSharp\Fudge\bin\Release\Fudge.pdb
-C:\OpenGamma\Fudge-CSharp\Fudge\obj\Release\ResolveAssemblyReference.cache
-C:\OpenGamma\Fudge-CSharp\Fudge\obj\Release\Fudge.dll
-C:\OpenGamma\Fudge-CSharp\Fudge\obj\Release\Fudge.pdb

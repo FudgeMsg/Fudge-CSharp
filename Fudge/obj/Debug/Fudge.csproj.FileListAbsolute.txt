@@ -1,5 +1,0 @@
-C:\OpenGamma\Fudge-CSharp\Fudge\bin\Debug\Fudge.dll
-C:\OpenGamma\Fudge-CSharp\Fudge\bin\Debug\Fudge.pdb
-C:\OpenGamma\Fudge-CSharp\Fudge\obj\Debug\ResolveAssemblyReference.cache
-C:\OpenGamma\Fudge-CSharp\Fudge\obj\Debug\Fudge.dll
-C:\OpenGamma\Fudge-CSharp\Fudge\obj\Debug\Fudge.pdb
