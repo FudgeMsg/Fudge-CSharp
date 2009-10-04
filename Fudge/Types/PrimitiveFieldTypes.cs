@@ -18,19 +18,14 @@ namespace OpenGamma.Fudge.Types
         public static readonly FudgeFieldType<short> ShortType = new FudgeFieldType<short>(FudgeTypeDictionary.SHORT_TYPE_ID, false, 2, (short i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<int> IntType = new FudgeFieldType<int>(FudgeTypeDictionary.INT_TYPE_ID, false, 4, (int i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<long> LongType = new FudgeFieldType<long>(FudgeTypeDictionary.LONG_TYPE_ID, false, 8, (long i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
-        public static readonly FudgeFieldType<float> FloatType = new FudgeFieldType<float>(FudgeTypeDictionary.FLOAT_TYPE_ID, false, 4, (float f, ref FudgeFieldType t) => MinimizeFloat(f, ref t));
-        public static readonly FudgeFieldType<double> DoubleType = new FudgeFieldType<double>(FudgeTypeDictionary.DOUBLE_TYPE_ID, false, 8, (double d, ref FudgeFieldType t) => MinimizeDouble(d, ref t));
+        public static readonly FudgeFieldType<float> FloatType = new FudgeFieldType<float>(FudgeTypeDictionary.FLOAT_TYPE_ID, false, 4);
+        public static readonly FudgeFieldType<double> DoubleType = new FudgeFieldType<double>(FudgeTypeDictionary.DOUBLE_TYPE_ID, false, 8);
 
         #region Minimizations
         private static object MinimizeIntegers(long valueAsLong, ref FudgeFieldType type)
         {
             object value = valueAsLong;
-            if (valueAsLong == 0)
-            {
-                value = IndicatorType.Instance;
-                type = IndicatorFieldType.Instance;
-            }
-            else if ((valueAsLong >= sbyte.MinValue) && (valueAsLong <= sbyte.MaxValue))
+            if ((valueAsLong >= sbyte.MinValue) && (valueAsLong <= sbyte.MaxValue))
             {
                 value = (sbyte)valueAsLong;
                 type = PrimitiveFieldTypes.SByteType;
@@ -51,28 +46,6 @@ namespace OpenGamma.Fudge.Types
         private static object MinimizeBoolean(bool value, ref FudgeFieldType type)
         {
             if (!value)
-            {
-                type = IndicatorFieldType.Instance;
-                return IndicatorType.Instance;
-            }
-
-            return value;
-        }
-
-        private static object MinimizeDouble(double value, ref FudgeFieldType type)
-        {
-            if (value == 0.0)
-            {
-                type = IndicatorFieldType.Instance;
-                return IndicatorType.Instance;
-            }
-
-            return value;
-        }
-
-        private static object MinimizeFloat(float value, ref FudgeFieldType type)
-        {
-            if (value == 0.0f)
             {
                 type = IndicatorFieldType.Instance;
                 return IndicatorType.Instance;

@@ -49,26 +49,5 @@ namespace OpenGamma.Fudge.Types
                 writer(output, element);
             }
         }
-
-        public override object Minimize(object value, ref FudgeFieldType type)
-        {
-            T[] array = value as T[];
-            
-            if (array != null && array.Length == 0)
-            {
-                type = IndicatorFieldType.Instance;
-                value = IndicatorType.Instance;
-            }
-
-            return value;
-        }
-
-        public override object ConvertValueFrom(object value)
-        {
-            if (value == IndicatorType.Instance)
-                return new T[0];
-
-            return base.ConvertValueFrom(value);
-        }
     }
 }

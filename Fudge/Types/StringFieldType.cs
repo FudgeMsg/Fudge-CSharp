@@ -40,15 +40,5 @@ namespace OpenGamma.Fudge.Types
         {
             ModifiedUTF8Util.WriteModifiedUTF8(value, output.BaseStream);
         }
-
-        public override object Minimize(object value, ref FudgeFieldType type)
-        {
-            if ((string)value == "")
-            {
-                type = IndicatorFieldType.Instance;
-                value = IndicatorType.Instance;
-            }
-            return value;
-        }
     }
 }

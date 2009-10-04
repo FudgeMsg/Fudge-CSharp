@@ -382,34 +382,6 @@ namespace OpenGamma.Fudge.Tests.Unit
             inputMsg.Add(false, 1);
             Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(1).Value);
             Assert.Equal(false, inputMsg.GetBoolean(1));
-
-            inputMsg.Add((sbyte)0, 2);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(2).Value);
-            Assert.Equal((sbyte)0, inputMsg.GetSByte(2));
-
-            inputMsg.Add((short)0, 3);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(3).Value);
-            Assert.Equal((short)0, inputMsg.GetShort(3));
-
-            inputMsg.Add((int)0, 4);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(4).Value);
-            Assert.Equal((int)0, inputMsg.GetInt(4));
-
-            inputMsg.Add((long)0, 5);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(5).Value);
-            Assert.Equal((long)0, inputMsg.GetLong(5));
-
-            inputMsg.Add(0.0f, 6);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(6).Value);
-            Assert.Equal(0.0f, inputMsg.GetFloat(6));
-
-            inputMsg.Add(0.0, 7);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(7).Value);
-            Assert.Equal(0.0, inputMsg.GetDouble(7));
-            
-            inputMsg.Add("", 8);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(8).Value);
-            Assert.Equal("", inputMsg.GetString(8));
         }
 
         [Fact]
