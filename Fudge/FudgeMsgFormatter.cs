@@ -69,7 +69,7 @@ namespace OpenGamma.Fudge
             {
                 return;
             }
-            IList<FudgeMsgField> fields = msg.GetAllFields();
+            IList<IFudgeField> fields = msg.GetAllFields();
             IList<string> fieldSpecs = new List<string>(fields.Count);
             int maxFieldSpecWidth = -1;
             int maxTypeNameWidth = -1;

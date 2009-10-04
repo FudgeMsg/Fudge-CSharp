@@ -11,6 +11,7 @@ using OpenGamma.Fudge.Taxon;
 using System.Diagnostics;
 using System.IO;
 using OpenGamma.Fudge.Types;
+using System.Collections;
 
 namespace OpenGamma.Fudge
 {
@@ -28,10 +29,8 @@ namespace OpenGamma.Fudge
     /// <see cref="InvalidCastException"/> and <see cref="OverFlowException"/> as
     /// appropriate.
     /// </remarks>
-    public class FudgeMsg : FudgeEncodingObject
+    public class FudgeMsg : FudgeEncodingObject, IMutableFudgeFieldContainer
     {
-        // TODO t0rx 2009-08-30 -- Finish porting FudgeMsg
-
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
         public FudgeMsg()
@@ -68,6 +67,7 @@ namespace OpenGamma.Fudge
             fields.AddRange(other.Message.fields);
         }
 
+        #region IMutableFudgeFieldContainer implementation
         public void Add(IFudgeField field)
         {
             if (field == null)
@@ -129,7 +129,9 @@ namespace OpenGamma.Fudge
             }
             return type;
         }
+        #endregion
 
+        #region IFudgeFieldContainer implementation
         public short GetNumFields()
         {
             int size = fields.Count;
@@ -142,9 +144,11 @@ namespace OpenGamma.Fudge
         /// order for those fields.
         /// </summary>
         /// <returns></returns>
-        public IList<FudgeMsgField> GetAllFields()      // TODO t0rx 2009-08-30 -- This should be IList<IFudgeField>, but we can't do this in .net 3.5, so is this OK?
+        public IList<IFudgeField> GetAllFields()
         {
-            return fields.AsReadOnly();
+            // Fudge-Java just returns a read-only wrapper, but we can't do that in a typed way in .net 3.5
+            var copy = new List<IFudgeField>(fields.Cast<IFudgeField>());
+            return copy;
         }
 
         public IFudgeField GetByIndex(int index)
@@ -188,7 +192,7 @@ namespace OpenGamma.Fudge
             return null;
         }
 
-        public List<IFudgeField> GetAllByName(string name)
+        public IList<IFudgeField> GetAllByName(string name)
         {
             List<IFudgeField> results = new List<IFudgeField>();
             foreach (FudgeMsgField field in fields)
@@ -284,36 +288,6 @@ namespace OpenGamma.Fudge
         {
             object value = GetValue(name, ordinal);
             return ConvertType(value, type);
-        }
-
-        public byte[] ToByteArray()
-        {
-            MemoryStream stream = new MemoryStream(ComputeSize(null));
-            BinaryWriter bw = new BinaryWriter(stream);
-            try
-            {
-                FudgeStreamEncoder.WriteMsg(bw, this);
-                bw.Flush();
-            }
-            catch (IOException e)
-            {
-                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
-            }
-            // TODO t0rx 2009-08-30 -- Could also get an ObjectDisposedException from the BinaryWriter...
-
-            return stream.ToArray();
-        }
-
-        public override int ComputeSize(IFudgeTaxonomy taxonomy)
-        {
-            int size = 0;
-            foreach (FudgeMsgField field in fields)
-            {
-                size += field.GetSize(taxonomy);
-            }
-            // The final end message virtual-field
-            size += 2;
-            return size;
         }
 
         // Primitive Queries:
@@ -518,6 +492,37 @@ namespace OpenGamma.Fudge
                 return value.ToString(null);
         }
 
+        public byte[] ToByteArray()
+        {
+            MemoryStream stream = new MemoryStream(ComputeSize(null));
+            BinaryWriter bw = new BinaryWriter(stream);
+            try
+            {
+                FudgeStreamEncoder.WriteMsg(bw, this);
+                bw.Flush();
+            }
+            catch (IOException e)
+            {
+                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
+            }
+            // TODO t0rx 2009-08-30 -- Could also get an ObjectDisposedException from the BinaryWriter...
+
+            return stream.ToArray();
+        }
+        #endregion
+
+        public override int ComputeSize(IFudgeTaxonomy taxonomy)
+        {
+            int size = 0;
+            foreach (FudgeMsgField field in fields)
+            {
+                size += field.GetSize(taxonomy);
+            }
+            // The final end message virtual-field
+            size += 2;
+            return size;
+        }
+
         protected object GetFirstTypedValue(string fieldName, int typeId)
         {
             foreach (FudgeMsgField field in fields)
@@ -589,5 +594,28 @@ namespace OpenGamma.Fudge
             }
             return value;
         }
+
+        #region IEnumerable<IFudgeField> Members
+
+        public IEnumerator<IFudgeField> GetEnumerator()
+        {
+            var copy = new List<FudgeMsgField>(fields);
+            foreach (object field in copy)
+            {
+                yield return (IFudgeField)field;
+            }
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            var copy = new List<FudgeMsgField>(fields);
+            return copy.GetEnumerator();
+        }
+
+        #endregion
     }
 }

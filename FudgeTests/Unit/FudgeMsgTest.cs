@@ -103,7 +103,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = CreateMessageAllNames();
             IFudgeField field = null;
-            List<IFudgeField> fields = null;
+            IList<IFudgeField> fields = null;
 
             field = msg.GetByName("boolean");
             Assert.NotNull(field);
@@ -138,7 +138,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = CreateMessageAllNames();
             IFudgeField field = null;
-            List<IFudgeField> fields = null;
+            IList<IFudgeField> fields = null;
 
             // Now add a second by name.
             msg.Add(true, "boolean");
@@ -257,7 +257,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             long longValue = ((long)int.MaxValue) + 5;
             Assert.Equal(longValue, msg.GetValue<long>("long"));
             Assert.Equal(5, msg.GetValue<long>("byte"));
-        } 
+        }
 
         [Fact]
         public void AsQueriesToLongNoNames()        // TODO t0rx 2009-08-31 -- This test from Fudge-Java doesn't make sense
@@ -424,6 +424,30 @@ namespace OpenGamma.Fudge.Tests.Unit
 
             Guid guid2 = msg.GetValue<Guid>("guid");
             Assert.Equal(guid, guid2);
+        }
+
+        [Fact]
+        public void Iterable()
+        {
+            FudgeMsg msg = CreateMessageAllNames();
+            int fieldCount = 0;
+            foreach (IFudgeField field in msg)
+            {
+                fieldCount++;
+            }
+            Assert.Equal(msg.GetNumFields(), fieldCount);
+        }
+
+        [Fact]
+        public void IterableContainer()
+        {
+            IFudgeFieldContainer msg = CreateMessageAllNames();
+            int fieldCount = 0;
+            foreach (IFudgeField field in msg)
+            {
+                fieldCount++;
+            }
+            Assert.Equal(msg.GetNumFields(), fieldCount);
         }
     }
 }
