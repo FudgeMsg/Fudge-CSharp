@@ -62,7 +62,7 @@
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
     <Compile Include="Unit\FudgeMsgTest.cs" />
-    <Compile Include="Unit\FudgeStreamEncoderTest.cs" />
+    <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
     <Compile Include="Unit\FudgeTestUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />

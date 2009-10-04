@@ -97,9 +97,9 @@ namespace OpenGamma.Fudge
             CheckInputStream(br);
             int nRead = 0;
 
-            bool fixedWidth = (fieldPrefix & FudgeStreamEncoder.FIELD_PREFIX_FIXED_WIDTH_MASK) != 0;
-            bool hasOrdinal = (fieldPrefix & FudgeStreamEncoder.FIELD_PREFIX_ORDINAL_PROVIDED_MASK) != 0;
-            bool hasName = (fieldPrefix & FudgeStreamEncoder.FIELD_PREFIX_NAME_PROVIDED_MASK) != 0;
+            bool fixedWidth = FudgeFieldPrefixCodec.IsFixedWidth(fieldPrefix);
+            bool hasOrdinal = FudgeFieldPrefixCodec.HasOrdinal(fieldPrefix);
+            bool hasName = FudgeFieldPrefixCodec.HasName(fieldPrefix);
             int varSizeBytes = 0;
             if (!fixedWidth)
             {

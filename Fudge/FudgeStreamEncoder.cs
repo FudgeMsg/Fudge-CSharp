@@ -15,11 +15,6 @@ namespace OpenGamma.Fudge
 {
     public class FudgeStreamEncoder
     {
-        // Yes, this is a byte.
-        internal const int FIELD_PREFIX_FIXED_WIDTH_MASK = 0x80;
-        internal const int FIELD_PREFIX_ORDINAL_PROVIDED_MASK = 0x10;
-        internal const int FIELD_PREFIX_NAME_PROVIDED_MASK = 0x08;
-
         public static void WriteMsg(BinaryWriter bw, FudgeMsg msg) //throws IOException
         {
             WriteMsg(bw, new FudgeMsgEnvelope(msg));
@@ -120,7 +115,7 @@ namespace OpenGamma.Fudge
         {
             int nWritten = 0;
 
-            int fieldPrefix = ComposeFieldPrefix(!variableSize, valueSize, (ordinal != null), (name != null));
+            int fieldPrefix = FudgeFieldPrefixCodec.ComposeFieldPrefix(!variableSize, valueSize, (ordinal != null), (name != null));
             bw.Write((byte)fieldPrefix);
             nWritten++;
             bw.Write((byte)typeId);
@@ -215,44 +210,6 @@ namespace OpenGamma.Fudge
                 type.WriteValue(bw, value, taxonomy);
             }
             return nWritten;
-        }
-
-        protected static int ComposeFieldPrefix(bool fixedWidth, int varDataSize, bool hasOrdinal, bool hasName)
-        {
-            int varDataBits = 0;
-            if (!fixedWidth)
-            {
-                // This is correct. This is an unsigned value for reading. See note in
-                // writeFieldValue.
-                if (varDataSize <= 255)
-                {
-                    varDataSize = 1;
-                }
-                else if (varDataSize <= short.MaxValue)
-                {
-                    varDataSize = 2;
-                }
-                else
-                {
-                    // Yes, this is right. Remember, we only have 2 bits here.
-                    varDataSize = 3;
-                }
-                varDataBits = varDataSize << 5;
-            }
-            int fieldPrefix = varDataBits;
-            if (fixedWidth)
-            {
-                fieldPrefix |= FIELD_PREFIX_FIXED_WIDTH_MASK;
-            }
-            if (hasOrdinal)
-            {
-                fieldPrefix |= FIELD_PREFIX_ORDINAL_PROVIDED_MASK;
-            }
-            if (hasName)
-            {
-                fieldPrefix |= FIELD_PREFIX_NAME_PROVIDED_MASK;
-            }
-            return fieldPrefix;
         }
 
         protected static void CheckOutputStream(BinaryWriter bw)
