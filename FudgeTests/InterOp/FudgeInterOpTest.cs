@@ -5,7 +5,9 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Xunit;
 using System.IO;
@@ -118,23 +120,16 @@ namespace OpenGamma.Fudge.Tests.Unit
 
         protected static FudgeMsg CycleMessage(FudgeMsg msg, String filename) //throws IOException
         {
-            string outputDir = System.Environment.GetEnvironmentVariable("FudgeTestOutputDir");
-            string fullPath;
-            if (outputDir != null)
-            {
-                fullPath = outputDir + Path.PathSeparator + filename;
-            }
-            else
-            {
-                fullPath = filename;  // fall back to local directory if env not set.
-            }
-            FileStream fileStream = new FileStream(fullPath, FileMode.Create);
-            BinaryWriter bw = new FudgeBinaryWriter(fileStream);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Stream stream = assembly.GetManifestResourceStream("OpenGamma.Fudge.Tests.Resources." + filename);
+            BinaryReader referenceReader = new FudgeBinaryReader(stream);
+            Stream memoryStream = new MemoryStream();
+            // set the last parameter of the following line to true to see the full diff report between streams and not fail at the first difference.
+            BinaryWriter bw = new StreamComparingBinaryNBOWriter(referenceReader, memoryStream, false);
             FudgeStreamEncoder.WriteMsg(bw, msg);
-            fileStream.Close();
+            bw.Close();
 
-            fileStream = new FileStream(fullPath, FileMode.Open);
-            BinaryReader br = new FudgeBinaryReader(fileStream);
+            BinaryReader br = new FudgeBinaryReader(memoryStream);
             FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br).Message;
             return outputMsg;
         }

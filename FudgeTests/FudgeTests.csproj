@@ -54,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InterOp\FudgeInterOpTest.cs" />
-    <Compile Include="Rabbit\RabbitTest.cs" />
+    <Compile Include="InterOp\SteamComparingBinaryNBOWriter.cs" />
     <Compile Include="Perf\SmallFinancialTick.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Perf\ShortPerformanceTest.cs" />
@@ -73,6 +73,20 @@
       <Project>{109A43D4-CE96-41E7-9FFC-D7A30D238E06}</Project>
       <Name>Fudge</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\allNames.dat" />
+    <EmbeddedResource Include="Resources\allOrdinals.dat" />
+    <EmbeddedResource Include="Resources\fixedWidthByteArrays.dat" />
+    <EmbeddedResource Include="Resources\subMsg.dat" />
+    <EmbeddedResource Include="Resources\unknown.dat" />
+    <EmbeddedResource Include="Resources\variableWidthColumnSizes.dat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
