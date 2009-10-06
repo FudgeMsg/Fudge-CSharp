@@ -67,6 +67,13 @@ namespace OpenGamma.Fudge
             }
         }
 
+        public byte[] ToByteArray(FudgeMsg msg)
+        {
+            MemoryStream stream = new MemoryStream();
+            Serialize(msg, stream);
+            return stream.ToArray();
+        }  
+
         public FudgeMsgEnvelope Deserialize(Stream s)
         {
             BinaryReader br = new FudgeBinaryReader(s);
@@ -81,5 +88,13 @@ namespace OpenGamma.Fudge
             }
             return envelope;
         }
+
+        public FudgeMsgEnvelope Deserialize(byte[] bytes)
+        {
+            MemoryStream stream = new MemoryStream(bytes, false);
+            return Deserialize(stream);
+        }
+  
+
     }
 }
