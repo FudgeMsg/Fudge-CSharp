@@ -33,12 +33,12 @@ namespace OpenGamma.Fudge.Types
 
         public override string ReadTypedValue(BinaryReader input, int dataSize)
         {
-            return ModifiedUTF8Util.ReadString(input.BaseStream, dataSize);
+            return ModifiedUTF8Util.ReadString(input, dataSize);
         }
 
         public override void WriteValue(BinaryWriter output, string value, IFudgeTaxonomy taxonomy)
         {
-            ModifiedUTF8Util.WriteModifiedUTF8(value, output.BaseStream);
+            ModifiedUTF8Util.WriteModifiedUTF8(value, output);
         }
     }
 }

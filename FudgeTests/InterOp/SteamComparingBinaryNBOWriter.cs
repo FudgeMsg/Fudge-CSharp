@@ -13,6 +13,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         private readonly BinaryReader referenceReader;
         private readonly bool runToCompletion;
         private readonly StringBuilder traceBuffer = new StringBuilder();
+        private bool errored = false;
         private int n = 0;
        
         public StreamComparingBinaryNBOWriter(BinaryReader referenceReader, Stream input, bool runToCompletion)
@@ -36,7 +37,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             } 
             else
             {
-
+                errored = true;
                 traceBuffer.AppendLine(n + ": Expected " + referenceVal.GetType().FullName + "[" + referenceVal + "] but was [" + actualVal.GetType().FullName + "[" + actualVal + "]");
                 if (!runToCompletion)
                 {
@@ -46,9 +47,43 @@ namespace OpenGamma.Fudge.Tests.Unit
             }
         }
 
+        private void Trace<T>(T[] referenceArray, T[] actualArray)
+        {
+            if (referenceArray.Length != actualArray.Length)
+            {
+                errored = true;
+                traceBuffer.AppendLine(n + ": Expected " + referenceArray.GetType().FullName + "[length " + referenceArray.Length + "] but was [" + actualArray.GetType().FullName + "[length " + actualArray.Length + "]");
+                if (!runToCompletion)
+                {
+                    Console.Error.WriteLine(traceBuffer);
+                    throw new InvalidDataException(n + ": Expected " + referenceArray.GetType().FullName + "[length " + referenceArray.Length + "] but was [" + actualArray.GetType().FullName + "[length " + actualArray.Length + "]");
+                }
+            }
+            traceBuffer.Append(n + ": " + actualArray.GetType().FullName + ": ");
+            for (int i = 0; i < referenceArray.Length; i++)
+            {
+                if (referenceArray[i].Equals(actualArray[i]))
+                {
+                    traceBuffer.Append("[" + actualArray[i] + "]");
+                }
+                else
+                {
+                    errored = true;
+                    traceBuffer.Append("Expected [" + referenceArray[i] + "] but was [" + actualArray[i] + "]");
+                    if (!runToCompletion)
+                    {
+                        Console.Error.WriteLine(traceBuffer);
+                        throw new InvalidDataException(n + ": " + referenceArray.GetType().FullName + "Element " + i + ": Expected [" + referenceArray[i] + "] but was [" + actualArray[i] + "]");
+                    }
+                }
+            }
+            traceBuffer.AppendLine();
+        }
+
         private void Trace<T>(T actualVal, Exception e)
         {
-            
+
+            errored = true;
             traceBuffer.AppendLine(n + ": Expected End of Stream but was [" + actualVal.GetType().FullName + "[" +
                                        actualVal + "]");
             if (!runToCompletion)
@@ -170,9 +205,30 @@ namespace OpenGamma.Fudge.Tests.Unit
             n += 8;
         }
 
+        public override void Write(byte[] value)
+        {
+            try
+            {
+                Trace(referenceReader.ReadBytes(value.Length), value);
+            }
+            catch (EndOfStreamException e)
+            {
+                Trace(value, e);
+            }
+            base.Write(value);
+            n += value.Length;
+        }
+
+        public override void Write(byte[] buffer, int index, int count)
+        {
+            byte[] copy = new byte[count];
+            Array.Copy(buffer, index, copy, 0, count);
+            Write(copy);
+        }
+
         public override void Close()
         {
-            if (traceBuffer.Length > 0)
+            if (errored)
             {
                 Console.WriteLine(traceBuffer.ToString());
                 throw new AssertException("Streams differed");

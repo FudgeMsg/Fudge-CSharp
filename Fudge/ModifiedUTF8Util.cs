@@ -28,7 +28,7 @@ namespace OpenGamma.Fudge
             return Encoding.GetByteCount(str.ToCharArray(), 0, str.Length);
         }
 
-        public static int WriteModifiedUTF8(string str, Stream output) //throws IOException
+        public static int WriteModifiedUTF8(string str, BinaryWriter output) //throws IOException
         {
             // Note that we're not prefixing with the length
             byte[] bytearr = Encoding.GetBytes(str);
@@ -47,7 +47,7 @@ namespace OpenGamma.Fudge
             return Encoding.GetCharCount(bytes, byteIndex, byteCount);
         }
 
-        public static string ReadString(Stream input, int utflen) //throws IOException
+        public static string ReadString(BinaryReader input, int utflen) //throws IOException
         {
             byte[] bytearr = new byte[utflen];
 

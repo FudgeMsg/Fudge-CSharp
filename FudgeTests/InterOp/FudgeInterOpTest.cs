@@ -129,7 +129,9 @@ namespace OpenGamma.Fudge.Tests.Unit
             FudgeStreamEncoder.WriteMsg(bw, msg);
             bw.Close();
 
-            BinaryReader br = new FudgeBinaryReader(memoryStream);
+            // Reload as closed above
+            stream = assembly.GetManifestResourceStream("OpenGamma.Fudge.Tests.Resources." + filename);
+            BinaryReader br = new FudgeBinaryReader(stream);                    // Load the message from the resource rather than our output
             FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br).Message;
             return outputMsg;
         }

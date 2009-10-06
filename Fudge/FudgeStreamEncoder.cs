@@ -134,7 +134,7 @@ namespace OpenGamma.Fudge
                 }
                 bw.Write((byte)utf8size);
                 nWritten++;
-                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw.BaseStream);
+                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw);
             }
             if (value != null)
             {
