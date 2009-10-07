@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
+using IQToolkit;
 
 namespace OpenGamma.Fudge.Linq
 {

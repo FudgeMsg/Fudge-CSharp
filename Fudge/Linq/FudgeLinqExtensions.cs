@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using IQToolkit;
 
 namespace OpenGamma.Fudge.Linq
 {
@@ -27,9 +28,9 @@ namespace OpenGamma.Fudge.Linq
         /// </para>
         /// <para>See the <c>Linq.Examples</c> unit test for some examples.</para>
         /// </remarks>
-        public static FudgeLinqQueryable<T> AsLinq<T>(this IEnumerable<FudgeMsg> msgSource)
+        public static IQueryable<T> AsLinq<T>(this IEnumerable<FudgeMsg> msgSource)
         {
-            return new FudgeLinqQueryable<T>(new FudgeLinqProvider(msgSource));
+            return new Query<T>(new FudgeLinqProvider(msgSource));
         }
     }
 }

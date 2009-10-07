@@ -13,6 +13,7 @@ using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Collections;
 using System.Diagnostics;
+using IQToolkit;
 
 namespace OpenGamma.Fudge.Linq
 {
@@ -36,9 +37,10 @@ namespace OpenGamma.Fudge.Linq
     /// </para>
     /// <para>
     /// For a walkthrough of how this works, have a look at Matt Warren's MSDN blog at http://blogs.msdn.com/mattwar/pages/linq-links.aspx
+    /// on which IQToolkit is based.
     /// </para>
     /// </remarks>
-    public class FudgeLinqProvider : IQueryProvider
+    public class FudgeLinqProvider : QueryProvider
     {
         private static readonly ParameterExpression msgParam = Expression.Parameter(typeof(FudgeMsg), "msg");
         
@@ -57,43 +59,15 @@ namespace OpenGamma.Fudge.Linq
             get { return source; }
         }
 
-        #region IQueryProvider Members
-
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+        public override string GetQueryText(Expression expression)
         {
-            return (IQueryable<TElement>)new FudgeLinqQueryable<TElement>(this, expression);
+            return expression.ToString();
         }
 
-        public IQueryable CreateQuery(Expression expression)
-        {
-            Type elementType = TypeSystem.GetElementType(expression.Type);
-            try
-            {
-                return (IQueryable)Activator.CreateInstance(typeof(FudgeLinqQueryable<>).MakeGenericType(elementType), new object[] { this, expression });
-            }
-            catch (System.Reflection.TargetInvocationException tie)
-            {
-                throw tie.InnerException;
-            }
-        }
-
-        public TResult Execute<TResult>(Expression expression)
-        {
-            return (TResult)ExecuteInternal(expression);
-        }
-
-        public object Execute(Expression expression)
-        {
-            return ExecuteInternal(expression);
-        }
-
-        #endregion
-
-        private object ExecuteInternal(Expression expression)
+        public override object Execute(Expression expression)
         {
             if (expression.NodeType != ExpressionType.Call)
                 throw new Exception("Unsupported node type: " + expression.NodeType);
-
 
             MethodCallExpression m = (MethodCallExpression)expression;
             if (m.Method.Name != "Select")
@@ -103,7 +77,7 @@ namespace OpenGamma.Fudge.Linq
 
             var readerSource = HandleSource(m.Arguments[0]);
 
-            Type elementType = TypeSystem.GetElementType(expression.Type);
+            Type elementType = TypeHelper.GetElementType(expression.Type);
             Type readerType = typeof(FudgeLinqReader<>).MakeGenericType(elementType);
             return Activator.CreateInstance(readerType, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { readerSource, newProjector }, null);
         }
@@ -139,6 +113,7 @@ namespace OpenGamma.Fudge.Linq
             LambdaExpression newLambda = Expression.Lambda(newBody, msgParam);
             return newLambda;
         }
+
     }
 
 }

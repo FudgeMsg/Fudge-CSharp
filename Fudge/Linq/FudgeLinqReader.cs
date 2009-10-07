@@ -17,7 +17,6 @@ namespace OpenGamma.Fudge.Linq
     /// onto the results of the <c>Select</c> clause.
     /// </summary>
     /// <typeparam name="T">Type of the result of the <c>Select clause</c></typeparam>
-    /// <remarks>Based on Matt Warren's MSDN Blog at http://blogs.msdn.com/mattwar/archive/2007/08/02/linq-building-an-iqueryable-provider-part-iv.aspx</remarks>
     internal class FudgeLinqReader<T> : IEnumerable<T>
     {
         private Enumerator enumerator;
