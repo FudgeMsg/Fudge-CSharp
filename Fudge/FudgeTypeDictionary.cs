@@ -115,7 +115,7 @@ namespace OpenGamma.Fudge
         public const byte STRING_TYPE_ID = 14;
         // Indicators for controlling stack-based sub-message expressions:
         public const byte FUDGE_MSG_TYPE_ID = 15;
-        public const byte END_FUDGE_MSG_TYPE_ID = 16;
+        // End message indicator type removed as unnecessary, so no 16.
         // The fixed-width byte arrays:
         public const byte BYTE_ARR_4_TYPE_ID = 17;
         public const byte BYTE_ARR_8_TYPE_ID = 18;

@@ -47,7 +47,6 @@ namespace OpenGamma.Fudge
             {
                 nWritten += WriteField(bw, field.Type, field.Value, field.Ordinal, field.Name, taxonomy);
             }
-            nWritten += WriteFieldContents(bw, null, null, taxonomy, 0, false, FudgeTypeDictionary.END_FUDGE_MSG_TYPE_ID, null, null);
             return nWritten;
         }
 

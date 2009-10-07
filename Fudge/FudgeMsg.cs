@@ -518,8 +518,6 @@ namespace OpenGamma.Fudge
             {
                 size += field.GetSize(taxonomy);
             }
-            // The final end message virtual-field
-            size += 2;
             return size;
         }
 
