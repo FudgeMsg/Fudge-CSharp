@@ -35,7 +35,7 @@ namespace OpenGamma.Fudge.Types
             FudgeMsg msg = new FudgeMsg();
             // REVIEW kirk 2009-09-01 -- This is right. We have to use the same taxonomy,
             // so the parent taxonomy resolver will be fixed up later on.
-            int nRead = FudgeStreamDecoder.ReadMsgFields(input, null, msg);
+            int nRead = FudgeStreamDecoder.ReadMsgFields(input, dataSize, null, msg);
             Debug.Assert(dataSize == nRead, "Sub-message reading failed in size; envelope unpacking will throw exception in prod.");
             return msg;
         }

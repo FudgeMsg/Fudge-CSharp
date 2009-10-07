@@ -49,7 +49,8 @@ namespace OpenGamma.Fudge
             }
 
             FudgeMsg msg = new FudgeMsg();
-            nRead += ReadMsgFields(br, taxonomy, msg);
+            // note that this is size-nRead because the size is for the whole envelope, including the header which we've already read in.
+            nRead += ReadMsgFields(br, size - nRead, taxonomy, msg);
 
             if ((size > 0) && (nRead != size))
             {
@@ -60,23 +61,19 @@ namespace OpenGamma.Fudge
             return envelope;
         }
 
-        public static int ReadMsgFields(BinaryReader br, IFudgeTaxonomy taxonomy, FudgeMsg msg)   // throws IOException
+        public static int ReadMsgFields(BinaryReader br, int size, IFudgeTaxonomy taxonomy, FudgeMsg msg)   // throws IOException
         {
             if (msg == null)
             {
                 throw new ArgumentNullException("msg", "Must specify a message to populate with fields.");
             }
             int nRead = 0;
-            while (true)
+            while (nRead < size)
             {
                 byte fieldPrefix = br.ReadByte();
                 nRead++;
                 int typeId = br.ReadByte();
                 nRead++;
-                if (typeId == FudgeTypeDictionary.END_FUDGE_MSG_TYPE_ID)
-                {
-                    break;
-                }
                 nRead += ReadField(br, msg, fieldPrefix, typeId);
             }
             if (taxonomy != null)
