@@ -13,7 +13,7 @@ namespace OpenGamma.Fudge.Types
     /// </summary>
     public static class PrimitiveFieldTypes
     {
-        public static readonly FudgeFieldType<bool> BooleanType = new FudgeFieldType<bool>(FudgeTypeDictionary.BOOLEAN_TYPE_ID, false, 1, (bool b, ref FudgeFieldType t) => MinimizeBoolean(b, ref t));
+        public static readonly FudgeFieldType<bool> BooleanType = new FudgeFieldType<bool>(FudgeTypeDictionary.BOOLEAN_TYPE_ID, false, 1);
         public static readonly FudgeFieldType<sbyte> SByteType = new FudgeFieldType<sbyte>(FudgeTypeDictionary.SBYTE_TYPE_ID, false, 1, (sbyte i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<short> ShortType = new FudgeFieldType<short>(FudgeTypeDictionary.SHORT_TYPE_ID, false, 2, (short i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
         public static readonly FudgeFieldType<int> IntType = new FudgeFieldType<int>(FudgeTypeDictionary.INT_TYPE_ID, false, 4, (int i, ref FudgeFieldType t) => MinimizeIntegers(i, ref t));
@@ -43,16 +43,17 @@ namespace OpenGamma.Fudge.Types
             return value;
         }
 
-        private static object MinimizeBoolean(bool value, ref FudgeFieldType type)
-        {
-            if (!value)
-            {
-                type = IndicatorFieldType.Instance;
-                return IndicatorType.Instance;
-            }
+        // TODO t0rx 2009-10-07 -- Need to get clarification on whether false should minimise to Indicator.  Currently Fudge-Java does not so matching that behaviour.
+        //private static object MinimizeBoolean(bool value, ref FudgeFieldType type)
+        //{
+        //    if (!value)
+        //    {
+        //        type = IndicatorFieldType.Instance;
+        //        return IndicatorType.Instance;
+        //    }
 
-            return value;
-        }
+        //    return value;
+        //}
         #endregion
     }
 }

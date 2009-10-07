@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using System.IO;
+using OpenGamma.Fudge.Util;
 
 namespace OpenGamma.Fudge.Tests.Unit
 {
@@ -148,13 +149,15 @@ namespace OpenGamma.Fudge.Tests.Unit
         protected static FudgeMsg CycleMessage(FudgeMsg msg) //throws IOException
         {
             MemoryStream stream = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(stream);
+            BinaryWriter bw = new FudgeBinaryWriter(stream);
             FudgeStreamEncoder.WriteMsg(bw, msg);
 
             byte[] content = stream.ToArray();
+            // Double-check the size calc was right
+            Assert.Equal(content.Length, new FudgeMsgEnvelope(msg).ComputeSize(null));
 
             MemoryStream stream2 = new MemoryStream(content);
-            BinaryReader br = new BinaryReader(stream2);
+            BinaryReader br = new FudgeBinaryReader(stream2);
             FudgeMsgEnvelope outputMsgEnvelope = FudgeStreamDecoder.ReadMsg(br);
             Assert.NotNull(outputMsgEnvelope);
             Assert.NotNull(outputMsgEnvelope.Message);

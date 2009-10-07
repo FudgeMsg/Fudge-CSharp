@@ -93,7 +93,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             byte[] bytes = new byte[length];
             for (int i = 0; i < length; i++)
             {
-                bytes[i] = (byte) (i % sbyte.MaxValue);
+                bytes[i] = (byte)i;
             }
             return bytes;
         }
@@ -118,7 +118,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
-        protected static FudgeMsg CycleMessage(FudgeMsg msg, String filename) //throws IOException
+        protected static FudgeMsg CycleMessage(FudgeMsg msg, string filename) //throws IOException
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             Stream stream = assembly.GetManifestResourceStream("OpenGamma.Fudge.Tests.Resources." + filename);

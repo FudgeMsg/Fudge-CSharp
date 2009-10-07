@@ -19,7 +19,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             FudgeMsg msg = new FudgeMsg();
 
             msg.Add(true, "boolean");
-            msg.Add((object)true, "Boolean");
+            msg.Add((object)false, "Boolean");
             msg.Add((sbyte)5, "byte");
             msg.Add((object)((sbyte)5), "Byte");
             short shortValue = ((short)sbyte.MaxValue) + 5;
@@ -43,7 +43,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             msg.Add(new double[273], "double array");
             msg.Add(new short[32], "short array");
             msg.Add(new int[83], "int array");
-            msg.Add(new long[873], "long array");
+            msg.Add(new long[837], "long array");
 
             msg.Add(IndicatorType.Instance, "indicator");
 
@@ -55,7 +55,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             FudgeMsg msg = new FudgeMsg();
 
             msg.Add(true, (short)1);
-            msg.Add((object)(true), (short)2);
+            msg.Add((object)(false), (short)2);
             msg.Add((sbyte)5, (short)3);
             msg.Add((object)((sbyte)5), (short)4);
             short shortValue = ((short)sbyte.MaxValue) + 5;
@@ -115,7 +115,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             field = msg.GetByName("Boolean");
             Assert.NotNull(field);
             Assert.Equal(PrimitiveFieldTypes.BooleanType, field.Type);
-            Assert.Equal((object)true, field.Value);
+            Assert.Equal((object)false, field.Value);
             Assert.Equal("Boolean", field.Name);
             Assert.Null(field.Ordinal);
 
@@ -372,16 +372,6 @@ namespace OpenGamma.Fudge.Tests.Unit
 
             msg.Add((long)5, "test");
             Assert.Equal((long)5, msg.GetLong("test"));
-        }
-
-        [Fact]
-        public void IndicatorBehaviour()
-        {
-            FudgeMsg inputMsg = new FudgeMsg();
-
-            inputMsg.Add(false, 1);
-            Assert.Same(IndicatorType.Instance, inputMsg.GetByOrdinal(1).Value);
-            Assert.Equal(false, inputMsg.GetBoolean(1));
         }
 
         [Fact]
