@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using OpenGamma.Fudge.Linq;
 using Xunit;
+using System.Xml.Linq;
 
 namespace OpenGamma.Fudge.Tests.Unit.Linq
 {
@@ -70,6 +71,31 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
             Assert.Equal(1, results.Length);
             Assert.Equal("FOO", results[0].Ticker);
             Assert.Equal(11.1, results[0].Ask);
+        }
+
+        [Fact]
+        public void XmlExample()
+        {
+            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+
+            XElement tree = new XElement("Ticks", from tick in msgs.AsLinq<Tick>()
+                                                  select new XElement("Tick",
+                                                      new XElement("Ticker", tick.Ticker),
+                                                      new XElement("Bid", tick.Bid),
+                                                      new XElement("Ask", tick.Ask)));
+            string s = tree.ToString();
+            //<Ticks>
+            //  <Tick>
+            //    <Ticker>FOO</Ticker>
+            //    <Bid>10.3</Bid>
+            //    <Ask>11.1</Ask>
+            //  </Tick>
+            //  <Tick>
+            //    <Ticker>BAR</Ticker>
+            //    <Bid>2.4</Bid>
+            //    <Ask>3.1</Ask>
+            //  </Tick>
+            //</Ticks>
         }
 
         private static FudgeMsg Create(double bid, double ask, string ticker)
