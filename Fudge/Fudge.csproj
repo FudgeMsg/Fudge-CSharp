@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeEncodingObject.cs" />
     <Compile Include="FudgeFieldPrefixCodec.cs" />

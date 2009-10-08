@@ -46,6 +46,14 @@ namespace OpenGamma.Fudge
             InitializeFromByteArray(other.ToByteArray());
         }
 
+        public FudgeMsg(params IFudgeField[] fields)
+        {
+            foreach (var field in fields)
+            {
+                Add(field);
+            }
+        }
+
         public FudgeMsg(byte[] byteArray, IFudgeTaxonomy taxonomy)
         {
             InitializeFromByteArray(byteArray);
@@ -74,30 +82,30 @@ namespace OpenGamma.Fudge
             {
                 throw new ArgumentNullException("Cannot add an empty field");
             }
-            fields.Add(new FudgeMsgField(field));
+            Add(field.Name, field.Ordinal, field.Type, field.Value);
         }
 
-        public void Add(object value, string name)
+        public void Add(string name, object value)
         {
-            Add(value, name, null);
+            Add(name, null, value);
         }
 
-        public void Add(object value, short? ordinal)
+        public void Add(int? ordinal, object value)
         {
-            Add(value, null, ordinal);
+            Add(null, ordinal, value);
         }
 
-        public void Add(object value, string name, short? ordinal)
+        public void Add(string name, int? ordinal, object value)
         {
             FudgeFieldType type = DetermineTypeFromValue(value);
             if (type == null)
             {
                 throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
             }
-            Add(type, value, name, ordinal);
+            Add(name, ordinal, type, value);
         }
 
-        public void Add(FudgeFieldType type, object value, string name, short? ordinal)
+        public void Add(string name, int? ordinal, FudgeFieldType type, object value)
         {
             if (fields.Count >= short.MaxValue)
             {
@@ -107,15 +115,19 @@ namespace OpenGamma.Fudge
             {
                 throw new ArgumentNullException("Cannot add a field without a type specified.");
             }
+            if (ordinal.HasValue && (ordinal < short.MinValue || ordinal > short.MaxValue))
+            {
+                throw new ArgumentOutOfRangeException("ordinal", "Ordinal must be within signed 16-bit range");
+            }
 
             // Adjust values to the lowest possible representation.
             value = type.Minimize(value, ref type);
 
-            FudgeMsgField field = new FudgeMsgField(type, value, name, ordinal);
+            FudgeMsgField field = new FudgeMsgField(type, value, name, (short?)ordinal);
             fields.Add(field);
         }
 
-        protected FudgeFieldType DetermineTypeFromValue(object value)
+        protected internal static FudgeFieldType DetermineTypeFromValue(object value)
         {
             if (value == null)
             {
@@ -167,7 +179,7 @@ namespace OpenGamma.Fudge
         // REVIEW kirk 2009-08-16 -- All of these getters are currently extremely unoptimized.
         // there may be an option required if we have a lot of random access to the field content
         // to speed things up by building an index.
-        public IList<IFudgeField> GetAllByOrdinal(short ordinal)
+        public IList<IFudgeField> GetAllByOrdinal(int ordinal)
         {
             List<IFudgeField> result = new List<IFudgeField>();
             foreach (FudgeMsgField field in fields)
@@ -180,7 +192,7 @@ namespace OpenGamma.Fudge
             return result;
         }
 
-        public IFudgeField GetByOrdinal(short ordinal)
+        public IFudgeField GetByOrdinal(int ordinal)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -240,7 +252,7 @@ namespace OpenGamma.Fudge
             return ConvertType(value, type);
         }
 
-        public object GetValue(short ordinal)
+        public object GetValue(int ordinal)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -252,18 +264,18 @@ namespace OpenGamma.Fudge
             return null;
         }
 
-        public T GetValue<T>(short ordinal)
+        public T GetValue<T>(int ordinal)
         {
             return (T)GetValue(ordinal, typeof(T));
         }
 
-        public object GetValue(short ordinal, Type type)
+        public object GetValue(int ordinal, Type type)
         {
             object value = GetValue(ordinal);
             return ConvertType(value, type);
         }
 
-        public object GetValue(string name, short? ordinal)
+        public object GetValue(string name, int? ordinal)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -279,12 +291,12 @@ namespace OpenGamma.Fudge
             return null;
         }
 
-        public T GetValue<T>(string name, short? ordinal)
+        public T GetValue<T>(string name, int? ordinal)
         {
             return (T)GetValue(name, ordinal, typeof(T));
         }
 
-        public object GetValue(string name, short? ordinal, Type type)
+        public object GetValue(string name, int? ordinal, Type type)
         {
             object value = GetValue(name, ordinal);
             return ConvertType(value, type);
@@ -303,12 +315,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>double</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>double</c></exception>
-        public double? GetDouble(short ordinal)
+        public double? GetDouble(int ordinal)
         {
             return GetAsDoubleInternal(null, ordinal);
         }
 
-        protected double? GetAsDoubleInternal(string fieldName, short? ordinal)
+        protected double? GetAsDoubleInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -328,12 +340,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>float</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>float</c></exception>
-        public float? GetFloat(short ordinal)
+        public float? GetFloat(int ordinal)
         {
             return GetAsFloatInternal(null, ordinal);
         }
 
-        protected float? GetAsFloatInternal(string fieldName, short? ordinal)
+        protected float? GetAsFloatInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -353,12 +365,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>long</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>long</c></exception>
-        public long? GetLong(short ordinal)
+        public long? GetLong(int ordinal)
         {
             return GetAsLongInternal(null, ordinal);
         }
 
-        protected long? GetAsLongInternal(string fieldName, short? ordinal)
+        protected long? GetAsLongInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -378,12 +390,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to an <c>int</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within an <c>int</c></exception>
-        public int? GetInt(short ordinal)
+        public int? GetInt(int ordinal)
         {
             return GetAsIntInternal(null, ordinal);
         }
 
-        protected int? GetAsIntInternal(string fieldName, short? ordinal)
+        protected int? GetAsIntInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -403,12 +415,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>short</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>short</c></exception>
-        public short? GetShort(short ordinal)
+        public short? GetShort(int ordinal)
         {
             return GetAsShortInternal(null, ordinal);
         }
 
-        protected short? GetAsShortInternal(string fieldName, short? ordinal)
+        protected short? GetAsShortInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -428,12 +440,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
-        public sbyte? GetSByte(short ordinal)
+        public sbyte? GetSByte(int ordinal)
         {
             return GetAsSByteInternal(null, ordinal);
         }
 
-        protected sbyte? GetAsSByteInternal(string fieldName, short? ordinal)
+        protected sbyte? GetAsSByteInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -453,12 +465,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>bool</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>bool</c></exception>
-        public bool? GetBoolean(short ordinal)
+        public bool? GetBoolean(int ordinal)
         {
             return GetAsBooleanInternal(null, ordinal);
         }
 
-        protected bool? GetAsBooleanInternal(string fieldName, short? ordinal)
+        protected bool? GetAsBooleanInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)
@@ -478,12 +490,12 @@ namespace OpenGamma.Fudge
         /// <returns>value, or <c>null</c> if field not found.</returns>
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>string</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>string</c></exception>
-        public string GetString(short ordinal)
+        public string GetString(int ordinal)
         {
             return GetAsStringInternal(null, ordinal);
         }
 
-        protected string GetAsStringInternal(string fieldName, short? ordinal)
+        protected string GetAsStringInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
             if (value == null)

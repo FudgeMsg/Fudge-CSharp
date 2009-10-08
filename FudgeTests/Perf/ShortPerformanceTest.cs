@@ -148,27 +148,27 @@ namespace OpenGamma.Fudge.Tests.Perf
             FudgeMsg msg = new FudgeMsg();
             if (useNames && useOrdinals)
             {
-                msg.Add(tick.Ask, "ask", (short)1);
-                msg.Add(tick.AskVolume, "askVolume", (short)2);
-                msg.Add(tick.Bid, "bid", (short)3);
-                msg.Add(tick.BidVolume, "bidVolume", (short)4);
-                msg.Add(tick.Timestamp, "ts", (short)5);
+                msg.Add("ask", (short)1, tick.Ask);
+                msg.Add("askVolume", (short)2, tick.AskVolume);
+                msg.Add("bid", (short)3, tick.Bid);
+                msg.Add("bidVolume", (short)4, tick.BidVolume);
+                msg.Add("ts", (short)5, tick.Timestamp);
             }
             else if (useNames)
             {
-                msg.Add(tick.Ask, "ask");
-                msg.Add(tick.AskVolume, "askVolume");
-                msg.Add(tick.Bid, "bid");
-                msg.Add(tick.BidVolume, "bidVolume");
-                msg.Add(tick.Timestamp, "ts");
+                msg.Add("ask", tick.Ask);
+                msg.Add("askVolume", tick.AskVolume);
+                msg.Add("bid", tick.Bid);
+                msg.Add("bidVolume", tick.BidVolume);
+                msg.Add("ts", tick.Timestamp);
             }
             else if (useOrdinals)
             {
-                msg.Add(tick.Ask, 1);
-                msg.Add(tick.AskVolume, 2);
-                msg.Add(tick.Bid, 3);
-                msg.Add(tick.BidVolume, 4);
-                msg.Add(tick.Timestamp, 5);
+                msg.Add(1, tick.Ask);
+                msg.Add(2, tick.AskVolume);
+                msg.Add(3, tick.Bid);
+                msg.Add(4, tick.BidVolume);
+                msg.Add(5, tick.Timestamp);
             }
             FudgeStreamEncoder.WriteMsg(bw, msg);
 

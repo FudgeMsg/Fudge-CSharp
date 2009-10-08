@@ -34,10 +34,10 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void AllNamesCodecWithTaxonomy()
         {
             FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add("value1", NAMES[0]);
-            inputMsg.Add("value2", NAMES[1]);
-            inputMsg.Add("value3", NAMES[2]);
-            inputMsg.Add("value4", NAMES[3]);
+            inputMsg.Add(NAMES[0], "value1");
+            inputMsg.Add(NAMES[1], "value2");
+            inputMsg.Add(NAMES[2], "value3");
+            inputMsg.Add(NAMES[3], "value4");
 
             FudgeContext context = new FudgeContext();
             var resolverMap = new Dictionary<short, IFudgeTaxonomy>();
@@ -59,10 +59,10 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void AllOrdinalsCodecWithTaxonomy()
         {
             FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add("value1", ORDINALS[0]);
-            inputMsg.Add("value2", ORDINALS[1]);
-            inputMsg.Add("value3", ORDINALS[2]);
-            inputMsg.Add("value4", ORDINALS[3]);
+            inputMsg.Add(ORDINALS[0], "value1");
+            inputMsg.Add(ORDINALS[1], "value2");
+            inputMsg.Add(ORDINALS[2], "value3");
+            inputMsg.Add(ORDINALS[3], "value4");
 
             FudgeContext context = new FudgeContext();
             var resolverMap = new Dictionary<short, IFudgeTaxonomy>();

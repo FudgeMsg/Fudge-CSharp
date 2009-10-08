@@ -100,10 +100,10 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
 
         private static FudgeMsg Create(double bid, double ask, string ticker)
         {
-            FudgeMsg msg = new FudgeMsg();
-            msg.Add(bid, "Bid");
-            msg.Add(ask, "Ask");
-            msg.Add(ticker, "Ticker");
+            FudgeMsg msg = new FudgeMsg(
+                                new Field("Bid", bid),
+                                new Field("Ask", ask),
+                                new Field("Ticker", ticker));
             return msg;
         }
     }

@@ -153,7 +153,7 @@ namespace OpenGamma.Fudge
                 nRead += varSize;
             }
 
-            msg.Add(type, fieldValue, name, ordinal);
+            msg.Add(name, ordinal, type, fieldValue);
 
             return nRead;
         }

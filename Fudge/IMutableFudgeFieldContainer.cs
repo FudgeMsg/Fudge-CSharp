@@ -14,12 +14,12 @@ namespace OpenGamma.Fudge
     {
         void Add(IFudgeField field);
 
-        void Add(object value, string name);
+        void Add(string name, object value);
 
-        void Add(object value, short? ordinal);
+        void Add(int? ordinal, object value);
 
-        void Add(object value, string name, short? ordinal);
+        void Add(string name, int? ordinal, object value);
 
-        void Add(FudgeFieldType type, object value, string name, short? ordinal);
+        void Add(string name, int? ordinal, FudgeFieldType type, object value);
     }
 }

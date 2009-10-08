@@ -23,7 +23,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             Console.Out.WriteLine("FudgeMsgFormatterTest.OutputToStdoutAllNames()");
             FudgeMsg msg = FudgeMsgTest.CreateMessageAllNames();
-            msg.Add(FudgeMsgTest.CreateMessageAllNames(), "Sub Message", (short)9999);
+            msg.Add("Sub Message", (short)9999, FudgeMsgTest.CreateMessageAllNames());
             new FudgeMsgFormatter(Console.Out).Format(msg);
         }
 
@@ -35,7 +35,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             Console.Out.WriteLine("FudgeMsgFormatterTest.OutputToStdoutAllOrdinals()");
             FudgeMsg msg = FudgeMsgTest.CreateMessageAllOrdinals();
-            msg.Add(FudgeMsgTest.CreateMessageAllOrdinals(), "Sub Message", (short)9999);
+            msg.Add("Sub Message", (short)9999, FudgeMsgTest.CreateMessageAllOrdinals());
             new FudgeMsgFormatter(Console.Out).Format(msg);
         }
     }

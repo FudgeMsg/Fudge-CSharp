@@ -18,34 +18,34 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = new FudgeMsg();
 
-            msg.Add(true, "boolean");
-            msg.Add((object)false, "Boolean");
-            msg.Add((sbyte)5, "byte");
-            msg.Add((object)((sbyte)5), "Byte");
+            msg.Add("boolean", true);
+            msg.Add("Boolean", (object)false);
+            msg.Add("byte", (sbyte)5);
+            msg.Add("Byte", (object)((sbyte)5));
             short shortValue = ((short)sbyte.MaxValue) + 5;
-            msg.Add(shortValue, "short");
-            msg.Add((object)(shortValue), "Short");
+            msg.Add("short", shortValue);
+            msg.Add("Short", (object)(shortValue));
             int intValue = ((int)short.MaxValue) + 5;
-            msg.Add(intValue, "int");
-            msg.Add((object)(intValue), "Integer");
+            msg.Add("int", intValue);
+            msg.Add("Integer", (object)(intValue));
             long longValue = ((long)int.MaxValue) + 5;
-            msg.Add(longValue, "long");
-            msg.Add((object)(longValue), "Long");
+            msg.Add("long", longValue);
+            msg.Add("Long", (object)(longValue));
 
-            msg.Add(0.5f, "float");
-            msg.Add((object)(0.5f), "Float");
-            msg.Add(0.27362, "double");
-            msg.Add((object)(0.27362), "Double");
+            msg.Add("float", 0.5f);
+            msg.Add("Float", (object)(0.5f));
+            msg.Add("double", 0.27362);
+            msg.Add("Double", (object)(0.27362));
 
-            msg.Add("Kirk Wylie", "String");
+            msg.Add("String", "Kirk Wylie");
 
-            msg.Add(new float[24], "float array");
-            msg.Add(new double[273], "double array");
-            msg.Add(new short[32], "short array");
-            msg.Add(new int[83], "int array");
-            msg.Add(new long[837], "long array");
+            msg.Add("float array", new float[24]);
+            msg.Add("double array", new double[273]);
+            msg.Add("short array", new short[32]);
+            msg.Add("int array", new int[83]);
+            msg.Add("long array", new long[837]);
 
-            msg.Add(IndicatorType.Instance, "indicator");
+            msg.Add("indicator", IndicatorType.Instance);
 
             return msg;
         }
@@ -54,29 +54,29 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = new FudgeMsg();
 
-            msg.Add(true, (short)1);
-            msg.Add((object)(false), (short)2);
-            msg.Add((sbyte)5, (short)3);
-            msg.Add((object)((sbyte)5), (short)4);
+            msg.Add(1, true);
+            msg.Add(2, (object)(false));
+            msg.Add(3, (sbyte)5);
+            msg.Add(4, (object)((sbyte)5));
             short shortValue = ((short)sbyte.MaxValue) + 5;
-            msg.Add(shortValue, (short)5);
-            msg.Add((object)(shortValue), (short)6);
+            msg.Add(5, shortValue);
+            msg.Add(6, (object)(shortValue));
             int intValue = ((int)short.MaxValue) + 5;
-            msg.Add(intValue, (short)7);
-            msg.Add((object)(intValue), (short)8);
+            msg.Add(7, intValue);
+            msg.Add(8, (object)(intValue));
             long longValue = ((long)int.MaxValue) + 5;
-            msg.Add(longValue, (short)9);
-            msg.Add((object)(longValue), (short)10);
+            msg.Add(9, longValue);
+            msg.Add(10, (object)(longValue));
 
-            msg.Add(0.5f, (short)11);
-            msg.Add((object)(0.5f), (short)12);
-            msg.Add(0.27362, (short)13);
-            msg.Add((object)(0.27362), (short)14);
+            msg.Add(11, 0.5f);
+            msg.Add(12, (object)(0.5f));
+            msg.Add(13, 0.27362);
+            msg.Add(14, (object)(0.27362));
 
-            msg.Add("Kirk Wylie", (short)15);
+            msg.Add(15, "Kirk Wylie");
 
-            msg.Add(new float[24], (short)16);
-            msg.Add(new double[273], (short)17);
+            msg.Add(16, new float[24]);
+            msg.Add(17, new double[273]);
 
             return msg;
         }
@@ -84,17 +84,17 @@ namespace OpenGamma.Fudge.Tests.Unit
         protected static FudgeMsg CreateMessageAllByteArrayLengths()
         {
             FudgeMsg msg = new FudgeMsg();
-            msg.Add(new byte[4], "byte[4]");
-            msg.Add(new byte[8], "byte[8]");
-            msg.Add(new byte[16], "byte[16]");
-            msg.Add(new byte[20], "byte[20]");
-            msg.Add(new byte[32], "byte[32]");
-            msg.Add(new byte[64], "byte[64]");
-            msg.Add(new byte[128], "byte[128]");
-            msg.Add(new byte[256], "byte[256]");
-            msg.Add(new byte[512], "byte[512]");
+            msg.Add("byte[4]", new byte[4]);
+            msg.Add("byte[8]", new byte[8]);
+            msg.Add("byte[16]", new byte[16]);
+            msg.Add("byte[20]", new byte[20]);
+            msg.Add("byte[32]", new byte[32]);
+            msg.Add("byte[64]", new byte[64]);
+            msg.Add("byte[128]", new byte[128]);
+            msg.Add("byte[256]", new byte[256]);
+            msg.Add("byte[512]", new byte[512]);
 
-            msg.Add(new byte[28], "byte[28]");
+            msg.Add("byte[28]", new byte[28]);
             return msg;
         }
 
@@ -141,7 +141,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             IList<IFudgeField> fields = null;
 
             // Now add a second by name.
-            msg.Add(true, "boolean");
+            msg.Add("boolean", true);
 
             field = msg.GetByName("boolean");
             Assert.NotNull(field);
@@ -370,7 +370,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeMsg msg = new FudgeMsg();
 
-            msg.Add((long)5, "test");
+            msg.Add("test", (long)5);
             Assert.Equal((long)5, msg.GetLong("test"));
         }
 
@@ -395,7 +395,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void Minimization()
         {
             FudgeMsg msg = new FudgeMsg();
-            msg.Add(17, "int?");
+            msg.Add("int?", 17);
 
             Assert.Same(PrimitiveFieldTypes.SByteType, msg.GetByName("int?").Type);
         }
@@ -408,7 +408,7 @@ namespace OpenGamma.Fudge.Tests.Unit
 
             Guid guid = Guid.NewGuid();
             FudgeMsg msg = new FudgeMsg();
-            msg.Add(guid, "guid");
+            msg.Add("guid", guid);
 
             Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("guid").Type);
 

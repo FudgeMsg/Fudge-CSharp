@@ -36,9 +36,9 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void VariableWidthColumnSizes()
         {
             FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add(new byte[100], "100");
-            inputMsg.Add(new byte[1000], "1000");
-            inputMsg.Add(new byte[100000], "10000");
+            inputMsg.Add("100", new byte[100]);
+            inputMsg.Add("1000", new byte[1000]);
+            inputMsg.Add("10000", new byte[100000]);
 
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
@@ -50,15 +50,13 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void SubMsg() //throws IOException
         {
-            FudgeMsg inputMsg = new FudgeMsg();
-            FudgeMsg sub1 = new FudgeMsg();
-            sub1.Add("fibble", "bibble");
-            sub1.Add("Blibble", (short)827);
-            FudgeMsg sub2 = new FudgeMsg();
-            sub2.Add(9837438, "bibble9");
-            sub2.Add(82.77f, (short)828);
-            inputMsg.Add(sub1, "sub1");
-            inputMsg.Add(sub2, "sub2");
+            FudgeMsg inputMsg = new FudgeMsg(
+                        new Field("sub1",
+                            new Field("bibble", "fibble"),
+                            new Field(827, "Blibble")),
+                        new Field("sub2",
+                            new Field("bibble9", 9837438),
+                            new Field(828, 82.77f)));
 
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
@@ -71,7 +69,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void Unknown()
         {
             FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add(new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200)), "unknown");
+            inputMsg.Add("unknown", new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200)));
             FudgeMsg outputMsg = CycleMessage(inputMsg);
             AssertAllFieldsMatch(inputMsg, outputMsg);
         }
@@ -87,18 +85,17 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void FixedWidthByteArrays()
         {
-            FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add(CreateRandomArray(4), "byte[4]");
-            inputMsg.Add(CreateRandomArray(8), "byte[8]");
-            inputMsg.Add(CreateRandomArray(16), "byte[16]");
-            inputMsg.Add(CreateRandomArray(20), "byte[20]");
-            inputMsg.Add(CreateRandomArray(32), "byte[32]");
-            inputMsg.Add(CreateRandomArray(64), "byte[64]");
-            inputMsg.Add(CreateRandomArray(128), "byte[128]");
-            inputMsg.Add(CreateRandomArray(256), "byte[256]");
-            inputMsg.Add(CreateRandomArray(512), "byte[512]");
-
-            inputMsg.Add(CreateRandomArray(28), "byte[28]");
+            FudgeMsg inputMsg = new FudgeMsg(
+                        new Field("byte[4]", CreateRandomArray(4)),
+                        new Field("byte[8]", CreateRandomArray(8)),
+                        new Field("byte[16]", CreateRandomArray(16)),
+                        new Field("byte[20]", CreateRandomArray(20)),
+                        new Field("byte[32]", CreateRandomArray(32)),
+                        new Field("byte[64]", CreateRandomArray(64)),
+                        new Field("byte[128]", CreateRandomArray(128)),
+                        new Field("byte[256]", CreateRandomArray(256)),
+                        new Field("byte[512]", CreateRandomArray(512)),
+                        new Field("byte[28]", CreateRandomArray(28)));
 
             FudgeMsg outputMsg = CycleMessage(inputMsg);
             AssertAllFieldsMatch(inputMsg, outputMsg);

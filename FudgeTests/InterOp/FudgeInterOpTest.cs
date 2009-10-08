@@ -46,10 +46,10 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void VariableWidthColumnSizes()
         {
-            FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add(new byte[100], "100");
-            inputMsg.Add(new byte[1000], "1000");
-            inputMsg.Add(new byte[100000], "10000");
+            FudgeMsg inputMsg = new FudgeMsg(
+                                    new Field("100", new byte[100]),
+                                    new Field("1000", new byte[1000]),
+                                    new Field("10000", new byte[100000]));          // TODO t0rx 20091008 -- Fix this field name in Fudge-Java and here so the interop still works
 
             FudgeMsg outputMsg = CycleMessage(inputMsg, "variableWidthColumnSizes.dat");
 
@@ -61,15 +61,13 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void SubMsg() //throws IOException
         {
-            FudgeMsg inputMsg = new FudgeMsg();
-            FudgeMsg sub1 = new FudgeMsg();
-            sub1.Add("fibble", "bibble");
-            sub1.Add("Blibble", (short)827);
-            FudgeMsg sub2 = new FudgeMsg();
-            sub2.Add(9837438, "bibble9");
-            sub2.Add(82.77f, (short)828);
-            inputMsg.Add(sub1, "sub1");
-            inputMsg.Add(sub2, "sub2");
+            var inputMsg = new FudgeMsg(   
+                                new Field("sub1",
+                                    new Field("bibble", "fibble"),
+                                    new Field(827, "Blibble")),
+                                new Field("sub2", 
+                                    new Field("bibble9", 9837438),
+                                    new Field(828, 82.77f)));
 
             FudgeMsg outputMsg = CycleMessage(inputMsg, "subMsg.dat");
 
@@ -81,8 +79,8 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void Unknown()
         {
-            FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add(new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200)), "unknown");
+            FudgeMsg inputMsg = new FudgeMsg(
+                                    new Field("unknown", new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200))));
             FudgeMsg outputMsg = CycleMessage(inputMsg, "unknown.dat");
             FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
@@ -101,18 +99,17 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void FixedWidthByteArrays()
         {
-            FudgeMsg inputMsg = new FudgeMsg();
-            inputMsg.Add(CreateAscendingArray(4), "byte[4]");
-            inputMsg.Add(CreateAscendingArray(8), "byte[8]");
-            inputMsg.Add(CreateAscendingArray(16), "byte[16]");
-            inputMsg.Add(CreateAscendingArray(20), "byte[20]");
-            inputMsg.Add(CreateAscendingArray(32), "byte[32]");
-            inputMsg.Add(CreateAscendingArray(64), "byte[64]");
-            inputMsg.Add(CreateAscendingArray(128), "byte[128]");
-            inputMsg.Add(CreateAscendingArray(256), "byte[256]");
-            inputMsg.Add(CreateAscendingArray(512), "byte[512]");
-
-            inputMsg.Add(CreateAscendingArray(28), "byte[28]");
+            FudgeMsg inputMsg = new FudgeMsg(
+                                    new Field("byte[4]", CreateAscendingArray(4)),
+                                    new Field("byte[8]", CreateAscendingArray(8)),
+                                    new Field("byte[16]", CreateAscendingArray(16)),
+                                    new Field("byte[20]", CreateAscendingArray(20)),
+                                    new Field("byte[32]", CreateAscendingArray(32)),
+                                    new Field("byte[64]", CreateAscendingArray(64)),
+                                    new Field("byte[128]", CreateAscendingArray(128)),
+                                    new Field("byte[256]", CreateAscendingArray(256)),
+                                    new Field("byte[512]", CreateAscendingArray(512)),
+                                    new Field("byte[28]", CreateAscendingArray(28)));
 
             FudgeMsg outputMsg = CycleMessage(inputMsg, "fixedWidthByteArrays.dat");
             FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
