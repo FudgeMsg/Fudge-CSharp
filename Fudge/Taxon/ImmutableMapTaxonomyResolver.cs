@@ -19,8 +19,8 @@ namespace OpenGamma.Fudge.Taxon
     /// </summary>
     public class ImmutableMapTaxonomyResolver : ITaxonomyResolver
     {
-        private static readonly Dictionary<short, IFudgeTaxonomy> emptyDictionary = new Dictionary<short, IFudgeTaxonomy>();
-        private readonly Dictionary<short, IFudgeTaxonomy> taxonomiesById;
+        private static readonly Dictionary<int, IFudgeTaxonomy> emptyDictionary = new Dictionary<int, IFudgeTaxonomy>();
+        private readonly Dictionary<int, IFudgeTaxonomy> taxonomiesById;
 
         /// <summary>
         /// The default constructor will result in a resolver that never
@@ -31,13 +31,13 @@ namespace OpenGamma.Fudge.Taxon
         {
         }
 
-        public ImmutableMapTaxonomyResolver(Dictionary<short, IFudgeTaxonomy> taxonomiesById)
+        public ImmutableMapTaxonomyResolver(Dictionary<int, IFudgeTaxonomy> taxonomiesById)
         {
             if (taxonomiesById == null)
             {
                 taxonomiesById = emptyDictionary;
             }
-            this.taxonomiesById = new Dictionary<short, IFudgeTaxonomy>(taxonomiesById);
+            this.taxonomiesById = new Dictionary<int, IFudgeTaxonomy>(taxonomiesById);
         }
 
         #region ITaxonomyResolver Members

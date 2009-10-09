@@ -15,7 +15,7 @@ namespace OpenGamma.Fudge.Tests.Unit
 {
     public class FudgeContextTest
     {
-        private static readonly short[] ORDINALS = new short[] { 5, 14, 928, 74 };
+        private static readonly int[] ORDINALS = new int[] { 5, 14, 928, 74 };
         private static readonly string[] NAMES = new string[] { "Kirk", "Wylie", "Jim", "Moores" };
 
         [Fact]
@@ -40,7 +40,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             inputMsg.Add(NAMES[3], "value4");
 
             FudgeContext context = new FudgeContext();
-            var resolverMap = new Dictionary<short, IFudgeTaxonomy>();
+            var resolverMap = new Dictionary<int, IFudgeTaxonomy>();
             resolverMap.Add(45, new MapFudgeTaxonomy(ORDINALS, NAMES));
             context.TaxonomyResolver = new ImmutableMapTaxonomyResolver(resolverMap);
 
@@ -65,7 +65,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             inputMsg.Add(ORDINALS[3], "value4");
 
             FudgeContext context = new FudgeContext();
-            var resolverMap = new Dictionary<short, IFudgeTaxonomy>();
+            var resolverMap = new Dictionary<int, IFudgeTaxonomy>();
             resolverMap.Add(45, new MapFudgeTaxonomy(ORDINALS, NAMES));
             context.TaxonomyResolver = new ImmutableMapTaxonomyResolver(resolverMap);
 

@@ -20,30 +20,30 @@ namespace OpenGamma.Fudge.Taxon
     /// </summary>
     public class MapFudgeTaxonomy : IFudgeTaxonomy
     {
-        private readonly Dictionary<short, string> namesByOrdinal;
-        private readonly Dictionary<string, short> ordinalsByName;
-        private static readonly Dictionary<short, string> emptyDictionary = new Dictionary<short, string>();
+        private readonly Dictionary<int, string> namesByOrdinal;
+        private readonly Dictionary<string, int> ordinalsByName;
+        private static readonly Dictionary<int, string> emptyDictionary = new Dictionary<int, string>();
 
         public MapFudgeTaxonomy() :
             this(emptyDictionary)
         {
         }
 
-        public MapFudgeTaxonomy(Dictionary<short, string> namesByOrdinal)
+        public MapFudgeTaxonomy(Dictionary<int, string> namesByOrdinal)
         {
             if (namesByOrdinal == null)
             {
                 namesByOrdinal = emptyDictionary;
             }
-            this.namesByOrdinal = new Dictionary<short, string>(namesByOrdinal);
-            this.ordinalsByName = new Dictionary<string, short>(namesByOrdinal.Count);
+            this.namesByOrdinal = new Dictionary<int, string>(namesByOrdinal);
+            this.ordinalsByName = new Dictionary<string, int>(namesByOrdinal.Count);
             foreach (var entry in namesByOrdinal)
             {
                 ordinalsByName.Add(entry.Value, entry.Key);
             }
         }
 
-        public MapFudgeTaxonomy(short[] ordinals, string[] names)
+        public MapFudgeTaxonomy(int[] ordinals, string[] names)
         {
             if (ordinals == null)
             {
@@ -57,8 +57,8 @@ namespace OpenGamma.Fudge.Taxon
             {
                 throw new ArgumentException("Arrays of ordinals and names must be of same length.");
             }
-            namesByOrdinal = new Dictionary<short, string>(ordinals.Length);
-            ordinalsByName = new Dictionary<string, short>(ordinals.Length);
+            namesByOrdinal = new Dictionary<int, string>(ordinals.Length);
+            ordinalsByName = new Dictionary<string, int>(ordinals.Length);
             for (int i = 0; i < ordinals.Length; i++)
             {
                 namesByOrdinal.Add(ordinals[i], names[i]);
@@ -76,7 +76,7 @@ namespace OpenGamma.Fudge.Taxon
 
         public short? GetFieldOrdinal(string fieldName)
         {
-            short result;
+            int result;
             return ordinalsByName.TryGetValue(fieldName, out result) ? (short?)result : null;
         }
 
