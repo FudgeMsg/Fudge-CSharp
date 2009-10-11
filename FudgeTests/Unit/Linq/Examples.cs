@@ -95,6 +95,20 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         }
 
         [Fact]
+        public void BindingParams()
+        {
+            // Make sure we can handle constants that are coming in from outside the query
+            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR"), Create(5.2, 5.5, "ZIP") };
+            double bid = 2.4;
+            var query = from tick in msgs.AsLinq<Tick>()
+                        where tick.Bid == bid               // bid here comes from outside the query
+                        select tick.Ticker;
+
+            var tickers = query.ToArray();
+            Assert.Equal(new string[] { "BAR" }, tickers);
+        }
+
+        [Fact]
         public void XmlExample()
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };

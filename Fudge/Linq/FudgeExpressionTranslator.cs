@@ -47,9 +47,9 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
+            // This is where we switch the ultimate source used by the expression tree from the Query<type> to our IEnumerable<FudgeMsg>
             if (c.Type.IsGenericType && c.Type.GetGenericTypeDefinition() == typeof(Query<>) && c.Type.GetGenericArguments()[0] == dataType)
             {
-                // TODO t0rx 20091011 -- Check type
                 return Expression.Constant(source, typeof(IEnumerable<>).MakeGenericType(typeof(FudgeMsg)));
             }
 
@@ -58,6 +58,7 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitLambda(LambdaExpression lambda)
         {
+            // If we have a lambda of the form dataType => something then it now becomes FudgeMsg => something
             var body = Visit(lambda.Body);
             IList<ParameterExpression> parameters = lambda.Parameters;
             if (parameters.Count == 1 && parameters[0].Type == dataType)
@@ -69,7 +70,7 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            // Translate calls to Queryable.xxx<IQueryable<type>(...) to Enumerable.xxx<IEnumerable<FudgeMsg>>(...)
+            // Translate calls to Queryable.xxx<IQueryable<dataType>(...) to Enumerable.xxx<IEnumerable<FudgeMsg>>(...)
             // TODO t0rx 20091011 -- Need to refactor this to make less copy-paste and more efficient
             Expression obj = Visit(m.Object);
             var args = VisitExpressionList(m.Arguments);
@@ -122,7 +123,8 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter)
+            // Pick up accesses to dataType.member and translate to FudgeMsg.GetValue(membername)
+            if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == dataType)
             {
                 // Change the member access to the data type into a call to get the value from the message
                 return Expression.Convert(Expression.Call(msgParam, getValueMethod, Expression.Constant(m.Member.Name), Expression.Constant(m.Type)), m.Type);
