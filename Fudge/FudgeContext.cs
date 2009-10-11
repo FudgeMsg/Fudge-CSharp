@@ -46,12 +46,31 @@ namespace OpenGamma.Fudge
     /// </summary>
     public class FudgeContext
     {
+        private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private ITaxonomyResolver taxonomyResolver;
 
         public ITaxonomyResolver TaxonomyResolver
         {
             get { return taxonomyResolver; }
             set { taxonomyResolver = value; }
+        }
+
+        public FudgeTypeDictionary TypeDictionary
+        {
+            get { return typeDictionary; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("value", "Every Fudge context must have a type dictionary.");
+                }
+                typeDictionary = value;
+            }
+        }
+
+        public FudgeMsg NewMessage()
+        {
+            return new FudgeMsg(TypeDictionary);
         }
 
         public void Serialize(FudgeMsg msg, Stream s)
@@ -69,7 +88,7 @@ namespace OpenGamma.Fudge
             BinaryWriter bw = new FudgeBinaryWriter(s);
             try
             {
-                FudgeStreamEncoder.WriteMsg(bw, new FudgeMsgEnvelope(msg), taxonomy, taxonomyId ?? 0);
+                FudgeStreamEncoder.WriteMsg(bw, new FudgeMsgEnvelope(msg), TypeDictionary, taxonomy, taxonomyId ?? 0);
             }
             catch (IOException e)
             {
@@ -90,7 +109,7 @@ namespace OpenGamma.Fudge
             FudgeMsgEnvelope envelope;
             try
             {
-                envelope = FudgeStreamDecoder.ReadMsg(br, TaxonomyResolver);
+                envelope = FudgeStreamDecoder.ReadMsg(br, TypeDictionary, TaxonomyResolver);
             }
             catch (IOException e)
             {

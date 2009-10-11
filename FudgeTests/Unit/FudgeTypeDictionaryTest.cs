@@ -30,11 +30,11 @@ namespace OpenGamma.Fudge.Tests.Unit
         {
             FudgeFieldType type = null;
 
-            type = FudgeTypeDictionary.Instance.GetByCSharpType(typeof(bool));
+            type = new FudgeTypeDictionary().GetByCSharpType(typeof(bool));
             Assert.NotNull(type);
             Assert.Equal(PrimitiveFieldTypes.BooleanType.TypeId, type.TypeId);
 
-            type = FudgeTypeDictionary.Instance.GetByCSharpType(typeof(Boolean));
+            type = new FudgeTypeDictionary().GetByCSharpType(typeof(Boolean));
             Assert.NotNull(type);
             Assert.Equal(PrimitiveFieldTypes.BooleanType.TypeId, type.TypeId);
         }

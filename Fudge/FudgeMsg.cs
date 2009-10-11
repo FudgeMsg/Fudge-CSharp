@@ -41,10 +41,20 @@ namespace OpenGamma.Fudge
     /// </remarks>
     public class FudgeMsg : FudgeEncodingObject, IMutableFudgeFieldContainer
     {
+        private readonly FudgeTypeDictionary typeDictionary;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
-        public FudgeMsg()
+        public FudgeMsg() : this(FudgeTypeDictionary.Instance)
         {
+        }
+
+        public FudgeMsg(FudgeTypeDictionary typeDictionary)
+        {
+            if (typeDictionary == null)
+            {
+                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided");
+            }
+            this.typeDictionary = typeDictionary;
         }
 
         public FudgeMsg(FudgeMsg other)
@@ -54,9 +64,10 @@ namespace OpenGamma.Fudge
                 throw new ArgumentNullException("Cannot initialize from a null other FudgeMsg");
             }
             InitializeFromByteArray(other.ToByteArray());
+            this.typeDictionary = other.typeDictionary;
         }
 
-        public FudgeMsg(params IFudgeField[] fields)
+        public FudgeMsg(params IFudgeField[] fields) : this(FudgeTypeDictionary.Instance)
         {
             foreach (var field in fields)
             {
@@ -64,8 +75,13 @@ namespace OpenGamma.Fudge
             }
         }
 
-        public FudgeMsg(byte[] byteArray, IFudgeTaxonomy taxonomy)
+        public FudgeMsg(byte[] byteArray, FudgeTypeDictionary typeDictionary, IFudgeTaxonomy taxonomy)
         {
+            if (typeDictionary == null)
+            {
+                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided");
+            }
+            this.typeDictionary = typeDictionary;
             InitializeFromByteArray(byteArray);
         }
 
@@ -83,6 +99,11 @@ namespace OpenGamma.Fudge
                 throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO t0rx 2009-08-31 -- This is just RuntimeException in Fudge-Java
             }
             fields.AddRange(other.Message.fields);
+        }
+
+        public FudgeTypeDictionary TypeDictionary
+        {
+            get { return typeDictionary; }
         }
 
         #region IMutableFudgeFieldContainer implementation
@@ -107,7 +128,7 @@ namespace OpenGamma.Fudge
 
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = DetermineTypeFromValue(value);
+            FudgeFieldType type = DetermineTypeFromValue(value, typeDictionary);
             if (type == null)
             {
                 throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
@@ -137,13 +158,13 @@ namespace OpenGamma.Fudge
             fields.Add(field);
         }
 
-        protected internal static FudgeFieldType DetermineTypeFromValue(object value)
+        protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeTypeDictionary typeDictionary)
         {
             if (value == null)
             {
                 throw new ArgumentNullException("Cannot determine type for null value.");
             }
-            FudgeFieldType type = FudgeTypeDictionary.Instance.GetByCSharpType(value.GetType());
+            FudgeFieldType type = typeDictionary.GetByCSharpType(value.GetType());
             if ((type == null) && (value is UnknownFudgeFieldValue))
             {
                 UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
@@ -151,6 +172,7 @@ namespace OpenGamma.Fudge
             }
             return type;
         }
+
         #endregion
 
         #region IFudgeFieldContainer implementation
@@ -606,7 +628,7 @@ namespace OpenGamma.Fudge
 
             if (!type.IsAssignableFrom(value.GetType()))
             {
-                FudgeFieldType fieldType = FudgeTypeDictionary.Instance.GetByCSharpType(type);
+                FudgeFieldType fieldType = TypeDictionary.GetByCSharpType(type);
                 if (fieldType == null)
                     throw new InvalidCastException("No registered field type for " + type.Name);
 

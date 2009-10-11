@@ -31,7 +31,7 @@ namespace OpenGamma.Fudge.Types
         {
         }
 
-        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
+        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
         {
             return IndicatorType.Instance;
         }

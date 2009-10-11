@@ -414,10 +414,11 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void SecondaryTypes()
         {
             var guidType = new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray());
-            FudgeTypeDictionary.Instance.AddType(guidType);
+            var typeDictionary = new FudgeTypeDictionary();
+            typeDictionary.AddType(guidType);
 
             Guid guid = Guid.NewGuid();
-            FudgeMsg msg = new FudgeMsg();
+            FudgeMsg msg = new FudgeMsg(typeDictionary);
             msg.Add("guid", guid);
 
             Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("guid").Type);

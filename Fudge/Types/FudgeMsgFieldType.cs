@@ -40,12 +40,12 @@ namespace OpenGamma.Fudge.Types
             return value.GetSize(taxonomy);
         }
 
-        public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
+        public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
         {
             FudgeMsg msg = new FudgeMsg();
             // REVIEW kirk 2009-09-01 -- This is right. We have to use the same taxonomy,
             // so the parent taxonomy resolver will be fixed up later on.
-            int nRead = FudgeStreamDecoder.ReadMsgFields(input, dataSize, null, msg);
+            int nRead = FudgeStreamDecoder.ReadMsgFields(input, dataSize, typeDictionary, null, msg);
             Debug.Assert(dataSize == nRead, "Sub-message reading failed in size; envelope unpacking will throw exception in prod.");
             return msg;
         }

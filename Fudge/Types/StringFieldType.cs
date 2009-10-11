@@ -41,7 +41,7 @@ namespace OpenGamma.Fudge.Types
             return ModifiedUTF8Util.ModifiedUTF8Length(value);
         }
 
-        public override string ReadTypedValue(BinaryReader input, int dataSize)
+        public override string ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
         {
             return ModifiedUTF8Util.ReadString(input, dataSize);
         }

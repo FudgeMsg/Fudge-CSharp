@@ -78,7 +78,7 @@ namespace OpenGamma.Fudge
             throw new NotSupportedException("Secondary type should never have to get a value size, the wire type should handle this");
         }
 
-        public override T ReadTypedValue(BinaryReader input, int dataSize)
+        public override T ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
         {
             throw new NotSupportedException("Secondary type should never have to read a value, the wire type should handle this");
         }

@@ -63,7 +63,7 @@ namespace OpenGamma.Fudge
             this.name = name;
             this.ordinal = (short?)ordinal;
             this.value = value;
-            this.type = FudgeMsg.DetermineTypeFromValue(value);
+            this.type = FudgeMsg.DetermineTypeFromValue(value, FudgeTypeDictionary.Instance);
         }
 
         #region IFudgeField Members

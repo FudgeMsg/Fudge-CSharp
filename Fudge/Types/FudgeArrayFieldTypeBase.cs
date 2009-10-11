@@ -41,7 +41,7 @@ namespace OpenGamma.Fudge.Types
             return value.Length * elementSize;
         }
 
-        public override T[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
+        public override T[] ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
         {
             int nElements = dataSize / elementSize;
             T[] result = new T[nElements];

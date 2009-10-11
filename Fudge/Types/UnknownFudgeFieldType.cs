@@ -39,7 +39,7 @@ namespace OpenGamma.Fudge.Types
             return value.Contents.Length;
         }
 
-        public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize)
+        public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
         {
             byte[] contents = new byte[dataSize];
             input.Read(contents, 0, dataSize);

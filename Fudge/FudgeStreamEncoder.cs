@@ -32,15 +32,19 @@ namespace OpenGamma.Fudge
 
         public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope)// throws IOException
         {
-            WriteMsg(bw, envelope, null, 0);
+            WriteMsg(bw, envelope, FudgeTypeDictionary.Instance, null, 0);
         }
 
-        public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope, IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
+        public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope, FudgeTypeDictionary typeDictionary, IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
         {
             CheckOutputStream(bw);
             if (envelope == null)
             {
                 throw new ArgumentNullException("envelope", "Must provide a message envelope to output.");
+            }
+            if (typeDictionary == null)
+            {
+                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided.");
             }
             int nWritten = 0;
             int msgSize = envelope.GetSize(taxonomy);

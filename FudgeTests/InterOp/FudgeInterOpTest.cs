@@ -90,7 +90,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         public void Unknown()
         {
             FudgeMsg inputMsg = new FudgeMsg(
-                                    new Field("unknown", new UnknownFudgeFieldValue(new byte[10], FudgeTypeDictionary.Instance.GetUnknownType(200))));
+                                    new Field("unknown", new UnknownFudgeFieldValue(new byte[10], new FudgeTypeDictionary().GetUnknownType(200))));
             FudgeMsg outputMsg = CycleMessage(inputMsg, "unknown.dat");
             FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }

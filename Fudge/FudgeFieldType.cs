@@ -159,7 +159,7 @@ namespace OpenGamma.Fudge
 
         public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy);
 
-        public abstract object ReadValue(BinaryReader input, int dataSize);
+        public abstract object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary);
     }
 
     /// <summary>
@@ -211,7 +211,7 @@ namespace OpenGamma.Fudge
             }
         }
 
-        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
+        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
         {
             // TODO t0rx 2009-08-30 -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
@@ -242,9 +242,9 @@ namespace OpenGamma.Fudge
             WriteValue(output, (TValue)value, taxonomy);
         }
 
-        public sealed override object ReadValue(BinaryReader input, int dataSize)
+        public sealed override object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
         {
-            return ReadTypedValue(input, dataSize);
+            return ReadTypedValue(input, dataSize, typeDictionary);
         }
         #endregion
     }

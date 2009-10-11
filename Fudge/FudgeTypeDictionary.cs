@@ -25,16 +25,45 @@ namespace OpenGamma.Fudge
     /// <summary>
     /// Contains all the <see cref="FudgeFieldType"/> definitions for a particular
     /// Fudge installation.
-    /// This class will usually be used as a classic Singleton, although the constructor
-    /// is public so that it can be used in a Dependency Injection framework. 
+    /// You control it through your <see cref="FudgeContext"/>.
     /// </summary>
     public sealed class FudgeTypeDictionary
     {
-        public static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
+        internal static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
 
         private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
         private volatile UnknownFudgeFieldType[] unknownTypesById = new UnknownFudgeFieldType[0];
         private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // Also used as synchronisation lock
+
+        public FudgeTypeDictionary()
+        {
+            AddType(ByteArrayFieldType.Length4Instance);
+            AddType(ByteArrayFieldType.Length8Instance);
+            AddType(ByteArrayFieldType.Length16Instance);
+            AddType(ByteArrayFieldType.Length20Instance);
+            AddType(ByteArrayFieldType.Length32Instance);
+            AddType(ByteArrayFieldType.Length64Instance);
+            AddType(ByteArrayFieldType.Length128Instance);
+            AddType(ByteArrayFieldType.Length256Instance);
+            AddType(ByteArrayFieldType.Length512Instance);
+
+            AddType(PrimitiveFieldTypes.BooleanType);
+            AddType(PrimitiveFieldTypes.SByteType);
+            AddType(PrimitiveFieldTypes.ShortType);
+            AddType(PrimitiveFieldTypes.IntType);
+            AddType(PrimitiveFieldTypes.LongType);
+            AddType(PrimitiveFieldTypes.FloatType);
+            AddType(ShortArrayFieldType.Instance);
+            AddType(IntArrayFieldType.Instance);
+            AddType(LongArrayFieldType.Instance);
+            AddType(IndicatorFieldType.Instance);
+            AddType(FloatArrayFieldType.Instance);
+            AddType(PrimitiveFieldTypes.DoubleType);
+            AddType(DoubleArrayFieldType.Instance);
+            AddType(ByteArrayFieldType.VariableSizedInstance);
+            AddType(StringFieldType.Instance);
+            AddType(FudgeMsgFieldType.Instance);
+        }
 
         public void AddType(FudgeFieldType type, params Type[] alternativeTypes)
         {
@@ -141,37 +170,5 @@ namespace OpenGamma.Fudge
         public const byte BYTE_ARR_128_TYPE_ID = 23;
         public const byte BYTE_ARR_256_TYPE_ID = 24;
         public const byte BYTE_ARR_512_TYPE_ID = 25;
-
-        static FudgeTypeDictionary()
-        {
-            // We have to add the fixed width byte array types first, so that the last
-            // one can override.
-            Instance.AddType(ByteArrayFieldType.Length4Instance);
-            Instance.AddType(ByteArrayFieldType.Length8Instance);
-            Instance.AddType(ByteArrayFieldType.Length16Instance);
-            Instance.AddType(ByteArrayFieldType.Length20Instance);
-            Instance.AddType(ByteArrayFieldType.Length32Instance);
-            Instance.AddType(ByteArrayFieldType.Length64Instance);
-            Instance.AddType(ByteArrayFieldType.Length128Instance);
-            Instance.AddType(ByteArrayFieldType.Length256Instance);
-            Instance.AddType(ByteArrayFieldType.Length512Instance);    
-
-            Instance.AddType(PrimitiveFieldTypes.BooleanType);
-            Instance.AddType(PrimitiveFieldTypes.SByteType);
-            Instance.AddType(PrimitiveFieldTypes.ShortType);
-            Instance.AddType(PrimitiveFieldTypes.IntType);
-            Instance.AddType(PrimitiveFieldTypes.LongType);
-            Instance.AddType(PrimitiveFieldTypes.FloatType);
-            Instance.AddType(ShortArrayFieldType.Instance);
-            Instance.AddType(IntArrayFieldType.Instance);
-            Instance.AddType(LongArrayFieldType.Instance);
-            Instance.AddType(IndicatorFieldType.Instance);
-            Instance.AddType(FloatArrayFieldType.Instance);
-            Instance.AddType(PrimitiveFieldTypes.DoubleType);
-            Instance.AddType(DoubleArrayFieldType.Instance);
-            Instance.AddType(ByteArrayFieldType.VariableSizedInstance);
-            Instance.AddType(StringFieldType.Instance);
-            Instance.AddType(FudgeMsgFieldType.Instance);
-        }
     }
 }

@@ -53,7 +53,7 @@ namespace OpenGamma.Fudge.Types
             return value.Length;
         }
 
-        public override byte[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
+        public override byte[] ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
         {
             if (!IsVariableSize)
             {
