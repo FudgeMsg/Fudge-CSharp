@@ -74,6 +74,27 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         }
 
         [Fact]
+        public void OrderBy()
+        {
+            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR"), Create(5.2, 5.5, "ZIP") };
+
+            var query = from tick in msgs.AsLinq<Tick>()
+                        orderby tick.Ask
+                        select tick.Ticker;
+
+            string[] tickers = query.ToArray();
+            Assert.Equal(new string[] { "BAR", "ZIP", "FOO" }, tickers);
+
+            // And descending
+            query = from tick in msgs.AsLinq<Tick>()
+                        orderby tick.Bid descending
+                        select tick.Ticker;
+
+            tickers = query.ToArray();
+            Assert.Equal(new string[] { "FOO", "ZIP", "BAR" }, tickers);
+        }
+
+        [Fact]
         public void XmlExample()
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };

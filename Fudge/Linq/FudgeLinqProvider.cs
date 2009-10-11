@@ -69,51 +69,24 @@ namespace OpenGamma.Fudge.Linq
             if (expression.NodeType != ExpressionType.Call)
                 throw new Exception("Unsupported node type: " + expression.NodeType);
 
-            MethodCallExpression m = (MethodCallExpression)expression;
+            var m = (MethodCallExpression)expression;
             if (m.Method.Name != "Select")
                 throw new Exception("Unsupported method: " + m.Method.Name);
 
-            Delegate newProjector = TranslateLambda(m.Arguments[1]).Compile();
+            Type dataType = m.Method.GetGenericArguments()[0];                  // Queryable.Select<TSource,TResult>(...)
 
-            var readerSource = HandleSource(m.Arguments[0]);
+            var translator = new FudgeExpressionTranslator(dataType, msgParam, source);
 
+            // Translate our select, and pull out the resulting IEnumerable<FudgeMsg> and projection function that our reader needs
+            var newSelect = (MethodCallExpression)translator.Translate(m);
+            var lhsValue = Expression.Lambda(newSelect.Arguments[0]).Compile().DynamicInvoke();
+            Delegate projector = ((LambdaExpression)(newSelect.Arguments[1])).Compile();
+
+            // Construct a reader of the right type
             Type elementType = TypeHelper.GetElementType(expression.Type);
             Type readerType = typeof(FudgeLinqReader<>).MakeGenericType(elementType);
-            return Activator.CreateInstance(readerType, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { readerSource, newProjector }, null);
+            return Activator.CreateInstance(readerType, BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { lhsValue, projector }, null);
         }
-
-        private IEnumerable<FudgeMsg> HandleSource(Expression e)
-        {
-            switch (e.NodeType)
-            {
-                case ExpressionType.Constant:
-                    // TODO t0rx 20091006 -- Check type
-                    return source;
-                case ExpressionType.Call:
-                    var m = (MethodCallExpression)e;
-                    var newSource = HandleSource(m.Arguments[0]);
-                    switch (m.Method.Name)
-                    {
-                        case "Where":
-                            var newLambda = TranslateLambda(m.Arguments[1]);
-                            var newPredicate = (Func<FudgeMsg, bool>)(newLambda.Compile());
-                            return newSource.Where(newPredicate);
-                        // TODO t0rx 20091007 -- Handle OrderBy and other Linq methods
-                        default:
-                            throw new Exception("Unsupported method call :" + m.Method.Name);
-                    }
-            }
-            return source;
-        }
-
-        private LambdaExpression TranslateLambda(Expression exp)
-        {
-            LambdaExpression oldLambda = (LambdaExpression)FudgeExpressionTranslator.StripQuotes(exp);
-            Expression newBody = new FudgeExpressionTranslator(msgParam).Translate(oldLambda.Body);
-            LambdaExpression newLambda = Expression.Lambda(newBody, msgParam);
-            return newLambda;
-        }
-
     }
 
 }
