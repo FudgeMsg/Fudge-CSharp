@@ -68,12 +68,12 @@ namespace OpenGamma.Fudge
             }
         }
 
-        public void Format(FudgeMsg msg)
+        public void Format(IFudgeFieldContainer msg)
         {
             Format(msg, 0);
         }
 
-        protected void Format(FudgeMsg msg, int depth)
+        protected void Format(IFudgeFieldContainer msg, int depth)
         {
             if (msg == null)
             {
