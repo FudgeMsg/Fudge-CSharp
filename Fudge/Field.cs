@@ -54,7 +54,7 @@ namespace OpenGamma.Fudge
         {
         }
 
-        private Field(string name, int? ordinal, object value)
+        public Field(string name, int? ordinal, object value)
         {
             if (ordinal.HasValue && ordinal < short.MinValue || ordinal > short.MaxValue)
             {

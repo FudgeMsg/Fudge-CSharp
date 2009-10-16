@@ -659,5 +659,32 @@ namespace OpenGamma.Fudge
         }
 
         #endregion
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("FudgeMsg[");
+            foreach (var field in this)
+            {
+                if (field.Ordinal != null)
+                {
+                    sb.Append(field.Ordinal);
+                    sb.Append(": ");
+                }
+                if (field.Name != null)
+                {
+                    sb.Append(field.Name);
+                }
+                sb.Append(" => ");
+                sb.Append(field.Value);
+                sb.Append(", ");
+            }
+            if (sb.Length > 13)
+            {
+                sb.Remove(sb.Length - 2, 2);
+            }
+            sb.Append("]");
+            return sb.ToString();
+        }
     }
 }
