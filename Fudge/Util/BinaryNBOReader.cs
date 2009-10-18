@@ -24,7 +24,7 @@ namespace OpenGamma.Fudge.Util
     /// <summary>
     /// Like the <see cref="BinaryReader"/>, but uses Network Byte Order for compatiblility with other languages.
     /// </summary>
-    /// <remarks>Note that only the signed integer types plus float and double have been overridden.</remarks>
+    /// <remarks>Note that only the integer types plus float and double have been overridden.</remarks>
     public class BinaryNBOReader : BinaryReader
     {
         private readonly byte[] buffer;
@@ -51,10 +51,22 @@ namespace OpenGamma.Fudge.Util
             return (short)((buffer[0] << 8) | buffer[1]);
         }
 
+        public override ushort ReadUInt16()
+        {
+            FillBytes(2);
+            return (ushort)((buffer[0] << 8) | buffer[1]);
+        }
+
         public override int ReadInt32()
         {
             FillBytes(4);
             return (buffer[0] << 0x18) | (buffer[1] << 0x10) | (buffer[2] << 0x8) | buffer[3];
+        }
+
+        public override uint ReadUInt32()
+        {
+            FillBytes(4);
+            return (uint)((buffer[0] << 0x18) | (buffer[1] << 0x10) | (buffer[2] << 0x8) | buffer[3]);
         }
 
         public override long ReadInt64()
@@ -63,6 +75,14 @@ namespace OpenGamma.Fudge.Util
             uint num = (uint)(((buffer[7] | (buffer[6] << 8)) | (buffer[5] << 0x10)) | (buffer[4] << 0x18));
             uint num2 = (uint)(((buffer[3] | (buffer[2] << 8)) | (buffer[1] << 0x10)) | (buffer[0] << 0x18));
             return (long)((num2 << 0x20) | num);
+        }
+
+        public override ulong ReadUInt64()
+        {
+            FillBytes(8);
+            uint num = (uint)(((buffer[7] | (buffer[6] << 8)) | (buffer[5] << 0x10)) | (buffer[4] << 0x18));
+            uint num2 = (uint)(((buffer[3] | (buffer[2] << 8)) | (buffer[1] << 0x10)) | (buffer[0] << 0x18));
+            return (ulong)((num2 << 0x20) | num);
         }
 
         public override unsafe float ReadSingle()

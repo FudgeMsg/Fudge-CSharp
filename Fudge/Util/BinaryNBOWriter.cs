@@ -24,7 +24,7 @@ namespace OpenGamma.Fudge.Util
     /// <summary>
     /// Like the <see cref="BinaryWriter"/>, but uses Network Byte Order for compatiblility with other languages.
     /// </summary>
-    /// <remarks>Note that only the signed integer types plus float and double have been overridden.</remarks>
+    /// <remarks>Note that only the integer types plus float and double have been overridden.</remarks>
     public class BinaryNBOWriter : BinaryWriter
     {
         private readonly byte[] buffer = new byte[10];
@@ -41,7 +41,13 @@ namespace OpenGamma.Fudge.Util
 
         public override void Write(short value)
         {
-            // Big-endian
+            buffer[0] = (byte)(value >> 8);
+            buffer[1] = (byte)value;
+            OutStream.Write(buffer, 0, 2);
+        }
+
+        public override void Write(ushort value)
+        {
             buffer[0] = (byte)(value >> 8);
             buffer[1] = (byte)value;
             OutStream.Write(buffer, 0, 2);
@@ -49,7 +55,15 @@ namespace OpenGamma.Fudge.Util
 
         public override void Write(int value)
         {
-            // Big-endian
+            buffer[0] = (byte)(value >> 0x18);
+            buffer[1] = (byte)(value >> 0x10);
+            buffer[2] = (byte)(value >> 0x08);
+            buffer[3] = (byte)value;
+            OutStream.Write(buffer, 0, 4);
+        }
+
+        public override void Write(uint value)
+        {
             buffer[0] = (byte)(value >> 0x18);
             buffer[1] = (byte)(value >> 0x10);
             buffer[2] = (byte)(value >> 0x08);
@@ -58,6 +72,19 @@ namespace OpenGamma.Fudge.Util
         }
 
         public override void Write(long value)
+        {
+            buffer[0] = (byte)(value >> 0x38);
+            buffer[1] = (byte)(value >> 0x30);
+            buffer[2] = (byte)(value >> 0x28);
+            buffer[3] = (byte)(value >> 0x20);
+            buffer[4] = (byte)(value >> 0x18);
+            buffer[5] = (byte)(value >> 0x10);
+            buffer[6] = (byte)(value >> 0x08);
+            buffer[7] = (byte)(value >> 0x00);
+            OutStream.Write(buffer, 0, 8);
+        }
+
+        public override void Write(ulong value)
         {
             buffer[0] = (byte)(value >> 0x38);
             buffer[1] = (byte)(value >> 0x30);
