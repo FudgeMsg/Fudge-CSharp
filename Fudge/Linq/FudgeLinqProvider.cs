@@ -29,16 +29,16 @@ namespace OpenGamma.Fudge.Linq
 {
     /// <summary>
     /// <c>FudgeLinqProvider</c> gives an implementation of <see cref="IQueryProvider"/> for
-    /// sequences of <see cref="FudgeMsg"/>s.
+    /// sequences of <see cref="IFudgeFieldContainer"/>s.
     /// </summary>
     /// <remarks>
     /// <para>This is where the real work of Linq happens with <see cref="Expression"/>s that
     /// have been built on sequences of a reference type (by the compiler) being translated
-    /// to operate on sequences of <see cref="FudgeMsg"/> instead.
+    /// to operate on sequences of <see cref="IFudgeFieldContainer"/> instead.
     /// </para>
     /// <para>
-    /// You would not normally construct one of these directly, but instead use the <c>AsLinq</c>
-    /// extension method on a <see cref="IEnumerable"/> of <see cref="FudgeMsg"/>s (e.g. a <c>List</c>
+    /// You would not normally construct one of these directly, but instead use the <c>AsQueryable</c>
+    /// extension method on a <see cref="IEnumerable"/> of <see cref="IFudgeFieldContainer"/>s (e.g. a <c>List</c>
     /// or array).
     /// </para>
     /// <para>
@@ -52,11 +52,11 @@ namespace OpenGamma.Fudge.Linq
     /// </remarks>
     public class FudgeLinqProvider : QueryProvider
     {
-        private static readonly ParameterExpression msgParam = Expression.Parameter(typeof(FudgeMsg), "msg");
-        
-        private readonly IEnumerable<FudgeMsg> source;
+        private static readonly ParameterExpression msgParam = Expression.Parameter(typeof(IFudgeFieldContainer), "msg");
 
-        public FudgeLinqProvider(IEnumerable<FudgeMsg> source)
+        private readonly IEnumerable<IFudgeFieldContainer> source;
+
+        public FudgeLinqProvider(IEnumerable<IFudgeFieldContainer> source)
         {
             if (source == null)
                 throw new ArgumentNullException("source");
@@ -64,7 +64,7 @@ namespace OpenGamma.Fudge.Linq
             this.source = source;
         }
 
-        public IEnumerable<FudgeMsg> Source
+        public IEnumerable<IFudgeFieldContainer> Source
         {
             get { return source; }
         }
@@ -87,7 +87,7 @@ namespace OpenGamma.Fudge.Linq
 
             var translator = new FudgeExpressionTranslator(dataType, msgParam, source);
 
-            // Translate our select, and pull out the resulting IEnumerable<FudgeMsg> and projection function that our reader needs
+            // Translate our select, and pull out the resulting IEnumerable<IFudgeFieldContainer> and projection function that our reader needs
             var newSelect = (MethodCallExpression)translator.Translate(m);
             var lhsValue = Expression.Lambda(newSelect.Arguments[0]).Compile().DynamicInvoke();
             Delegate projector = ((LambdaExpression)(newSelect.Arguments[1])).Compile();

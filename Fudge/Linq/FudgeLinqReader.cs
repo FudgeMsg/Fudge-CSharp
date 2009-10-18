@@ -23,7 +23,7 @@ using OpenGamma.Fudge;
 namespace OpenGamma.Fudge.Linq
 {
     /// <summary>
-    /// The <c>FudgeLinqReader</c> class provides a lazy projection of the source IEnumerable&lt;FudgeMsg&gt;
+    /// The <c>FudgeLinqReader</c> class provides a lazy projection of the source IEnumerable&lt;IFudgeFieldContainer&gt;
     /// onto the results of the <c>Select</c> clause.
     /// </summary>
     /// <typeparam name="T">Type of the result of the <c>Select clause</c></typeparam>
@@ -31,7 +31,7 @@ namespace OpenGamma.Fudge.Linq
     {
         private Enumerator enumerator;
 
-        internal FudgeLinqReader(IEnumerable<FudgeMsg> source, Func<FudgeMsg, T> projector)
+        internal FudgeLinqReader(IEnumerable<IFudgeFieldContainer> source, Func<IFudgeFieldContainer, T> projector)
         {
             enumerator = new Enumerator(source.GetEnumerator(), projector);
         }
@@ -61,11 +61,11 @@ namespace OpenGamma.Fudge.Linq
 
         private class Enumerator : IEnumerator<T>
         {
-            private readonly IEnumerator<FudgeMsg> source;
-            private readonly Func<FudgeMsg, T> projector;
+            private readonly IEnumerator<IFudgeFieldContainer> source;
+            private readonly Func<IFudgeFieldContainer, T> projector;
             private T current;
 
-            public Enumerator(IEnumerator<FudgeMsg> source, Func<FudgeMsg, T> projector)
+            public Enumerator(IEnumerator<IFudgeFieldContainer> source, Func<IFudgeFieldContainer, T> projector)
             {
                 this.source = source;
                 this.projector = projector;

@@ -26,16 +26,16 @@ namespace OpenGamma.Fudge.Linq
 {
     /// <summary>
     /// Used to translate <see cref="Expression"/>s so that calls to get values from members of the
-    /// reference type become <c>GetValue</c> calls on the <see cref="FudgeMsg"/> instead.
+    /// reference type become <c>GetValue</c> calls on the <see cref="IFudgeFieldContainer"/> instead.
     /// </summary>
     internal class FudgeExpressionTranslator : ExpressionVisitor
     {
-        private static MethodInfo getValueMethod = typeof(FudgeMsg).GetMethod("GetValue", new Type[] { typeof(string), typeof(Type) });
+        private static MethodInfo getValueMethod = typeof(IFudgeFieldContainer).GetMethod("GetValue", new Type[] { typeof(string), typeof(Type) });
         private readonly ParameterExpression msgParam;
-        private readonly IEnumerable<FudgeMsg> source;
+        private readonly IEnumerable<IFudgeFieldContainer> source;
         private readonly Type dataType;
 
-        public FudgeExpressionTranslator(Type dataType, ParameterExpression msgParam, IEnumerable<FudgeMsg> source)
+        public FudgeExpressionTranslator(Type dataType, ParameterExpression msgParam, IEnumerable<IFudgeFieldContainer> source)
         {
             this.dataType = dataType;
             this.msgParam = msgParam;
@@ -57,10 +57,10 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitConstant(ConstantExpression c)
         {
-            // This is where we switch the ultimate source used by the expression tree from the Query<type> to our IEnumerable<FudgeMsg>
+            // This is where we switch the ultimate source used by the expression tree from the Query<type> to our IEnumerable<IFudgeFieldContainer>
             if (c.Type.IsGenericType && c.Type.GetGenericTypeDefinition() == typeof(Query<>) && c.Type.GetGenericArguments()[0] == dataType)
             {
-                return Expression.Constant(source, typeof(IEnumerable<>).MakeGenericType(typeof(FudgeMsg)));
+                return Expression.Constant(source, typeof(IEnumerable<>).MakeGenericType(typeof(IFudgeFieldContainer)));
             }
 
             return base.VisitConstant(c);
@@ -68,7 +68,7 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitLambda(LambdaExpression lambda)
         {
-            // If we have a lambda of the form dataType => something then it now becomes FudgeMsg => something
+            // If we have a lambda of the form dataType => something then it now becomes IFudgeFieldContainer => something
             var body = Visit(lambda.Body);
             IList<ParameterExpression> parameters = lambda.Parameters;
             if (parameters.Count == 1 && parameters[0].Type == dataType)
@@ -80,7 +80,7 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            // Translate calls to Queryable.xxx<IQueryable<dataType>(...) to Enumerable.xxx<IEnumerable<FudgeMsg>>(...)
+            // Translate calls to Queryable.xxx<IQueryable<dataType>(...) to Enumerable.xxx<IEnumerable<IFudgeFieldContainer>>(...)
             // TODO t0rx 20091011 -- Need to refactor this to make less copy-paste and more efficient
             Expression obj = Visit(m.Object);
             var args = VisitExpressionList(m.Arguments);
@@ -110,7 +110,7 @@ namespace OpenGamma.Fudge.Linq
                             var genericMethod = (from mi in typeof(Enumerable).GetMethods()
                                                  where mi.Name == method.Name && mi.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2
                                                  select mi).Single();
-                            var newMethod = genericMethod.MakeGenericMethod(new Type[] { typeof(FudgeMsg) });
+                            var newMethod = genericMethod.MakeGenericMethod(new Type[] { typeof(IFudgeFieldContainer) });
                             return Expression.Call(newMethod, newArgs);
                         }
                     case "OrderBy":
@@ -133,7 +133,7 @@ namespace OpenGamma.Fudge.Linq
 
         protected override Expression VisitMemberAccess(MemberExpression m)
         {
-            // Pick up accesses to dataType.member and translate to FudgeMsg.GetValue(membername)
+            // Pick up accesses to dataType.member and translate to IFudgeFieldContainer.GetValue(membername)
             if (m.Expression != null && m.Expression.NodeType == ExpressionType.Parameter && m.Expression.Type == dataType)
             {
                 // Change the member access to the data type into a call to get the value from the message

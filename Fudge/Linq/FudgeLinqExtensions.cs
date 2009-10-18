@@ -24,7 +24,7 @@ namespace OpenGamma.Fudge.Linq
     public static class FudgeLinqExtensions
     {
         /// <summary>
-        /// Map an <c>IEnumerable&lt;FudgeMsg&gt;</c> onto a <see cref="FudgeLinqQueryable"/> so
+        /// Map an <c>IEnumerable&lt;FudgeMsg&gt;</c> onto an <see cref="IQueryable<T>"/> so
         /// that all the Linq compiler magic works.
         /// </summary>
         /// <typeparam name="T">Type of the object which has the structure of the message data.</typeparam>
@@ -38,7 +38,49 @@ namespace OpenGamma.Fudge.Linq
         /// </para>
         /// <para>See the <c>Linq.Examples</c> unit test for some examples.</para>
         /// </remarks>
-        public static IQueryable<T> AsLinq<T>(this IEnumerable<FudgeMsg> msgSource)
+        public static IQueryable<T> AsQueryable<T>(this IEnumerable<FudgeMsg> msgSource)
+        {
+            return msgSource.Cast<IFudgeFieldContainer>().AsQueryable<T>();
+        }
+
+        /// <summary>
+        /// Map a <c>FudgeMsg[]</c> onto an <see cref="IQueryable<T>"/> so
+        /// that all the Linq compiler magic works.
+        /// </summary>
+        /// <typeparam name="T">Type of the object which has the structure of the message data.</typeparam>
+        /// <param name="msgSource">Array to map</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// <para>In the same way as Linq-to-SQL, Linq-to-Fudge relies on there being a proper type that the message
+        /// can be mapped onto (i.e. a property with the same name and type as each field that we need to operate
+        /// on in the message).  This is only used to make Intellisense and the compiler work - no actual
+        /// deserialisation into objects happens whilst processing.
+        /// </para>
+        /// <para>See the <c>Linq.Examples</c> unit test for some examples.</para>
+        /// <para>We need this version in addition to IEnumerable&lt;IFudgeFieldContainer&gt; and IEnumerable&lt;FudgeMsg&gt;
+        /// because otherwise arrays would be ambiguous.</para>
+        /// </remarks>
+        public static IQueryable<T> AsQueryable<T>(this FudgeMsg[] msgSource)
+        {
+            return new Query<T>(new FudgeLinqProvider(msgSource));
+        }
+
+        /// <summary>
+        /// Map an <c>IEnumerable&lt;IFudgeFieldContainer&gt;</c> onto an <see cref="IQueryable<T>"/> so
+        /// that all the Linq compiler magic works.
+        /// </summary>
+        /// <typeparam name="T">Type of the object which has the structure of the message data.</typeparam>
+        /// <param name="msgSource">Enumerable (array, list, etc.) to map</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// <para>In the same way as Linq-to-SQL, Linq-to-Fudge relies on there being a proper type that the message
+        /// can be mapped onto (i.e. a property with the same name and type as each field that we need to operate
+        /// on in the message).  This is only used to make Intellisense and the compiler work - no actual
+        /// deserialisation into objects happens whilst processing.
+        /// </para>
+        /// <para>See the <c>Linq.Examples</c> unit test for some examples.</para>
+        /// </remarks>
+        public static IQueryable<T> AsQueryable<T>(this IEnumerable<IFudgeFieldContainer> msgSource)
         {
             return new Query<T>(new FudgeLinqProvider(msgSource));
         }
