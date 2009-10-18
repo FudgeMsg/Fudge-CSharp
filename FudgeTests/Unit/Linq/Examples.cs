@@ -37,10 +37,25 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
 
-            var query = from tick in msgs.AsLinq<Tick>() select tick.Ticker;
+            var query = from tick in msgs.AsQueryable<Tick>() select tick.Ticker;
 
             string[] tickers = query.ToArray();
             Assert.Equal(new string[] {"FOO", "BAR"}, tickers);
+        }
+
+        [Fact]
+        public void FudgeMsgVsIFudgeFieldContainer()
+        {
+            // Make sure that we can work with enumerables of IFudgeFieldContainer, enumerables of IFudgeMsg and also arrays directly
+            var array = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            IEnumerable<IFudgeFieldContainer> containerList = array;
+            IEnumerable<FudgeMsg> msgList = array;
+            var query1 = from tick in containerList.AsQueryable<Tick>() select tick.Ticker;
+            var query2 = from tick in msgList.AsQueryable<Tick>() select tick.Ticker;
+            var query3 = from tick in array.AsQueryable<Tick>() select tick.Ticker;
+
+            Assert.Equal(query1, query2);
+            Assert.Equal(query1, query3);
         }
 
         [Fact]
@@ -48,7 +63,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
 
-            var query = from tick in msgs.AsLinq<Tick>()
+            var query = from tick in msgs.AsQueryable<Tick>()
                         select tick.Bid * 2;
 
             double[] vals = query.ToArray();
@@ -60,7 +75,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
 
-            var query = from tick in msgs.AsLinq<Tick>()
+            var query = from tick in msgs.AsQueryable<Tick>()
                         where tick.Bid < 5.0
                         select tick.Ticker;
 
@@ -73,7 +88,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
 
-            var query = from tick in msgs.AsLinq<Tick>()
+            var query = from tick in msgs.AsQueryable<Tick>()
                         where tick.Ask > 4.0
                         select new { tick.Ticker, tick.Ask };
 
@@ -88,7 +103,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR"), Create(5.2, 5.5, "ZIP") };
 
-            var query = from tick in msgs.AsLinq<Tick>()
+            var query = from tick in msgs.AsQueryable<Tick>()
                         orderby tick.Ask
                         select tick.Ticker;
 
@@ -96,7 +111,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
             Assert.Equal(new string[] { "BAR", "ZIP", "FOO" }, tickers);
 
             // And descending
-            query = from tick in msgs.AsLinq<Tick>()
+            query = from tick in msgs.AsQueryable<Tick>()
                         orderby tick.Bid descending
                         select tick.Ticker;
 
@@ -110,7 +125,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
             // Make sure we can handle constants that are coming in from outside the query
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR"), Create(5.2, 5.5, "ZIP") };
             double bid = 2.4;
-            var query = from tick in msgs.AsLinq<Tick>()
+            var query = from tick in msgs.AsQueryable<Tick>()
                         where tick.Bid == bid               // bid here comes from outside the query
                         select tick.Ticker;
 
@@ -123,7 +138,7 @@ namespace OpenGamma.Fudge.Tests.Unit.Linq
         {
             var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
 
-            XElement tree = new XElement("Ticks", from tick in msgs.AsLinq<Tick>()
+            XElement tree = new XElement("Ticks", from tick in msgs.AsQueryable<Tick>()
                                                   select new XElement("Tick",
                                                       new XElement("Ticker", tick.Ticker),
                                                       new XElement("Bid", tick.Bid),
