@@ -20,6 +20,8 @@ using System.Text;
 using Xunit;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using OpenGamma.Fudge.Util;
+using OpenGamma.Fudge.Serialization;
 
 namespace OpenGamma.Fudge.Tests.Perf
 {
@@ -153,7 +155,7 @@ namespace OpenGamma.Fudge.Tests.Perf
         private static int FudgeCycle(bool useNames, bool useOrdinals)
         {
             MemoryStream outputStream = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(outputStream);
+            var bw = new FudgeBinaryWriter(outputStream);
             SmallFinancialTick tick = new SmallFinancialTick();
             FudgeMsg msg = new FudgeMsg();
             if (useNames && useOrdinals)
@@ -185,7 +187,7 @@ namespace OpenGamma.Fudge.Tests.Perf
             byte[] data = outputStream.ToArray();
 
             MemoryStream inputstream = new MemoryStream(data);
-            BinaryReader br = new BinaryReader(inputstream);
+            var br = new FudgeBinaryReader(inputstream);
             msg = FudgeStreamDecoder.ReadMsg(br).Message;
 
             tick = new SmallFinancialTick();
