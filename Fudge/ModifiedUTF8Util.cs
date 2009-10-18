@@ -35,7 +35,11 @@ namespace OpenGamma.Fudge
 
         public static int ModifiedUTF8Length(string str)
         {
-            return Encoding.GetByteCount(str.ToCharArray(), 0, str.Length);
+            int utflen = Encoding.GetByteCount(str.ToCharArray(), 0, str.Length);
+            if (utflen > 65535)     // Fudge has a maximum string size
+                throw new ModifiedUTF8Encoding.UTFDataFormatException("Encoded string too long: " + utflen
+                    + " bytes");
+            return utflen;
         }
 
         public static int WriteModifiedUTF8(string str, BinaryWriter output) //throws IOException
