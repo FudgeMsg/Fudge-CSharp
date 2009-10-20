@@ -54,6 +54,7 @@
     <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeEncodingObject.cs" />
+    <Compile Include="FudgeExtensions.cs" />
     <Compile Include="FudgeFieldPrefixCodec.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />
@@ -73,6 +74,18 @@
     <Compile Include="Linq\FudgeLinqReader.cs" />
     <Compile Include="ModifiedUTF8Util.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\FudgeDeserializationContext.cs" />
+    <Compile Include="Serialization\FudgeSerializationExtensions.cs" />
+    <Compile Include="Serialization\FudgeSerializer.cs" />
+    <Compile Include="Serialization\IFudgeDeserializationContext.cs" />
+    <Compile Include="Serialization\IFudgeSerializable.cs" />
+    <Compile Include="Serialization\IFudgeSerializationContext.cs" />
+    <Compile Include="Serialization\IFudgeSerializationSurrogate.cs" />
+    <Compile Include="Serialization\FudgeSerializationContext.cs" />
+    <Compile Include="Serialization\SerializableSurrogate.cs" />
+    <Compile Include="Serialization\SerializationTypeMap.cs" />
+    <Compile Include="Serialization\SerializationMessage.cs" />
+    <Compile Include="Serialization\TrackingFudgeMsg.cs" />
     <Compile Include="Types\FudgeArrayFieldTypeBase.cs" />
     <Compile Include="Types\SecondaryFieldType.cs" />
     <Compile Include="Taxon\IFudgeTaxonomy.cs" />
@@ -89,6 +102,7 @@
     <Compile Include="Types\IndicatorFieldType.cs" />
     <Compile Include="Types\IndicatorType.cs" />
     <Compile Include="Types\PrimitiveFieldTypes.cs" />
+    <Compile Include="Types\StringArrayFieldType.cs" />
     <Compile Include="Types\StringFieldType.cs" />
     <Compile Include="Types\UnknownFudgeFieldType.cs" />
     <Compile Include="UnknownFudgeFieldValue.cs" />
