@@ -8,7 +8,7 @@
     <ProjectGuid>{109A43D4-CE96-41E7-9FFC-D7A30D238E06}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenGamma.Fudge</RootNamespace>
+    <RootNamespace>Fudge</RootNamespace>
     <AssemblyName>Fudge</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

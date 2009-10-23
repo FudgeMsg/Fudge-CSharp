@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using OpenGamma.Fudge.Serialization;
+using Fudge.Serialization;
 
-namespace OpenGamma.Fudge.Tests.Unit.Serialization
+namespace Fudge.Tests.Unit.Serialization
 {
     public class FudgeSerializerTest
     {

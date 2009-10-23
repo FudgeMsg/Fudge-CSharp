@@ -8,7 +8,7 @@
     <ProjectGuid>{21CF7F0A-1BE0-4E54-9BDA-A31089802967}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenGamma.Fudge.Tests</RootNamespace>
+    <RootNamespace>Fudge.Tests</RootNamespace>
     <AssemblyName>FudgeTests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -72,9 +72,10 @@
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
-    <Compile Include="Unit\FudgeTestUtils.cs" />
+    <Compile Include="Unit\FudgeUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />
+    <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
     <Compile Include="Unit\Types\StringArrayFieldTypeTest.cs" />

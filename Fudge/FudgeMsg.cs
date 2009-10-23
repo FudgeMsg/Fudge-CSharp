@@ -17,14 +17,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.Diagnostics;
 using System.IO;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 using System.Collections;
-using OpenGamma.Fudge.Util;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// A container for <see cref="FudgeMsgField"/>s.
@@ -222,6 +222,20 @@ namespace OpenGamma.Fudge
             // Fudge-Java just returns a read-only wrapper, but we can't do that in a typed way in .net 3.5
             var copy = new List<IFudgeField>(fields.Cast<IFudgeField>());
             return copy;
+        }
+
+        public IList<string> GetAllFieldNames()
+        {
+            // If only there was a set implementation...
+            var dict = new Dictionary<string, bool>();
+            foreach (var field in fields)
+            {
+                if (field.Name != null)
+                {
+                    dict[field.Name] = true;
+                }
+            }
+            return new List<string>(dict.Keys);
         }
 
         public IFudgeField GetByIndex(int index)

@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using OpenGamma.Fudge.Taxon;
-using OpenGamma.Fudge.Util;
+using Fudge.Taxon;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge.Types
+namespace Fudge.Types
 {
     /// <summary>
     /// The type definition for an array of strings.

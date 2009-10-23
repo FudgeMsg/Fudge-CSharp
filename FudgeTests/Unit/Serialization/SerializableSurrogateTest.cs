@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using OpenGamma.Fudge.Serialization;
+using Fudge.Serialization;
 using System.Reflection;
 
-namespace OpenGamma.Fudge.Tests.Unit.Serialization
+namespace Fudge.Tests.Unit.Serialization
 {
     public class SerializableSurrogateTest
     {

@@ -20,7 +20,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace OpenGamma.Fudge.Serialization
+namespace Fudge.Serialization
 {
     public class SerializableSurrogate : IFudgeSerializationSurrogate
     {

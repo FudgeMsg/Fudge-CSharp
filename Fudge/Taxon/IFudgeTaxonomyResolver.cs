@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge.Taxon
+namespace Fudge.Taxon
 {
     /// <summary>
     /// A Taxonomy Resolver can identify a <see cref="IFudgeTaxonomy"/> instance that is

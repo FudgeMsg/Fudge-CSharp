@@ -19,10 +19,10 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using System.IO;
-using OpenGamma.Fudge.Util;
-using OpenGamma.Fudge.Types;
+using Fudge.Util;
+using Fudge.Types;
 
-namespace OpenGamma.Fudge.Tests.Unit.Types
+namespace Fudge.Tests.Unit.Types
 {
     public class StringArrayFieldTypeTest
     {

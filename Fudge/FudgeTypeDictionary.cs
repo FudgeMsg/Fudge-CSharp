@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 using System.Diagnostics;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// Contains all the <see cref="FudgeFieldType"/> definitions for a particular

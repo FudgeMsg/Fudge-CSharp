@@ -20,7 +20,7 @@ using System.Text;
 using System.Collections;
 using System.Diagnostics;
 
-namespace OpenGamma.Fudge.Serialization
+namespace Fudge.Serialization
 {
     /// <summary>
     /// <c>TrackingFudgeMsg</c> keeps track of which fields are fetched.

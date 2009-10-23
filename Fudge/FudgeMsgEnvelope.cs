@@ -17,9 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// Wraps a <see cref="FudgeMsg"/> for the purpose of encoding the envelope header.

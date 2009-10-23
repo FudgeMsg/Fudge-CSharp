@@ -22,7 +22,7 @@ using System.Reflection;
 using IQToolkit;
 using System.Diagnostics;
 
-namespace OpenGamma.Fudge.Linq
+namespace Fudge.Linq
 {
     /// <summary>
     /// Used to translate <see cref="Expression"/>s so that calls to get values from members of the

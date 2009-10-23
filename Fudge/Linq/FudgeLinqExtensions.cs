@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using IQToolkit;
 
-namespace OpenGamma.Fudge.Linq
+namespace Fudge.Linq
 {
     public static class FudgeLinqExtensions
     {

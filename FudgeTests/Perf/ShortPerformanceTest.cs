@@ -20,10 +20,9 @@ using System.Text;
 using Xunit;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using OpenGamma.Fudge.Util;
-using OpenGamma.Fudge.Serialization;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge.Tests.Perf
+namespace Fudge.Tests.Perf
 {
     /// <summary>
     /// A very short test just to establish some simple performance metrics

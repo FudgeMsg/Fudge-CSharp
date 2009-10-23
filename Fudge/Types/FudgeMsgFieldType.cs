@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.IO;
 using System.Diagnostics;
 
-namespace OpenGamma.Fudge.Types
+namespace Fudge.Types
 {
     /// <summary>
     /// The type definition for a sub-message in a hierarchical message format.

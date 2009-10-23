@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     ///  An interface defining any arbitrary container for fields that can
@@ -33,6 +33,8 @@ namespace OpenGamma.Fudge
         /// order for those fields.
         /// </summary>
         IList<IFudgeField> GetAllFields();
+
+        IList<string> GetAllFieldNames();
 
         IFudgeField GetByIndex(int index);
 

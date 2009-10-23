@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 
-namespace OpenGamma.Fudge.Serialization
+namespace Fudge.Serialization
 {
     public class FudgeDeserializationContext : IFudgeDeserializationContext
     {

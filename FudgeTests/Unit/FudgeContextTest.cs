@@ -19,9 +19,9 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using System.IO;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class FudgeContextTest
     {
@@ -31,7 +31,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void AllNamesCodecNoTaxonomy()
         {
-            FudgeMsg inputMsg = FudgeMsgTest.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
             FudgeContext context = new FudgeContext();
             FudgeMsg outputMsg = CycleMessage(inputMsg, context, null);
 

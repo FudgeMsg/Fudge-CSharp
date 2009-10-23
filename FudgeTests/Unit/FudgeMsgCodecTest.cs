@@ -19,9 +19,9 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using System.IO;
-using OpenGamma.Fudge.Util;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     /// <summary>
     /// A test class that will encode and decode a number of different Fudge messages
@@ -34,7 +34,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void AllNames()
         {
-            FudgeMsg inputMsg = FudgeMsgTest.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
             Assert.NotNull(outputMsg);

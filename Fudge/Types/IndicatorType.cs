@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge.Types
+namespace Fudge.Types
 {
     /// <summary>
     /// The only value of a field with the Indicator type.

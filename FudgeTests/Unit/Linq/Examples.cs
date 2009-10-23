@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Linq;
+using Fudge.Linq;
 using Xunit;
 using System.Xml.Linq;
 
-namespace OpenGamma.Fudge.Tests.Unit.Linq
+namespace Fudge.Tests.Unit.Linq
 {
     public class Examples
     {

@@ -17,9 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// A concrete implementation of <see cref="IFudgeField"/> suitable for inclusion in

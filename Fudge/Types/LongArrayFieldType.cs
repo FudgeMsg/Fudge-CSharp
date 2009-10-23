@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 
-namespace OpenGamma.Fudge.Types
+namespace Fudge.Types
 {
     /// <summary>
     /// The type definition for an array of 64-bit integers.

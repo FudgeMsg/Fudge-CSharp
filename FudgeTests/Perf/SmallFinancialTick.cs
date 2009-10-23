@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge.Tests.Perf
+namespace Fudge.Tests.Perf
 {
     /// <summary>
     /// Intended to model a very small tick, with just a few key fields.

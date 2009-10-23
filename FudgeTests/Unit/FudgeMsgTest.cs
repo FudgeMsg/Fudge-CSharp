@@ -18,100 +18,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class FudgeMsgTest
     {
-        protected internal static FudgeMsg CreateMessageAllNames()
-        {
-            FudgeMsg msg = new FudgeMsg();
-
-            msg.Add("boolean", true);
-            msg.Add("Boolean", (object)false);
-            msg.Add("byte", (sbyte)5);
-            msg.Add("Byte", (object)((sbyte)5));
-            short shortValue = ((short)sbyte.MaxValue) + 5;
-            msg.Add("short", shortValue);
-            msg.Add("Short", (object)(shortValue));
-            int intValue = ((int)short.MaxValue) + 5;
-            msg.Add("int", intValue);
-            msg.Add("Integer", (object)(intValue));
-            long longValue = ((long)int.MaxValue) + 5;
-            msg.Add("long", longValue);
-            msg.Add("Long", (object)(longValue));
-
-            msg.Add("float", 0.5f);
-            msg.Add("Float", (object)(0.5f));
-            msg.Add("double", 0.27362);
-            msg.Add("Double", (object)(0.27362));
-
-            msg.Add("String", "Kirk Wylie");
-
-            msg.Add("float array", new float[24]);
-            msg.Add("double array", new double[273]);
-            msg.Add("short array", new short[32]);
-            msg.Add("int array", new int[83]);
-            msg.Add("long array", new long[837]);
-
-            msg.Add("indicator", IndicatorType.Instance);
-
-            return msg;
-        }
-
-        protected internal static FudgeMsg CreateMessageAllOrdinals()
-        {
-            FudgeMsg msg = new FudgeMsg();
-
-            msg.Add(1, true);
-            msg.Add(2, (object)(false));
-            msg.Add(3, (sbyte)5);
-            msg.Add(4, (object)((sbyte)5));
-            short shortValue = ((short)sbyte.MaxValue) + 5;
-            msg.Add(5, shortValue);
-            msg.Add(6, (object)(shortValue));
-            int intValue = ((int)short.MaxValue) + 5;
-            msg.Add(7, intValue);
-            msg.Add(8, (object)(intValue));
-            long longValue = ((long)int.MaxValue) + 5;
-            msg.Add(9, longValue);
-            msg.Add(10, (object)(longValue));
-
-            msg.Add(11, 0.5f);
-            msg.Add(12, (object)(0.5f));
-            msg.Add(13, 0.27362);
-            msg.Add(14, (object)(0.27362));
-
-            msg.Add(15, "Kirk Wylie");
-
-            msg.Add(16, new float[24]);
-            msg.Add(17, new double[273]);
-
-            return msg;
-        }
-
-        protected static FudgeMsg CreateMessageAllByteArrayLengths()
-        {
-            FudgeMsg msg = new FudgeMsg();
-            msg.Add("byte[4]", new byte[4]);
-            msg.Add("byte[8]", new byte[8]);
-            msg.Add("byte[16]", new byte[16]);
-            msg.Add("byte[20]", new byte[20]);
-            msg.Add("byte[32]", new byte[32]);
-            msg.Add("byte[64]", new byte[64]);
-            msg.Add("byte[128]", new byte[128]);
-            msg.Add("byte[256]", new byte[256]);
-            msg.Add("byte[512]", new byte[512]);
-
-            msg.Add("byte[28]", new byte[28]);
-            return msg;
-        }
-
         [Fact]
         public void LookupByNameSingleValue()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
             IFudgeField field = null;
             IList<IFudgeField> fields = null;
 
@@ -146,7 +62,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void LookupByNameMultipleValues()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
             IFudgeField field = null;
             IList<IFudgeField> fields = null;
 
@@ -181,7 +97,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesNamesMatch()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
 
             Assert.Equal((sbyte)5, msg.GetSByte("byte"));
             Assert.Equal((sbyte)5, msg.GetSByte("Byte"));
@@ -209,7 +125,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesNamesNoMatch()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
 
             Assert.Throws<OverflowException>(() => msg.GetSByte("int"));
             Assert.Throws<OverflowException>(() => msg.GetShort("int"));
@@ -222,7 +138,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesNoNames()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
 
             Assert.Null(msg.GetSByte("foobar"));
             Assert.Null(msg.GetShort("foobar"));
@@ -236,7 +152,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void AsQueriesToLongNames()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
 
             Assert.Equal((long?)((sbyte)5), msg.GetLong("byte"));
             Assert.Equal((long?)((sbyte)5), msg.GetLong("Byte"));
@@ -263,7 +179,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void GetValueTyped()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
             long longValue = ((long)int.MaxValue) + 5;
             Assert.Equal(longValue, msg.GetValue<long>("long"));
             Assert.Equal(5, msg.GetValue<long>("byte"));
@@ -272,7 +188,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void AsQueriesToLongNoNames()        // TODO t0rx 2009-08-31 -- This test from Fudge-Java doesn't make sense
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
 
             Assert.Null(msg.GetSByte("foobar"));
             Assert.Null(msg.GetShort("foobar"));
@@ -288,7 +204,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesOrdinalsMatch()
         {
-            FudgeMsg msg = CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
 
             Assert.Equal((sbyte)5, msg.GetSByte((short)3));
             Assert.Equal((sbyte)5, msg.GetSByte((short)4));
@@ -316,7 +232,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesOrdinalsNoMatch()
         {
-            FudgeMsg msg = CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
 
             Assert.Throws<OverflowException>(() => msg.GetSByte(7));
             Assert.Throws<OverflowException>(() => msg.GetShort(7));
@@ -329,7 +245,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactOrdinalsNoOrdinals()
         {
-            FudgeMsg msg = CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
 
             Assert.Null(msg.GetSByte((short)100));
             Assert.Null(msg.GetShort((short)100));
@@ -343,7 +259,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void AsQueriesToLongOrdinals()
         {
-            FudgeMsg msg = CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
 
             Assert.Equal((long)((sbyte)5), msg.GetLong((short)3));
             Assert.Equal((long)((sbyte)5), msg.GetLong((short)4));
@@ -369,7 +285,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void ToByteArray()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
             byte[] bytes = msg.ToByteArray();
             Assert.NotNull(bytes);
             Assert.True(bytes.Length > 10);
@@ -387,7 +303,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void FixedLengthByteArrays()
         {
-            FudgeMsg msg = CreateMessageAllByteArrayLengths();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllByteArrayLengths();
             Assert.Same(ByteArrayFieldType.Length4Instance, msg.GetByName("byte[4]").Type);
             Assert.Same(ByteArrayFieldType.Length8Instance, msg.GetByName("byte[8]").Type);
             Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("byte[16]").Type);
@@ -430,7 +346,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void Iterable()
         {
-            FudgeMsg msg = CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
             int fieldCount = 0;
             foreach (IFudgeField field in msg)
             {
@@ -442,13 +358,26 @@ namespace OpenGamma.Fudge.Tests.Unit
         [Fact]
         public void IterableContainer()
         {
-            IFudgeFieldContainer msg = CreateMessageAllNames();
+            IFudgeFieldContainer msg = StandardFudgeMessages.CreateMessageAllNames();
             int fieldCount = 0;
             foreach (IFudgeField field in msg)
             {
                 fieldCount++;
             }
             Assert.Equal(msg.GetNumFields(), fieldCount);
+        }
+
+        [Fact]
+        public void GetAllNames()
+        {
+            var msg = new FudgeMsg();
+            msg.Add("foo", 3);
+            msg.Add("bar", 17);
+            msg.Add("foo", 2);      // Deliberately do a duplicate
+            var names = msg.GetAllFieldNames();
+            Assert.Equal(2, names.Count);
+            Assert.Contains("foo", names);
+            Assert.Contains("bar", names);
         }
     }
 }

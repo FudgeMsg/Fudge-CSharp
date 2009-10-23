@@ -16,9 +16,9 @@
 using System;
 using Xunit;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
-    class FudgeTestUtils
+    class FudgeUtils
     {
         public static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
         {

@@ -19,9 +19,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Diagnostics;
-using OpenGamma.Fudge.Util;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// Code relating to working with <a href="http://en.wikipedia.org/wiki/UTF-8#Modified_UTF-8">Modified UTF-8</a> data.
