@@ -34,6 +34,8 @@ namespace Fudge
         /// </summary>
         IList<IFudgeField> GetAllFields();
 
+        IList<string> GetAllFieldNames();
+
         IFudgeField GetByIndex(int index);
 
         IList<IFudgeField> GetAllByOrdinal(int ordinal);

@@ -366,5 +366,18 @@ namespace Fudge.Tests.Unit
             }
             Assert.Equal(msg.GetNumFields(), fieldCount);
         }
+
+        [Fact]
+        public void GetAllNames()
+        {
+            var msg = new FudgeMsg();
+            msg.Add("foo", 3);
+            msg.Add("bar", 17);
+            msg.Add("foo", 2);      // Deliberately do a duplicate
+            var names = msg.GetAllFieldNames();
+            Assert.Equal(2, names.Count);
+            Assert.Contains("foo", names);
+            Assert.Contains("bar", names);
+        }
     }
 }

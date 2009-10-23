@@ -195,6 +195,20 @@ namespace Fudge
             return copy;
         }
 
+        public IList<string> GetAllFieldNames()
+        {
+            // If only there was a set implementation...
+            var dict = new Dictionary<string, bool>();
+            foreach (var field in fields)
+            {
+                if (field.Name != null)
+                {
+                    dict[field.Name] = true;
+                }
+            }
+            return new List<string>(dict.Keys);
+        }
+
         public IFudgeField GetByIndex(int index)
         {
             if (index < 0)
