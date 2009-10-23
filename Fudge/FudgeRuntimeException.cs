@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// A Fudge-specific subclass of <see cref="Exception"/> for all exceptions

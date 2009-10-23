@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace OpenGamma.Fudge.Util
+namespace Fudge.Util
 {
     /// <summary>
     /// FudgeBinaryWriter provides the wire encoding for primitive types.

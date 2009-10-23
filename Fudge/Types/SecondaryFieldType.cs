@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.IO;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// Marker interface to indicate that this type isn't a primary type

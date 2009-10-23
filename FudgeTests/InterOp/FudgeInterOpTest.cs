@@ -21,9 +21,9 @@ using System.Reflection;
 using System.Text;
 using Xunit;
 using System.IO;
-using OpenGamma.Fudge.Util;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     /// <summary>
     /// A test class that will encode and decode a number of different Fudge messages
@@ -128,7 +128,7 @@ namespace OpenGamma.Fudge.Tests.Unit
         protected static FudgeMsg CycleMessage(FudgeMsg msg, string filename) //throws IOException
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            Stream stream = assembly.GetManifestResourceStream("OpenGamma.Fudge.Tests.Resources." + filename);
+            Stream stream = assembly.GetManifestResourceStream("Fudge.Tests.Resources." + filename);
             BinaryReader referenceReader = new FudgeBinaryReader(stream);
             Stream memoryStream = new MemoryStream();
             // set the last parameter of the following line to true to see the full diff report between streams and not fail at the first difference.
@@ -137,7 +137,7 @@ namespace OpenGamma.Fudge.Tests.Unit
             bw.Close();
 
             // Reload as closed above
-            stream = assembly.GetManifestResourceStream("OpenGamma.Fudge.Tests.Resources." + filename);
+            stream = assembly.GetManifestResourceStream("Fudge.Tests.Resources." + filename);
             BinaryReader br = new FudgeBinaryReader(stream);                    // Load the message from the resource rather than our output
             FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br).Message;
             return outputMsg;

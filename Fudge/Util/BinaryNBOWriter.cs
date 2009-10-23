@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace OpenGamma.Fudge.Util
+namespace Fudge.Util
 {
     /// <summary>
     /// Like the <see cref="BinaryWriter"/>, but uses Network Byte Order for compatiblility with other languages.

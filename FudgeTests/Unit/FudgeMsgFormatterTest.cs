@@ -20,7 +20,7 @@ using System.Text;
 using Xunit;
 using System.IO;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class FudgeMsgFormatterTest
     {

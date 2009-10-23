@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 
-namespace OpenGamma.Fudge.Tests.Unit.Types
+namespace Fudge.Tests.Unit.Types
 {
     public class FudgeArrayFieldTypeBaseTest
     {

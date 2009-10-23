@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 
 using Xunit;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class FudgeTypeDictionaryTest
     {

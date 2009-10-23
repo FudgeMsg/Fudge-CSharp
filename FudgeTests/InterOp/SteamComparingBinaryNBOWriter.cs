@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using OpenGamma.Fudge.Util;
+using Fudge.Util;
 using Xunit;
 using Xunit.Sdk;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class StreamComparingBinaryNBOWriter : BinaryNBOWriter
     {

@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
-using OpenGamma.Fudge;
+using Fudge;
 
-namespace OpenGamma.Fudge.Linq
+namespace Fudge.Linq
 {
     /// <summary>
     /// The <c>FudgeLinqReader</c> class provides a lazy projection of the source IEnumerable&lt;IFudgeFieldContainer&gt;

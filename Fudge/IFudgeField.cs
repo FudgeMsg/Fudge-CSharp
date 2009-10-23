@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// A read-only representation of a field which is contained in a fudge

@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.Diagnostics;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// The base type for all objects which can be encoded using Fudge. 

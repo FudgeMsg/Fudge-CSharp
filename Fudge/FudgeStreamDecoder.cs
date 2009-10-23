@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.Diagnostics;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     public class FudgeStreamDecoder
     {

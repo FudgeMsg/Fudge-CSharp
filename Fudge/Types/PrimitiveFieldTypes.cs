@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge.Types
+namespace Fudge.Types
 {
     /// <summary>
     ///  A collection of all the simple fixed-width field types that represent

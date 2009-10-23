@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// <c>Field</c> is a convenience class to allow functional construction of messages.

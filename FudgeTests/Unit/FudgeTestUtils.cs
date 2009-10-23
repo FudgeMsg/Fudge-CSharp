@@ -16,7 +16,7 @@
 using System;
 using Xunit;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     class FudgeTestUtils
     {

@@ -18,14 +18,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
-using OpenGamma.Fudge;
+using Fudge;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Collections;
 using System.Diagnostics;
 using IQToolkit;
 
-namespace OpenGamma.Fudge.Linq
+namespace Fudge.Linq
 {
     /// <summary>
     /// <c>FudgeLinqProvider</c> gives an implementation of <see cref="IQueryProvider"/> for

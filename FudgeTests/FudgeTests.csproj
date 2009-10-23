@@ -8,7 +8,7 @@
     <ProjectGuid>{21CF7F0A-1BE0-4E54-9BDA-A31089802967}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenGamma.Fudge.Tests</RootNamespace>
+    <RootNamespace>Fudge.Tests</RootNamespace>
     <AssemblyName>FudgeTests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -58,6 +58,11 @@
     <Compile Include="Perf\SmallFinancialTick.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Perf\ShortPerformanceTest.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Unit\FudgeContextTest.cs" />
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />

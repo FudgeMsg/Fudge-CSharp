@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.IO;
-using OpenGamma.Fudge.Util;
+using Fudge.Util;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// The primary entry-point for code to interact with the rest of the fudge system.

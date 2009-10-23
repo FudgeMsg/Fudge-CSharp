@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// A container for all the utilities for working with fudge field prefixes.

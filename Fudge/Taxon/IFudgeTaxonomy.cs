@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge.Taxon
+namespace Fudge.Taxon
 {
     /// <summary>
     /// A Fudge Taxonomy is a mapping from ordinals to names for

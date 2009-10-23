@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class FudgeFieldPrefixCodecTest
     {

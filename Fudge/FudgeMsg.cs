@@ -17,13 +17,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 using System.Diagnostics;
 using System.IO;
-using OpenGamma.Fudge.Types;
+using Fudge.Types;
 using System.Collections;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// A container for <see cref="FudgeMsgField"/>s.

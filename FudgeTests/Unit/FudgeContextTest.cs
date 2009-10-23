@@ -19,9 +19,9 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using System.IO;
-using OpenGamma.Fudge.Taxon;
+using Fudge.Taxon;
 
-namespace OpenGamma.Fudge.Tests.Unit
+namespace Fudge.Tests.Unit
 {
     public class FudgeContextTest
     {

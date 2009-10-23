@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     ///  An interface defining any arbitrary container for fields that can

@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace OpenGamma.Fudge
+namespace Fudge
 {
     /// <summary>
     /// Allows for pretty-printing of <see cref="FudgeMsg"/> instances.

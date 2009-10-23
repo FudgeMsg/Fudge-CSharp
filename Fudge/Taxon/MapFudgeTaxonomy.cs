@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenGamma.Fudge.Taxon
+namespace Fudge.Taxon
 {
     /// <summary>
     /// An implementation of <see cref="IFudgeTaxonomy"/> where all lookups are specified
