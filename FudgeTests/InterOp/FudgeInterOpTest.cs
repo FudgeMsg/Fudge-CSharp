@@ -34,23 +34,23 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AllNames()
         {
-            FudgeMsg inputMsg = FudgeMsgTest.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
             FudgeMsg outputMsg = CycleMessage(inputMsg, "allNames.dat");
 
             Assert.NotNull(outputMsg);
 
-            FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         [Fact]
         public void AllOrdinals()
         {
-            FudgeMsg inputMsg = FudgeMsgTest.CreateMessageAllOrdinals();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllOrdinals();
             FudgeMsg outputMsg = CycleMessage(inputMsg, "allOrdinals.dat");
 
             Assert.NotNull(outputMsg);
 
-            FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Fudge.Tests.Unit
 
             Assert.NotNull(outputMsg);
 
-            FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace Fudge.Tests.Unit
 
             Assert.NotNull(outputMsg);
 
-            FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         [Fact]
@@ -92,7 +92,7 @@ namespace Fudge.Tests.Unit
             FudgeMsg inputMsg = new FudgeMsg(
                                     new Field("unknown", new UnknownFudgeFieldValue(new byte[10], new FudgeTypeDictionary().GetUnknownType(200))));
             FudgeMsg outputMsg = CycleMessage(inputMsg, "unknown.dat");
-            FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         // this was a random array, but changed for repeatability (didn't want to use a fixed seed because not sure Random impl is same on Java).
@@ -122,7 +122,7 @@ namespace Fudge.Tests.Unit
                                     new Field("byte[28]", CreateAscendingArray(28)));
 
             FudgeMsg outputMsg = CycleMessage(inputMsg, "fixedWidthByteArrays.dat");
-            FudgeTestUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         protected static FudgeMsg CycleMessage(FudgeMsg msg, string filename) //throws IOException

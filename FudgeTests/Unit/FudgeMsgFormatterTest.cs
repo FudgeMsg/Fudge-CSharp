@@ -32,8 +32,8 @@ namespace Fudge.Tests.Unit
         public void OutputToStdoutAllNames()
         {
             Console.Out.WriteLine("FudgeMsgFormatterTest.OutputToStdoutAllNames()");
-            FudgeMsg msg = FudgeMsgTest.CreateMessageAllNames();
-            msg.Add("Sub Message", (short)9999, FudgeMsgTest.CreateMessageAllNames());
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            msg.Add("Sub Message", (short)9999, StandardFudgeMessages.CreateMessageAllNames());
             new FudgeMsgFormatter(Console.Out).Format(msg);
         }
 
@@ -44,8 +44,8 @@ namespace Fudge.Tests.Unit
         public void OutputToStdoutAllOrdinals()
         {
             Console.Out.WriteLine("FudgeMsgFormatterTest.OutputToStdoutAllOrdinals()");
-            FudgeMsg msg = FudgeMsgTest.CreateMessageAllOrdinals();
-            msg.Add("Sub Message", (short)9999, FudgeMsgTest.CreateMessageAllOrdinals());
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
+            msg.Add("Sub Message", (short)9999, StandardFudgeMessages.CreateMessageAllOrdinals());
             new FudgeMsgFormatter(Console.Out).Format(msg);
         }
     }

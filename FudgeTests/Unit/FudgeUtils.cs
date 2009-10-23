@@ -18,7 +18,7 @@ using Xunit;
 
 namespace Fudge.Tests.Unit
 {
-    class FudgeTestUtils
+    class FudgeUtils
     {
         public static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
         {

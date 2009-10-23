@@ -34,7 +34,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AllNames()
         {
-            FudgeMsg inputMsg = FudgeMsgTest.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
             Assert.NotNull(outputMsg);

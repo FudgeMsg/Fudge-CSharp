@@ -31,7 +31,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AllNamesCodecNoTaxonomy()
         {
-            FudgeMsg inputMsg = FudgeMsgTest.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
             FudgeContext context = new FudgeContext();
             FudgeMsg outputMsg = CycleMessage(inputMsg, context, null);
 
