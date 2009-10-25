@@ -19,6 +19,7 @@ using System.Linq;
 using System.Text;
 using Fudge.Types;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Fudge
 {
@@ -33,7 +34,8 @@ namespace Fudge
 
         private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
         private volatile UnknownFudgeFieldType[] unknownTypesById = new UnknownFudgeFieldType[0];
-        private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();       // Also used as synchronisation lock
+        private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();
+        private readonly ReaderWriterLock rwLock = new ReaderWriterLock();      // Synchronisation lock around typesByCSharpType
 
         public FudgeTypeDictionary()
         {
@@ -71,8 +73,10 @@ namespace Fudge
             {
                 throw new ArgumentNullException("Must not provide a null FudgeFieldType to add.");
             }
-            lock (typesByCSharpType)
-            {
+
+            rwLock.AcquireWriterLock(Timeout.Infinite);
+            try
+            {                
                 if (!(type is ISecondaryFieldType))       // TODO t0rx 2009-09-12 -- Don't like this as a way of testing
                 {
                     int newLength = Math.Max(type.TypeId + 1, typesById.Length);
@@ -88,6 +92,10 @@ namespace Fudge
                     typesByCSharpType[alternativeType] = type;
                 }
             }
+            finally
+            {
+                rwLock.ReleaseWriterLock();
+            }
         }
 
         public FudgeFieldType GetByCSharpType(Type csharpType)
@@ -96,12 +104,13 @@ namespace Fudge
             {
                 return null;
             }
-            FudgeFieldType result;
-            lock (typesByCSharpType)
-            {
-                if (!typesByCSharpType.TryGetValue(csharpType, out result))
-                    return null;
-            }
+            
+            rwLock.AcquireReaderLock(Timeout.Infinite);
+
+            FudgeFieldType result = null;
+            typesByCSharpType.TryGetValue(csharpType, out result);
+            
+            rwLock.ReleaseReaderLock();
             return result;
         }
 
@@ -121,9 +130,9 @@ namespace Fudge
 
         public UnknownFudgeFieldType GetUnknownType(int typeId)
         {
-            int newLength = Math.Max(typeId + 1, unknownTypesById.Length);
-            if ((unknownTypesById.Length < newLength) || (unknownTypesById[typeId] == null))
+            if ((unknownTypesById.Length <= typeId) || (unknownTypesById[typeId] == null))
             {
+                int newLength = Math.Max(typeId + 1, unknownTypesById.Length); 
                 lock (unknownTypesById)
                 {
                     if ((unknownTypesById.Length < newLength) || (unknownTypesById[typeId] == null))

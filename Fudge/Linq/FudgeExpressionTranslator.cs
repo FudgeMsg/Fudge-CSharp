@@ -81,7 +81,7 @@ namespace Fudge.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             // Translate calls to Queryable.xxx<IQueryable<dataType>(...) to Enumerable.xxx<IEnumerable<IFudgeFieldContainer>>(...)
-            // TODO t0rx 20091011 -- Need to refactor this to make less copy-paste and more efficient
+            // TODO t0rx 2009-10-11 -- Need to refactor this to make less copy-paste and more efficient
             Expression obj = Visit(m.Object);
             var args = VisitExpressionList(m.Arguments);
 
