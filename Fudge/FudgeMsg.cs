@@ -563,7 +563,6 @@ namespace Fudge
             {
                 throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
             }
-            // TODO t0rx 2009-08-30 -- Could also get an ObjectDisposedException from the BinaryWriter...
 
             return stream.ToArray();
         }

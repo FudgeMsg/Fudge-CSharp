@@ -30,15 +30,31 @@ namespace Fudge.Linq
     /// </summary>
     internal class FudgeExpressionTranslator : ExpressionVisitor
     {
+        private static readonly ParameterExpression msgParam = Expression.Parameter(typeof(IFudgeFieldContainer), "msg");
+
+        #region Pre-cached methods
         private static MethodInfo getValueMethod = typeof(IFudgeFieldContainer).GetMethod("GetValue", new Type[] { typeof(string), typeof(Type) });
-        private readonly ParameterExpression msgParam;
+
+        private static MethodInfo selectMethod = (from mi in typeof(Enumerable).GetMethods()
+                                                  where mi.Name == "Select" && mi.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2
+                                                  select mi).Single();                                  // Find Enumerable.Select(IEnumerable<TSource>,Func<TSource,TResult>) rather than Func<TSource,Int32,Boolean> variant
+        private static MethodInfo whereMethod = (from mi in typeof(Enumerable).GetMethods()
+                                                 where mi.Name == "Where" && mi.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2
+                                                 select mi).Single();                                   // Find Enumerable.Where(IEnumerable<TSource>,Func<TSource,Boolean>) rather than Func<TSource,Int32,Boolean> variant
+        private static MethodInfo orderByMethod = (from mi in typeof(Enumerable).GetMethods()
+                                                   where mi.Name == "OrderBy" && mi.GetParameters().Length == 2
+                                                   select mi).Single();
+        private static MethodInfo orderByDescendingMethod = (from mi in typeof(Enumerable).GetMethods()
+                                                             where mi.Name == "OrderByDescending" && mi.GetParameters().Length == 2
+                                                             select mi).Single();
+        #endregion
+
         private readonly IEnumerable<IFudgeFieldContainer> source;
         private readonly Type dataType;
 
-        public FudgeExpressionTranslator(Type dataType, ParameterExpression msgParam, IEnumerable<IFudgeFieldContainer> source)
+        public FudgeExpressionTranslator(Type dataType, IEnumerable<IFudgeFieldContainer> source)
         {
             this.dataType = dataType;
-            this.msgParam = msgParam;
             this.source = source;
         }
 
@@ -75,7 +91,11 @@ namespace Fudge.Linq
             {
                 return Expression.Lambda(body, msgParam);
             }
-            return UpdateLambda(lambda, lambda.Type, body, parameters);
+
+            if (body == lambda.Body)
+                return lambda;
+            else
+                return Expression.Lambda(body, parameters.ToArray());
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
@@ -94,34 +114,25 @@ namespace Fudge.Linq
                     case "Select":
                         {
                             Debug.Assert(newArgs.Length == 2);
-                            // Find Enumerable.Select(IEnumerable<TSource>,Func<TSource,TResult>)
-                            // [rather than Func<TSource,Int32,Boolean> variant]
-                            var genericMethod = (from mi in typeof(Enumerable).GetMethods()
-                                                 where mi.Name == method.Name && mi.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2
-                                                 select mi).Single();
-                            var newMethod = genericMethod.MakeGenericMethod(newArgs[1].Type.GetGenericArguments());     // type args for method are same as for our func
+                            var newMethod = selectMethod.MakeGenericMethod(newArgs[1].Type.GetGenericArguments());     // type args for method are same as for our func
                             return Expression.Call(newMethod, newArgs);
                         }
                     case "Where":
                         {
                             Debug.Assert(newArgs.Length == 2);
-                            // Find Enumerable.Where(IEnumerable<TSource>,Func<TSource,Boolean>)
-                            // [rather than Func<TSource,Int32,Boolean> variant]
-                            var genericMethod = (from mi in typeof(Enumerable).GetMethods()
-                                                 where mi.Name == method.Name && mi.GetParameters()[1].ParameterType.GetGenericArguments().Length == 2
-                                                 select mi).Single();
-                            var newMethod = genericMethod.MakeGenericMethod(new Type[] { typeof(IFudgeFieldContainer) });
+                            var newMethod = whereMethod.MakeGenericMethod(new Type[] { typeof(IFudgeFieldContainer) });
                             return Expression.Call(newMethod, newArgs);
                         }
                     case "OrderBy":
+                        {
+                            Debug.Assert(newArgs.Length == 2);
+                            var newMethod = orderByMethod.MakeGenericMethod(newArgs[1].Type.GetGenericArguments());     // type args for method are same as for our func
+                            return Expression.Call(newMethod, newArgs);
+                        }
                     case "OrderByDescending":
                         {
                             Debug.Assert(newArgs.Length == 2);
-                            // Find Enumerable.OrderBy(IEnumerable<TSource>,Func<TSource,TKey>)
-                            var genericMethod = (from mi in typeof(Enumerable).GetMethods()
-                                                 where mi.Name == method.Name && mi.GetParameters().Length == 2
-                                                 select mi).Single();
-                            var newMethod = genericMethod.MakeGenericMethod(newArgs[1].Type.GetGenericArguments());     // type args for method are same as for our func
+                            var newMethod = orderByDescendingMethod.MakeGenericMethod(newArgs[1].Type.GetGenericArguments());     // type args for method are same as for our func
                             return Expression.Call(newMethod, newArgs);
                         }
                     default:

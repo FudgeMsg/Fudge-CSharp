@@ -57,18 +57,6 @@ namespace Fudge.Types
             }
             return value;
         }
-
-        // TODO t0rx 2009-10-07 -- Need to get clarification on whether false should minimise to Indicator.  Currently Fudge-Java does not so matching that behaviour.
-        //private static object MinimizeBoolean(bool value, ref FudgeFieldType type)
-        //{
-        //    if (!value)
-        //    {
-        //        type = IndicatorFieldType.Instance;
-        //        return IndicatorType.Instance;
-        //    }
-
-        //    return value;
-        //}
         #endregion
     }
 }

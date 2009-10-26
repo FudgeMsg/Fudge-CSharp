@@ -67,10 +67,10 @@
     <Compile Include="FudgeTypeDictionary.cs" />
     <Compile Include="IFudgeField.cs" />
     <Compile Include="IMutableFudgeFieldContainer.cs" />
+    <Compile Include="Linq\ExpressionTreeStructureHasher.cs" />
     <Compile Include="Linq\FudgeExpressionTranslator.cs" />
     <Compile Include="Linq\FudgeLinqExtensions.cs" />
     <Compile Include="Linq\FudgeLinqProvider.cs" />
-    <Compile Include="Linq\FudgeLinqReader.cs" />
     <Compile Include="ModifiedUTF8Util.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Types\FudgeArrayFieldTypeBase.cs" />

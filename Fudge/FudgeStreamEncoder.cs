@@ -73,7 +73,7 @@ namespace Fudge
             nWritten += 1;
             bw.Write((byte)version);
             nWritten += 1;
-            bw.Write((short)taxonomy);      // TODO t0rx 2009-10-04 -- This should probably be ushort, but we'll need to change throughout and also support within the BinaryNBOWriter/reader
+            bw.Write((short)taxonomy);      // TODO t0rx 2009-10-04 -- This should probably be ushort, but we'll need to change throughout
             nWritten += 2;
             bw.Write(messageSize);
             nWritten += 4;

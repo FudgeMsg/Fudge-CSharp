@@ -25,7 +25,6 @@ namespace Fudge.Util
     /// </summary>
     public class ModifiedUTF8Encoding : Encoding
     {
-        // TODO t0rx 2009-09-05 -- Providing unsafe versions working on the char* would give a performance improvement.
         // See the .net implementation of UTF8Encoding for what needs doing.
 
         public override int GetByteCount(char[] chars, int index, int count)
