@@ -541,6 +541,16 @@ namespace Fudge
             return GetAsStringInternal(null, ordinal);
         }
 
+        public IFudgeFieldContainer GetMessage(string name)
+        {
+            return (IFudgeFieldContainer)GetFirstTypedValue(name, FudgeTypeDictionary.FUDGE_MSG_TYPE_ID);
+        }
+
+        public IFudgeFieldContainer GetMessage(int ordinal)
+        {
+            return (IFudgeFieldContainer)GetFirstTypedValue(ordinal, FudgeTypeDictionary.FUDGE_MSG_TYPE_ID);
+        }
+
         protected string GetAsStringInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -591,7 +601,7 @@ namespace Fudge
             return null;
         }
 
-        protected object GetFirstTypedValue(short ordinal, int typeId)
+        protected object GetFirstTypedValue(int ordinal, int typeId)
         {
             foreach (FudgeMsgField field in fields)
             {

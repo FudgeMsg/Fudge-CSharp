@@ -379,5 +379,14 @@ namespace Fudge.Tests.Unit
             Assert.Contains("foo", names);
             Assert.Contains("bar", names);
         }
+
+        [Fact]
+        public void GetMessageMethodsFRN5()
+        {
+            var msg = StandardFudgeMessages.CreateMessageWithSubMsgs();
+            Assert.Null(msg.GetMessage(42));
+            Assert.Null(msg.GetMessage("No Such Field"));
+            Assert.True(msg.GetMessage("sub1") is IFudgeFieldContainer);
+        }
     }
 }

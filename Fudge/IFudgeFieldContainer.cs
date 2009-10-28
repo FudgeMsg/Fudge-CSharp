@@ -143,5 +143,11 @@ namespace Fudge
         /// <exception cref="InvalidCastException">Field type could not be converted to a <c>string</c></exception>
         /// <exception cref="OverflowException">Field value could not fit within a <c>string</c></exception>
         string GetString(int ordinal);
+
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        IFudgeFieldContainer GetMessage(string fieldName);
+
+        /// <returns>value, or <c>null</c> if field not found.</returns>
+        IFudgeFieldContainer GetMessage(int ordinal);
     }
 }

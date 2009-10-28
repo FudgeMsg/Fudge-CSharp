@@ -106,5 +106,17 @@ namespace Fudge.Tests.Unit
             msg.Add("byte[28]", new byte[28]);
             return msg;
         }
+
+        public static FudgeMsg CreateMessageWithSubMsgs()
+        {
+            FudgeMsg inputMsg = new FudgeMsg(
+                                    new Field("sub1",
+                                        new Field("bibble", "fibble"),
+                                        new Field(827, "Blibble")),
+                                    new Field("sub2",
+                                        new Field("bibble9", 9837438),
+                                        new Field(828, 82.77f)));
+            return inputMsg;
+        }
     }
 }

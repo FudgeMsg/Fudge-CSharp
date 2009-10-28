@@ -60,13 +60,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void SubMsg() //throws IOException
         {
-            FudgeMsg inputMsg = new FudgeMsg(
-                        new Field("sub1",
-                            new Field("bibble", "fibble"),
-                            new Field(827, "Blibble")),
-                        new Field("sub2",
-                            new Field("bibble9", 9837438),
-                            new Field(828, 82.77f)));
+            var inputMsg = StandardFudgeMessages.CreateMessageWithSubMsgs();
 
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
