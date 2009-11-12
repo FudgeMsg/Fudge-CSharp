@@ -18,27 +18,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Fudge.Taxon;
-using System.IO;
 
-namespace Fudge.Types
+namespace Fudge
 {
-    public class IndicatorFieldType : FudgeFieldType<IndicatorType>
+    public interface IFudgeStreamReader
     {
-        public static readonly IndicatorFieldType Instance = new IndicatorFieldType();
+        bool HasNext { get; }
 
-        public IndicatorFieldType()
-            : base(FudgeTypeDictionary.INDICATOR_TYPE_ID, false, 0)
-        {
-        }
+        FudgeStreamElement MoveNext();
 
-        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
-        {
-            return IndicatorType.Instance;
-        }
+        FudgeStreamElement CurrentElement { get; }
 
-        public override void WriteValue(BinaryWriter output, IndicatorType value) //throws IOException
-        {
-            // Intentional no-op.
-        }
+        int ProcessingDirectives { get; }
+
+        int SchemaVersion { get; }
+
+        int TaxonomyId { get; }
+
+        int EnvelopeSize { get; }
+
+        FudgeFieldType FieldType { get; }
+
+        int? FieldOrdinal { get; }
+
+        string FieldName { get; }
+
+        object FieldValue { get; }
+
+        IFudgeTaxonomy Taxonomy { get; }
     }
 }

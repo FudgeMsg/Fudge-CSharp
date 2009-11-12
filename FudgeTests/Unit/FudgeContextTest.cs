@@ -27,11 +27,12 @@ namespace Fudge.Tests.Unit
     {
         private static readonly int[] ORDINALS = new int[] { 5, 14, 928, 74 };
         private static readonly string[] NAMES = new string[] { "Kirk", "Wylie", "Jim", "Moores" };
+        private static readonly FudgeContext fudgeContext = new FudgeContext();
 
         [Fact]
         public void AllNamesCodecNoTaxonomy()
         {
-            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             FudgeContext context = new FudgeContext();
             FudgeMsg outputMsg = CycleMessage(inputMsg, context, null);
 
@@ -43,13 +44,13 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AllNamesCodecWithTaxonomy()
         {
-            FudgeMsg inputMsg = new FudgeMsg();
+            FudgeContext context = new FudgeContext();
+            FudgeMsg inputMsg = context.NewMessage();
             inputMsg.Add(NAMES[0], "value1");
             inputMsg.Add(NAMES[1], "value2");
             inputMsg.Add(NAMES[2], "value3");
             inputMsg.Add(NAMES[3], "value4");
 
-            FudgeContext context = new FudgeContext();
             var resolverMap = new Dictionary<int, IFudgeTaxonomy>();
             resolverMap.Add(45, new MapFudgeTaxonomy(ORDINALS, NAMES));
             context.TaxonomyResolver = new ImmutableMapTaxonomyResolver(resolverMap);
@@ -68,13 +69,14 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AllOrdinalsCodecWithTaxonomy()
         {
-            FudgeMsg inputMsg = new FudgeMsg();
+            FudgeContext context = new FudgeContext();
+            FudgeMsg inputMsg = context.NewMessage();
+
             inputMsg.Add(ORDINALS[0], "value1");
             inputMsg.Add(ORDINALS[1], "value2");
             inputMsg.Add(ORDINALS[2], "value3");
             inputMsg.Add(ORDINALS[3], "value4");
 
-            FudgeContext context = new FudgeContext();
             var resolverMap = new Dictionary<int, IFudgeTaxonomy>();
             resolverMap.Add(45, new MapFudgeTaxonomy(ORDINALS, NAMES));
             context.TaxonomyResolver = new ImmutableMapTaxonomyResolver(resolverMap);

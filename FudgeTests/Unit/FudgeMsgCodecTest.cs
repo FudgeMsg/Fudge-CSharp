@@ -30,11 +30,12 @@ namespace Fudge.Tests.Unit
     public class FudgeMsgCodecTest
     {
         private readonly Random random = new Random();
+        private static readonly FudgeContext fudgeContext = new FudgeContext();
 
         [Fact]
         public void AllNames()
         {
-            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
             Assert.NotNull(outputMsg);
@@ -60,7 +61,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void SubMsg() //throws IOException
         {
-            var inputMsg = StandardFudgeMessages.CreateMessageWithSubMsgs();
+            var inputMsg = StandardFudgeMessages.CreateMessageWithSubMsgs(fudgeContext);
 
             FudgeMsg outputMsg = CycleMessage(inputMsg);
 
@@ -149,17 +150,13 @@ namespace Fudge.Tests.Unit
 
         protected static FudgeMsg CycleMessage(FudgeMsg msg) //throws IOException
         {
-            MemoryStream stream = new MemoryStream();
-            BinaryWriter bw = new FudgeBinaryWriter(stream);
-            FudgeStreamEncoder.WriteMsg(bw, msg);
 
-            byte[] content = stream.ToArray();
+            byte[] content = fudgeContext.ToByteArray(msg);
             // Double-check the size calc was right
             Assert.Equal(content.Length, new FudgeMsgEnvelope(msg).ComputeSize(null));
 
             MemoryStream stream2 = new MemoryStream(content);
-            BinaryReader br = new FudgeBinaryReader(stream2);
-            FudgeMsgEnvelope outputMsgEnvelope = FudgeStreamDecoder.ReadMsg(br);
+            FudgeMsgEnvelope outputMsgEnvelope = fudgeContext.Deserialize(stream2);
             Assert.NotNull(outputMsgEnvelope);
             Assert.NotNull(outputMsgEnvelope.Message);
             return outputMsgEnvelope.Message;

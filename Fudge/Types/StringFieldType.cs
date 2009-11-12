@@ -41,12 +41,12 @@ namespace Fudge.Types
             return ModifiedUTF8Util.ModifiedUTF8Length(value);
         }
 
-        public override string ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public override string ReadTypedValue(BinaryReader input, int dataSize)
         {
             return ModifiedUTF8Util.ReadString(input, dataSize);
         }
 
-        public override void WriteValue(BinaryWriter output, string value, IFudgeTaxonomy taxonomy)
+        public override void WriteValue(BinaryWriter output, string value)
         {
             ModifiedUTF8Util.WriteModifiedUTF8(value, output);
         }

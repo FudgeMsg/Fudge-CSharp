@@ -17,28 +17,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Fudge.Taxon;
-using System.IO;
 
-namespace Fudge.Types
+namespace Fudge
 {
-    public class IndicatorFieldType : FudgeFieldType<IndicatorType>
+    public enum FudgeStreamElement
     {
-        public static readonly IndicatorFieldType Instance = new IndicatorFieldType();
-
-        public IndicatorFieldType()
-            : base(FudgeTypeDictionary.INDICATOR_TYPE_ID, false, 0)
-        {
-        }
-
-        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
-        {
-            return IndicatorType.Instance;
-        }
-
-        public override void WriteValue(BinaryWriter output, IndicatorType value) //throws IOException
-        {
-            // Intentional no-op.
-        }
+        NoElement,
+        /// <summary>Issued when the envelope header is parsed.</summary>
+        MessageEnvelope,
+        /// <summary>Issued when a simple (non-hierarchical) field is encountered.</summary>
+        SimpleField,
+        /// <summary>Issued when a sub-Message field is encountered.</summary>
+        SubmessageFieldStart,
+        /// <summary>Issued when the end of a sub-Message field is reached.</summary>
+        SubmessageFieldEnd
     }
 }

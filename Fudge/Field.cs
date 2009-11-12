@@ -41,6 +41,7 @@ namespace Fudge
         private readonly FudgeFieldType type;
         private readonly short? ordinal;
         private readonly string name;
+        private static readonly FudgeContext emptyContext = new FudgeContext();
 
         public Field(string name, object value) : this(name, null, value)
         {
@@ -63,7 +64,7 @@ namespace Fudge
             this.name = name;
             this.ordinal = (short?)ordinal;
             this.value = value;
-            this.type = FudgeMsg.DetermineTypeFromValue(value, FudgeTypeDictionary.Instance);
+            this.type = FudgeMsg.DetermineTypeFromValue(value, emptyContext);
         }
 
         #region IFudgeField Members
