@@ -17,19 +17,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Xunit;
+using Fudge.Encodings;
 
-namespace Fudge
+namespace Fudge.Tests.Unit.Encodings
 {
-    public interface IFudgeStreamWriter
+    public class FudgeMsgStreamTest
     {
-        // TODO t0rx 2009-11-12 -- Figure out how to handle the envelope
+        [Fact]
+        public void GeneralTest()
+        {
+            var context = new FudgeContext();
 
-        void StartSubMessage(string name, int? ordinal);
+            var msg = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
+            var reader = new FudgeMsgStreamReader(msg);
+            var writer = new FudgeMsgStreamWriter();
 
-        void WriteField(string name, int? ordinal, FudgeFieldType type, object value);     // TODO t0rx 2009-11-12 -- Do we need overloads of this, and auto-derivation of type? 
+            var pipe = new FudgeStreamPipe(reader, writer);
+            pipe.Process();
 
-        void WriteFields(IEnumerable<IFudgeField> fields);
+            var newMsg = writer.Message;
 
-        void EndSubMessage();
+            FudgeUtils.AssertAllFieldsMatch(msg, newMsg);
+        }
     }
 }

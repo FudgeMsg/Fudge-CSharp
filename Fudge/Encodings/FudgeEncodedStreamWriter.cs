@@ -68,7 +68,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamWriter Members
 
-        public void StartSubMessage(string name, short? ordinal)
+        public void StartSubMessage(string name, int? ordinal)
         {
             var newMsg = new FudgeMsg();
             if (currentMessage != null)
@@ -79,7 +79,7 @@ namespace Fudge.Encodings
             currentMessage = newMsg;
         }
 
-        public void WriteField(string name, short? ordinal, FudgeFieldType type, object value)
+        public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
         {
             currentMessage.Add(name, ordinal, type, value);
         }

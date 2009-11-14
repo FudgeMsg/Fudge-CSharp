@@ -53,12 +53,15 @@
   <ItemGroup>
     <Compile Include="Encodings\FudgeEncodedStreamReader.cs" />
     <Compile Include="Encodings\FudgeEncodedStreamWriter.cs" />
+    <Compile Include="Encodings\FudgeMsgStreamReader.cs" />
+    <Compile Include="Encodings\FudgeMsgStreamWriter.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeEncodingObject.cs" />
     <Compile Include="FudgeFieldPrefixCodec.cs" />
     <Compile Include="FudgeStreamElement.cs" />
     <Compile Include="FudgeStreamParser.cs" />
+    <Compile Include="FudgeStreamPipe.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />
