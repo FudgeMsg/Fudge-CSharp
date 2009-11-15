@@ -116,6 +116,11 @@ namespace Fudge.Encodings
             currentMessage = newCurrentMessage;
         }
 
+        public void End()
+        {
+            // Noop
+        }
+
         #endregion
 
         #region Main encoding stuff

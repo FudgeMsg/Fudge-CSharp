@@ -157,10 +157,10 @@ namespace Fudge.Encodings
                     return false;
                 }
                 MessageProcessingState processingState = processingStack.Peek();
-                if (processingState.consumed >= processingState.messageSize)
+                if (processingState.Consumed >= processingState.MessageSize)
                 {
                     processingStack.Pop();
-                    processingStack.Peek().consumed += processingState.consumed;
+                    processingStack.Peek().Consumed += processingState.Consumed;
                     return true;
                 }
                 return false;
@@ -231,14 +231,14 @@ namespace Fudge.Encodings
             fieldOrdinal = ordinal;
             fieldType = type;
             MessageProcessingState currMsgProcessingState = processingStack.Peek();
-            currMsgProcessingState.consumed += nRead;
+            currMsgProcessingState.Consumed += nRead;
             if (typeId == FudgeTypeDictionary.FUDGE_MSG_TYPE_ID)
             {
                 currentElement = FudgeStreamElement.SubmessageFieldStart;
                 fieldValue = null;
                 MessageProcessingState subState = new MessageProcessingState();
-                subState.messageSize = varSize;
-                subState.consumed = 0;
+                subState.MessageSize = varSize;
+                subState.Consumed = 0;
                 processingStack.Push(subState);
             }
             else
@@ -247,11 +247,11 @@ namespace Fudge.Encodings
                 fieldValue = ReadFieldValue(Reader, fieldType, varSize);
                 if (fixedWidth)
                 {
-                    currMsgProcessingState.consumed += type.FixedSize;
+                    currMsgProcessingState.Consumed += type.FixedSize;
                 }
                 else
                 {
-                    currMsgProcessingState.consumed += varSize;
+                    currMsgProcessingState.Consumed += varSize;
                 }
             }
         }
@@ -302,8 +302,8 @@ namespace Fudge.Encodings
                 this.taxonomy = taxonomy;
             }
             MessageProcessingState processingState = new MessageProcessingState();
-            processingState.consumed = 8;
-            processingState.messageSize = envelopeSize;
+            processingState.Consumed = 8;
+            processingState.MessageSize = envelopeSize;
             processingStack.Push(processingState);
         }
 
@@ -319,7 +319,7 @@ namespace Fudge.Encodings
                 else if (processingStack.Count == 1)
                 {
                     MessageProcessingState messageProcessingState = processingStack.Peek();
-                    return messageProcessingState.consumed < messageProcessingState.messageSize;
+                    return messageProcessingState.Consumed < messageProcessingState.MessageSize;
                 }
                 else
                 {
@@ -441,8 +441,8 @@ namespace Fudge.Encodings
 
         private class MessageProcessingState
         {
-            public int messageSize;
-            public int consumed;
+            public int MessageSize;
+            public int Consumed;
         }
     }
 }

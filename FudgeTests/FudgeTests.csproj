@@ -68,6 +68,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Unit\Encodings\FudgeMsgStreamTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamWriterTest.cs" />
     <Compile Include="Unit\FudgeContextTest.cs" />
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />

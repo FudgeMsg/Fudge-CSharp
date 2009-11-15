@@ -65,7 +65,7 @@ namespace Fudge
             int version = reader.SchemaVersion;
             FudgeMsg msg = FudgeContext.NewMessage();
             FudgeMsgEnvelope envelope = new FudgeMsgEnvelope(msg, version);
-            processFields(reader, msg);
+            ProcessFields(reader, msg);
             return envelope;                                                                    // TODO t0rx 2009-11-12 -- In Fudge-Java the reader is released to the context
         }
 
@@ -73,7 +73,7 @@ namespace Fudge
          * @param reader
          * @param msg
          */
-        protected void processFields(IFudgeStreamReader reader, FudgeMsg msg)
+        protected void ProcessFields(IFudgeStreamReader reader, FudgeMsg msg)
         {
             while (reader.HasNext)
             {
@@ -86,7 +86,7 @@ namespace Fudge
                     case FudgeStreamElement.SubmessageFieldStart:
                         FudgeMsg subMsg = FudgeContext.NewMessage();
                         msg.Add(reader.FieldName, reader.FieldOrdinal, subMsg);
-                        processFields(reader, subMsg);
+                        ProcessFields(reader, subMsg);
                         break;
                     case FudgeStreamElement.SubmessageFieldEnd:
                         return;

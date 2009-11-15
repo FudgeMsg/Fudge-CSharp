@@ -50,6 +50,7 @@ namespace Fudge
                         break;      // Unknown
                 }
             }
+            writer.End();
         }
     }
 }

@@ -71,6 +71,11 @@ namespace Fudge.Encodings
             current = msgStack.Pop();
         }
 
+        public void End()
+        {
+            // Noop
+        }
+
         #endregion
     }
 }

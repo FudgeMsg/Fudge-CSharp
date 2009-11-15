@@ -31,5 +31,7 @@ namespace Fudge
         void WriteFields(IEnumerable<IFudgeField> fields);
 
         void EndSubMessage();
+
+        void End();
     }
 }
