@@ -15,7 +15,7 @@
     <Name>Documentation</Name>
     <!-- SHFB properties -->
     <OutputPath>.\Help\</OutputPath>
-    <HtmlHelpName>Fudge</HtmlHelpName>
+    <HtmlHelpName>FudgeDocs</HtmlHelpName>
     <DocumentationSources>
       <DocumentationSource sourceFile="Fudge\bin\Debug\Fudge.dll" xmlns="" />
       <DocumentationSource sourceFile="Fudge\bin\Debug\Fudge.XML" xmlns="" />
