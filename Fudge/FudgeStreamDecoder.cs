@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,7 +97,6 @@ namespace Fudge
         /// <summary>
         /// Reads data about a field, and adds it to the message as a new field.
         /// </summary>
-        /// <param name="?"></param>
         /// <returns>The number of bytes read.</returns>
         public static int ReadField(BinaryReader br, FudgeMsg msg, FudgeTypeDictionary typeDictionary, byte fieldPrefix, int typeId) //throws IOException
         {

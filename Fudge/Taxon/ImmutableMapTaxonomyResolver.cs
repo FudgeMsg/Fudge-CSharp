@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,10 @@ using System.Text;
 namespace Fudge.Taxon
 {
     /// <summary>
-    /// An implementation of <see cref="TaxonomyResolver"/> which is backed by a <see cref="Dictionary"/>.
+    /// An implementation of <see cref="TaxonomyResolver"/> which is backed by a <c>Dictionary</c>.
     /// This is mostly useful where the entire set of taxonomies is known at module
     /// initialization (or compilation) time. As for performance reasons the
-    /// <see cref="Dictionary"/> is fixed at instantiation time, it is not appropriate for
+    /// <c>Dictionary</c> is fixed at instantiation time, it is not appropriate for
     /// situations where the set of taxonomies will change at runtime.
     /// </summary>
     public class ImmutableMapTaxonomyResolver : ITaxonomyResolver

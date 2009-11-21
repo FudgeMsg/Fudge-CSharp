@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ namespace Fudge.Linq
     public static class FudgeLinqExtensions
     {
         /// <summary>
-        /// Map an <c>IEnumerable&lt;FudgeMsg&gt;</c> onto an <see cref="IQueryable<T>"/> so
+        /// Map an <c>IEnumerable&lt;FudgeMsg&gt;</c> onto an <see cref="IQueryable{T}"/> so
         /// that all the Linq compiler magic works.
         /// </summary>
         /// <typeparam name="T">Type of the object which has the structure of the message data.</typeparam>
@@ -44,7 +44,7 @@ namespace Fudge.Linq
         }
 
         /// <summary>
-        /// Map a <c>FudgeMsg[]</c> onto an <see cref="IQueryable<T>"/> so
+        /// Map a <c>FudgeMsg[]</c> onto an <see cref="IQueryable{T}"/> so
         /// that all the Linq compiler magic works.
         /// </summary>
         /// <typeparam name="T">Type of the object which has the structure of the message data.</typeparam>
@@ -66,7 +66,7 @@ namespace Fudge.Linq
         }
 
         /// <summary>
-        /// Map an <c>IEnumerable&lt;IFudgeFieldContainer&gt;</c> onto an <see cref="IQueryable<T>"/> so
+        /// Map an <c>IEnumerable&lt;IFudgeFieldContainer&gt;</c> onto an <see cref="IQueryable{T}"/> so
         /// that all the Linq compiler magic works.
         /// </summary>
         /// <typeparam name="T">Type of the object which has the structure of the message data.</typeparam>
