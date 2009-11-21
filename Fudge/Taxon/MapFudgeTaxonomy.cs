@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,11 +22,10 @@ namespace Fudge.Taxon
 {
     /// <summary>
     /// An implementation of <see cref="IFudgeTaxonomy"/> where all lookups are specified
-    /// at construction time and held in a <see cref="Dictionary"/>.
+    /// at construction time and held in a <c>Dictionary</c>.
     /// This is extremely useful in a case where the taxonomy is generated dynamically,
     /// or as a building block for loading taxonomy definitions from persistent
     /// storage.
-
     /// </summary>
     public class MapFudgeTaxonomy : IFudgeTaxonomy
     {

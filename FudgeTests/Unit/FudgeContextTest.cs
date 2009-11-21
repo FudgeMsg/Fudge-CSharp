@@ -92,6 +92,32 @@ namespace Fudge.Tests.Unit
             Assert.Equal("value4", outputMsg.GetString(ORDINALS[3]));
         }
 
+        [Fact]
+        public void Example()
+        {
+            var context = new FudgeContext();
+
+            // Create a message
+            var msg = new FudgeMsg(new Field("name", "Eric"),
+                                   new Field("age", 14),
+                                   new Field("address",
+                                       new Field("line1", "29 Acacia Road"),
+                                       new Field("city", "London")));
+
+            // Serialise it
+            var stream = new MemoryStream();
+            context.Serialize(msg, stream);
+
+            // Get the raw bytes
+            var bytes = stream.ToArray();
+
+            // Deserialise it
+            var msg2 = context.Deserialize(bytes).Message;
+
+            // Get some data
+            int age = msg2.GetInt("age") ?? 0;
+        }
+
         private FudgeMsg CycleMessage(FudgeMsg msg, FudgeContext context, short? taxonomy)
         {
             MemoryStream outputStream = new MemoryStream();

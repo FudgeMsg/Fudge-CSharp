@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +38,7 @@ namespace Fudge
     /// <remarks>
     /// The various <c>Get*()</c> methods will return <c>null</c> if the field is not
     /// found, and otherwise use standard conversions to map between types, throwing
-    /// <see cref="InvalidCastException"/> and <see cref="OverFlowException"/> as
+    /// <see cref="InvalidCastException"/> and <see cref="OverflowException"/> as
     /// appropriate.
     /// </remarks>
     public class FudgeMsg : FudgeEncodingObject, IMutableFudgeFieldContainer

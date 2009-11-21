@@ -6,6 +6,9 @@
 */bin
 */obj
 
+# Generated help files
+Help/
+
 # ReSharper stuff
 _ReSharper.Fudge
 Fudge.4.5.resharper.user

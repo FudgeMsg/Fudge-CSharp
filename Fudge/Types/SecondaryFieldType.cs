@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -118,7 +118,7 @@ namespace Fudge
         /// <summary>
         /// Override ConvertFromWire if you do not wish to use a delegate.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="rawValue"></param>
         /// <returns></returns>
         protected virtual T ConvertFromWire(RawType rawValue)
         {
