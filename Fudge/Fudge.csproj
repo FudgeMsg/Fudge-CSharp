@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
+    <Compile Include="FudgeContextProperty.cs" />
     <Compile Include="FudgeEncodingObject.cs" />
     <Compile Include="FudgeFieldPrefixCodec.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />

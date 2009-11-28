@@ -48,6 +48,12 @@ namespace Fudge
     {
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private ITaxonomyResolver taxonomyResolver;
+        private readonly object[] properties;     // REVIEW t0rx 2009-11-28 -- Should we only create this on demand?
+
+        public FudgeContext()
+        {
+            properties = new object[FudgeContextProperty.MaxIndex + 1];     // Note that this means you can't set a property if it was created after the context
+        }
 
         public ITaxonomyResolver TaxonomyResolver
         {
@@ -123,7 +129,50 @@ namespace Fudge
             MemoryStream stream = new MemoryStream(bytes, false);
             return Deserialize(stream);
         }
-  
 
+        #region Property support
+
+        /// <summary>
+        /// Gets the value of a specific property from this context, or null if not set.
+        /// </summary>
+        /// <param name="prop">Property to retrieve.</param>
+        /// <returns>Property value or null if not set.</returns>
+        public object GetProperty(FudgeContextProperty prop)
+        {
+            if (prop == null)
+                throw new ArgumentNullException("prop");
+
+            int index = prop.Index;
+            if (index >= properties.Length)
+                throw new ArgumentOutOfRangeException("Cannot set the value of property " + prop.Name + " as it was created after this context was constructed.");
+
+            return properties[index];
+        }
+
+        /// <summary>
+        /// Sets the value of a specific property in the context.
+        /// </summary>
+        /// <param name="prop">Property to set.</param>
+        /// <param name="value">Value for the property.</param>
+        /// <remarks>
+        /// Context properties are used to control the behaviour of encoding and decoding.
+        /// </remarks>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is rejected by the <see cref="FudgeContextProperty"/> as invalid.</exception>
+        public void SetProperty(FudgeContextProperty prop, object value)
+        {
+            if (prop == null)
+                throw new ArgumentNullException("prop");
+
+            int index = prop.Index;
+            if (index >= properties.Length)
+                throw new ArgumentOutOfRangeException("Cannot set the value of property " + prop.Name + " as it was created after this context was constructed.");
+
+            if (!prop.IsValidValue(value))
+                throw new ArgumentOutOfRangeException("Value is not valid for context property " + prop.Name);
+
+            properties[index] = value;
+        }
+
+        #endregion
     }
 }
