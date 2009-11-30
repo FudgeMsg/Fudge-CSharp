@@ -59,6 +59,15 @@ namespace Fudge
         }
 
         /// <summary>
+        /// Construct a property with a given name that only requires values to be of a specific type (or specialisation thereof).
+        /// </summary>
+        /// <param name="name">Name of the property (used for exceptions).</param>
+        /// <param name="type">Type that values must be.</param>
+        public FudgeContextProperty(string name, Type type) : this(name, x => type.IsAssignableFrom(x.GetType()))
+        {            
+        }
+
+        /// <summary>
         /// Gets the name of the property.
         /// </summary>
         public string Name
