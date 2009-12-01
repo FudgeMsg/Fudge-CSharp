@@ -65,6 +65,7 @@ namespace Fudge
             AddType(ByteArrayFieldType.VariableSizedInstance);
             AddType(StringFieldType.Instance);
             AddType(FudgeMsgFieldType.Instance);
+            AddType(StringArrayFieldType.Instance);
         }
 
         public void AddType(FudgeFieldType type, params Type[] alternativeTypes)
@@ -179,5 +180,6 @@ namespace Fudge
         public const byte BYTE_ARR_128_TYPE_ID = 23;
         public const byte BYTE_ARR_256_TYPE_ID = 24;
         public const byte BYTE_ARR_512_TYPE_ID = 25;
+        public const byte STRING_ARRAY_TYPE_ID = 26;
     }
 }

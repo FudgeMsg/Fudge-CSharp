@@ -67,6 +67,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
+    <Compile Include="Unit\Serialization\SerializableSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\SerializationMessageTest.cs" />
+    <Compile Include="Unit\Serialization\TrackingFudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeContextTest.cs" />
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
@@ -79,6 +83,7 @@
     <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
+    <Compile Include="Unit\Types\StringArrayFieldTypeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fudge\Fudge.csproj">

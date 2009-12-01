@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using Fudge.Types;
 using System.Collections;
+using Fudge.Util;
 
 namespace Fudge
 {
@@ -88,7 +89,7 @@ namespace Fudge
         protected void InitializeFromByteArray(byte[] byteArray)
         {
             MemoryStream stream = new MemoryStream(byteArray);
-            BinaryReader bw = new BinaryReader(stream);
+            FudgeBinaryReader bw = new FudgeBinaryReader(stream);
             FudgeMsgEnvelope other;
             try
             {
@@ -136,7 +137,7 @@ namespace Fudge
             Add(name, ordinal, type, value);
         }
 
-        public void Add(string name, int? ordinal, FudgeFieldType type, object value)
+        public virtual void Add(string name, int? ordinal, FudgeFieldType type, object value)
         {
             if (fields.Count >= short.MaxValue)
             {
@@ -174,6 +175,34 @@ namespace Fudge
         }
 
         #endregion
+
+        public void Add(IEnumerable<IFudgeField> fields)
+        {
+            // TODO t0rx 20091017 -- Add this method to IMutableFudgeFieldContainer?
+            if (fields == null)
+                return;             // Whatever
+
+            foreach (var field in fields)
+            {
+                Add(field);
+            }
+        }
+
+        public void AddAll<T>(string name, IEnumerable<T> values)
+        {
+            foreach (T val in values)
+            {
+                Add(name, val);
+            }
+        }
+
+        public void AddAll<T>(int ordinal, IEnumerable<T> values)
+        {
+            foreach (T val in values)
+            {
+                Add(ordinal, val);
+            }
+        }
 
         #region IFudgeFieldContainer implementation
         public short GetNumFields()
@@ -275,7 +304,7 @@ namespace Fudge
             return null;
         }
 
-        public object GetValue(string name)
+        public virtual object GetValue(string name)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -285,6 +314,30 @@ namespace Fudge
                 }
             }
             return null;
+        }
+
+        public IList<T> GetAllValues<T>(string name)
+        {
+            var fields = GetAllByName(name);
+            int nFields = fields.Count;
+            T[] result = new T[nFields];
+            for (int i = 0; i < nFields; i++)
+            {
+                result[i] = (T)ConvertType(fields[i].Value, typeof(T));
+            }
+            return result;
+        }
+
+        public IList<T> GetAllValues<T>(int ordinal)
+        {
+            var fields = GetAllByOrdinal(ordinal);
+            int nFields = fields.Count;
+            T[] result = new T[nFields];
+            for (int i = 0; i < nFields; i++)
+            {
+                result[i] = (T)ConvertType(fields[i].Value, typeof(T));
+            }
+            return result;
         }
 
         public T GetValue<T>(string name)
@@ -298,7 +351,7 @@ namespace Fudge
             return ConvertType(value, type);
         }
 
-        public object GetValue(int ordinal)
+        public virtual object GetValue(int ordinal)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -321,20 +374,30 @@ namespace Fudge
             return ConvertType(value, type);
         }
 
-        public object GetValue(string name, int? ordinal)
+        public virtual object GetValue(string name, int? ordinal)
         {
-            foreach (FudgeMsgField field in fields)
+            int index = GetIndex(name, ordinal);
+            return index == -1 ? null : fields[index].Value;
+        }
+
+        protected int GetIndex(string name, int? ordinal)
+        {
+            int nFields = fields.Count;
+            for (int i = 0; i < nFields; i++)
             {
+                var field = fields[i];
                 if ((ordinal != null) && (ordinal == field.Ordinal))
                 {
-                    return field.Value;
+                    return i;
                 }
                 if ((name != null) && (name == field.Name))
                 {
-                    return field.Value;
+                    return i;
                 }
             }
-            return null;
+
+            // Not found
+            return -1;
         }
 
         public T GetValue<T>(string name, int? ordinal)
@@ -563,7 +626,7 @@ namespace Fudge
         public byte[] ToByteArray()
         {
             MemoryStream stream = new MemoryStream(ComputeSize(null));
-            BinaryWriter bw = new BinaryWriter(stream);
+            FudgeBinaryWriter bw = new FudgeBinaryWriter(stream);
             try
             {
                 FudgeStreamEncoder.WriteMsg(bw, this);
