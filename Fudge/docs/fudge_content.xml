@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<content xml:space="preserve" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+  <item id="copyrightText">Copyright &#169; 2009 - 2009 by OpenGamma Inc. and other contributors.</item>
+  <item id="feedbackHeader"><a href="http://wiki.fudgemsg.org/"><include item="fb_headerFeedback" /></a></item>
+  <item id="footer">Contact us, or join the <a href="http://wiki.fudgemsg.org/display/FDG/Ways+To+Help">Fudge project at wiki.fudgemsg.org</a>.</item>
+</content>
