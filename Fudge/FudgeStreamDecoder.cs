@@ -23,6 +23,9 @@ using System.Diagnostics;
 
 namespace Fudge
 {
+
+    //11/12/09 Andrew: I'm not too sure about having the read message functions here mixed with the lower level fudge stream components - it clutters the API space and might confuse library users. I think break into a Decoder/Encoder which does the low level stuff and a separate Reader/Writer built on top that can read whole messages
+
     public class FudgeStreamDecoder
     {
         public static FudgeMsgEnvelope ReadMsg(BinaryReader br) //throws IOException

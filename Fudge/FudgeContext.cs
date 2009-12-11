@@ -73,11 +73,24 @@ namespace Fudge
             return new FudgeMsg(TypeDictionary);
         }
 
+        /// <summary>
+        /// Encodes a <c>FudgeMsg</c> object to a <c>Stream</c> without any taxonomy reference.
+        /// </summary>
+        /// <param name="msg">The message to serialise</param>
+        /// <param name="s">The stream to serialise to</param>
         public void Serialize(FudgeMsg msg, Stream s)
         {
             Serialize(msg, null, s);
         }
 
+        /// <summary>
+        /// Encodes a <c>FudgeMsg</c> object to a <c>Stream</c> with an optional taxonomy reference.
+        /// If a taxonomy is supplied it may be used to optimize the output by writing ordinals instead
+        /// of field names.
+        /// </summary>
+        /// <param name="msg">the <c>FudgeMessage</c> to write</param>
+        /// <param name="taxonomyId">the identifier of the taxonomy to use. Specify <c>null</c> for no taxonomy</param>
+        /// <param name="s">the <c>Stream</c> to write to</param>
         public void Serialize(FudgeMsg msg, short? taxonomyId, Stream s)
         {
             IFudgeTaxonomy taxonomy = null;
@@ -96,13 +109,27 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Returns the Fudge encoded form of a <c>FudgeMsg</c> as a <c>byte</c> array without a taxonomy reference.
+        /// </summary>
+        /// <param name="msg">the <c>FudgeMsg</c> to encode</param>
+        /// <returns>an array containing the encoded message</returns>
         public byte[] ToByteArray(FudgeMsg msg)
         {
             MemoryStream stream = new MemoryStream();
             Serialize(msg, stream);
             return stream.ToArray();
-        }  
+        }
 
+        //11/12/09 Andrew: should we have a toByteArray that takes a taxonomy too?
+
+        //11/12/09 Andrew: Why serialise out a FudgeMsg (creating the envelope internally) yet deserialise to a FudgeMsgEnvelope  
+
+        /// <summary>
+        /// Decodes a <c>FudgeMsg</c> from a <c>Stream</c>.
+        /// </summary>
+        /// <param name="s">the <c>Stream</c> to read encoded data from</param>
+        /// <returns>the next <c>FudgeMsgEnvelope</c> encoded on the stream</returns>
         public FudgeMsgEnvelope Deserialize(Stream s)
         {
             BinaryReader br = new FudgeBinaryReader(s);
@@ -118,12 +145,18 @@ namespace Fudge
             return envelope;
         }
 
+        /// <summary>
+        /// Decodes a <c>FudgeMsg</c> from a <c>byte</c> array. If the array is larger than the Fudge envelope, any additional data is ignored.
+        /// </summary>
+        /// <param name="bytes">an array containing the envelope encoded <c>FudgeMsg</c></param>
+        /// <returns>the decoded <c>FudgeMsgEnvelope</c></returns>
         public FudgeMsgEnvelope Deserialize(byte[] bytes)
         {
             MemoryStream stream = new MemoryStream(bytes, false);
             return Deserialize(stream);
         }
-  
+
+        //11/12/09 Andrew: should we have a version that takes an offset so that arrays with more than one envelope can be processed?
 
     }
 }

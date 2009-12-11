@@ -37,16 +37,18 @@ set CONFIGURATION=%1
 
 rem Here we go
 
+set WORKINGDIR=..\..\obj\%CONFIGURATION%
 cd bin\%CONFIGURATION%
-mrefbuilder %PROJECT%.DLL /out:reflection.org
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ApplyVSDocModel.xsl" reflection.org /xsl:"%SANDCASTLE%ProductionTransforms\AddFriendlyFilenames.xsl" /out:reflection.xml
-XslTransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToManifest.xsl" reflection.xml /out:manifest.xml
+mrefbuilder %PROJECT%.DLL /out:%WORKINGDIR%\reflection.org
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ApplyVSDocModel.xsl" %WORKINGDIR%\reflection.org /xsl:"%SANDCASTLE%ProductionTransforms\AddFriendlyFilenames.xsl" /out:reflection.xml
+xslTransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToManifest.xsl" reflection.xml /out:manifest.xml
 call "%SANDCASTLE%Presentation\vs2005\copyOutput.bat"
-buildassembler /config:"..\..\docs\sandcastle.config" manifest.xml
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmProject.xsl" /arg:project=%PROJECT% reflection.xml /out:Output\%PROJECT%.hhp
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\createvstoc.xsl" reflection.xml /out:toc.xml
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\TocToChmContents.xsl" toc.xml /out:Output\%PROJECT%.hhc
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmIndex.xsl" reflection.xml /out:Output\%PROJECT%.hhk
+buildassembler /config:"..\..\docs\sandcastle.config" manifest.xml > %WORKINGDIR%\sandcastle.log
+find "Warn: ShowMissingComponent:" %WORKINGDIR%\sandcastle.log > %WORKINGDIR%\missing.log
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmProject.xsl" /arg:project=%PROJECT% %WORKINGDIR%\reflection.xml /out:Output\%PROJECT%.hhp
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\createvstoc.xsl" %WORKINGDIR%\reflection.xml /out:%WORKINGDIR%\toc.xml
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\TocToChmContents.xsl" %WORKINGDIR%\toc.xml /out:Output\%PROJECT%.hhc
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmIndex.xsl" %WORKINGDIR%\reflection.xml /out:Output\%PROJECT%.hhk
 cd Output
 %HHC% %PROJECT%.hhp
 copy /Y %PROJECT%.chm ..\..\..\docs

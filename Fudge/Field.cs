@@ -37,6 +37,11 @@ namespace Fudge
     /// </example>
     public class Field : IFudgeField
     {
+
+        //11/12/09 Andrew:  I'm not sure about the implementation of this class. I like the convenience, but not the static type resolver.
+        //                  I think we should look at putting a convenience method into FudgeContext instead, similar to NewMessage that
+        //                  uses the correct type resolver.
+        
         private readonly object value;
         private readonly FudgeFieldType type;
         private readonly short? ordinal;
