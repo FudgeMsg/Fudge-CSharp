@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -29,16 +30,29 @@ namespace Fudge.Util
     {
         private readonly byte[] buffer = new byte[10];
 
+        /// <summary>
+        /// Creates a new stream writer.
+        /// </summary>
+        /// <param name="output">underlying target stream</param>
         public BinaryNBOWriter(Stream output)
             : base(output)
         {
         }
 
+        /// <summary>
+        /// Creates a new stream writer
+        /// </summary>
+        /// <param name="output">underlying target stream</param>
+        /// <param name="encoding">custom encoding</param>
         public BinaryNBOWriter(Stream output, Encoding encoding)
             : base(output, encoding)
         {
         }
 
+        /// <summary>
+        /// Writes a signed 16-bit integer in network byte order.
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override void Write(short value)
         {
             buffer[0] = (byte)(value >> 8);
@@ -46,6 +60,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 2);
         }
 
+        /// <summary>
+        /// Writes an unsigned 16-bit integer in network byte order.
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override void Write(ushort value)
         {
             buffer[0] = (byte)(value >> 8);
@@ -53,6 +71,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 2);
         }
 
+        /// <summary>
+        /// Writes a signed 32-bit integer in network byte order.
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override void Write(int value)
         {
             buffer[0] = (byte)(value >> 0x18);
@@ -62,6 +84,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 4);
         }
 
+        /// <summary>
+        /// Writes an unsigned 32-bit integer in network byte order.
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override void Write(uint value)
         {
             buffer[0] = (byte)(value >> 0x18);
@@ -71,6 +97,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 4);
         }
 
+        /// <summary>
+        /// Writes a signed 64-bit integer in network byte order
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override void Write(long value)
         {
             buffer[0] = (byte)(value >> 0x38);
@@ -84,6 +114,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 8);
         }
 
+        /// <summary>
+        /// Writes an unsigned 64-bit integer in network byte order.
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override void Write(ulong value)
         {
             buffer[0] = (byte)(value >> 0x38);
@@ -97,6 +131,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 8);
         }
 
+        /// <summary>
+        /// Writes a single precision (32-bit) floating point number in network byte order.
+        /// </summary>
+        /// <param name="value">value to write</param>
         public override unsafe void Write(float value)
         {
             uint num = *((uint*)&value);
@@ -107,6 +145,10 @@ namespace Fudge.Util
             OutStream.Write(buffer, 0, 4);
         }
 
+        /// <summary>
+        /// Writes a double precision (64-bit) floating point number in network byte order.
+        /// </summary>
+        /// <param name="value"></param>
         public override unsafe void Write(double value)
         {
             ulong num = *((ulong*)&value);

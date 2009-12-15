@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -29,16 +30,22 @@ namespace Fudge.Types
     public class UnknownFudgeFieldType : FudgeFieldType<UnknownFudgeFieldValue>
     {
 
+        /// <summary>
+        /// Creates a new placeholder for a type ID not available in the current dictionary.
+        /// </summary>
+        /// <param name="typeId"></param>
         public UnknownFudgeFieldType(int typeId)
             : base(typeId, true, 0)
         {
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.GetVariableSize(System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override int GetVariableSize(UnknownFudgeFieldValue value, IFudgeTaxonomy taxonomy)
         {
             return value.Contents.Length;
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
         public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
         {
             byte[] contents = new byte[dataSize];
@@ -46,6 +53,7 @@ namespace Fudge.Types
             return new UnknownFudgeFieldValue(contents, this);
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value, IFudgeTaxonomy taxonomy)
         {
             output.Write(value.Contents);

@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -30,16 +31,18 @@ namespace Fudge.Types
     {
         public static readonly FudgeMsgFieldType Instance = new FudgeMsgFieldType();
 
-        public FudgeMsgFieldType()
+        FudgeMsgFieldType()
             : base(FudgeTypeDictionary.FUDGE_MSG_TYPE_ID, true, 0)
         {
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.GetVariableSize(System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override int GetVariableSize(FudgeMsg value, IFudgeTaxonomy taxonomy)
         {
             return value.GetSize(taxonomy);
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
         public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
         {
             FudgeMsg msg = new FudgeMsg();
@@ -50,6 +53,7 @@ namespace Fudge.Types
             return msg;
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override void WriteValue(BinaryWriter output, FudgeMsg value, IFudgeTaxonomy taxonomy) //throws IOException
         {
             FudgeStreamEncoder.WriteMsgFields(output, value, taxonomy);

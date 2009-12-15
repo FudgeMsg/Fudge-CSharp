@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Fudge.Taxon
 {
     /// <summary>
-    /// An implementation of <see cref="TaxonomyResolver"/> which is backed by a <see cref="Dictionary"/>.
+    /// An implementation of <see cref="TaxonomyResolver"/> which is backed by a Dictionary.
     /// This is mostly useful where the entire set of taxonomies is known at module
     /// initialization (or compilation) time. As for performance reasons the
-    /// <see cref="Dictionary"/> is fixed at instantiation time, it is not appropriate for
+    /// <see cref="Dictionary{TKey,TValue}"/> is fixed at instantiation time, it is not appropriate for
     /// situations where the set of taxonomies will change at runtime.
     /// </summary>
     public class ImmutableMapTaxonomyResolver : ITaxonomyResolver
@@ -41,6 +41,10 @@ namespace Fudge.Taxon
         {
         }
 
+        /// <summary>
+        /// Creates a new resolver with the given map of taxonomy IDs to taxonomy instances.
+        /// </summary>
+        /// <param name="taxonomiesById">taxonomy resolution map</param>
         public ImmutableMapTaxonomyResolver(Dictionary<int, IFudgeTaxonomy> taxonomiesById)
         {
             if (taxonomiesById == null)
@@ -52,6 +56,7 @@ namespace Fudge.Taxon
 
         #region ITaxonomyResolver Members
 
+        /// <inheritdoc />
         public IFudgeTaxonomy ResolveTaxonomy(short taxonomyId)
         {
             IFudgeTaxonomy result;

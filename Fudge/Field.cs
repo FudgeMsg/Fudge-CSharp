@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Fudge
@@ -38,10 +38,6 @@ namespace Fudge
     public class Field : IFudgeField
     {
 
-        //11/12/09 Andrew:  I'm not sure about the implementation of this class. I like the convenience, but not the static type resolver.
-        //                  I think we should look at putting a convenience method into FudgeContext instead, similar to NewMessage that
-        //                  uses the correct type resolver.
-        
         private readonly object value;
         private readonly FudgeFieldType type;
         private readonly short? ordinal;

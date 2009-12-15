@@ -45,10 +45,10 @@ xslTransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToManifest.xsl" re
 call "%SANDCASTLE%Presentation\vs2005\copyOutput.bat"
 buildassembler /config:"..\..\docs\sandcastle.config" manifest.xml > %WORKINGDIR%\sandcastle.log
 find "Warn: ShowMissingComponent:" %WORKINGDIR%\sandcastle.log > %WORKINGDIR%\missing.log
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmProject.xsl" /arg:project=%PROJECT% %WORKINGDIR%\reflection.xml /out:Output\%PROJECT%.hhp
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\createvstoc.xsl" %WORKINGDIR%\reflection.xml /out:%WORKINGDIR%\toc.xml
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmProject.xsl" /arg:project=%PROJECT% reflection.xml /out:Output\%PROJECT%.hhp
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\createvstoc.xsl" reflection.xml /out:%WORKINGDIR%\toc.xml
 xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\TocToChmContents.xsl" %WORKINGDIR%\toc.xml /out:Output\%PROJECT%.hhc
-xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmIndex.xsl" %WORKINGDIR%\reflection.xml /out:Output\%PROJECT%.hhk
+xsltransform /xsl:"%SANDCASTLE%ProductionTransforms\ReflectionToChmIndex.xsl" reflection.xml /out:Output\%PROJECT%.hhk
 cd Output
 %HHC% %PROJECT%.hhp
 copy /Y %PROJECT%.chm ..\..\..\docs

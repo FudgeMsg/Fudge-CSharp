@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -73,16 +74,19 @@ namespace Fudge
         }
 
         #region Overrides for methods that should be handled by the wire type
+        /// <inheritdoc cref="Fudge.FudgeFieldType.GetVariableSize(System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override int GetVariableSize(T value, IFudgeTaxonomy taxonomy)
         {
             throw new NotSupportedException("Secondary type should never have to get a value size, the wire type should handle this");
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
         public override T ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
         {
             throw new NotSupportedException("Secondary type should never have to read a value, the wire type should handle this");
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override void WriteValue(BinaryWriter output, T value, IFudgeTaxonomy taxonomy)
         {
             throw new NotSupportedException("Secondary type should never have to write a value, the wire type should handle this");
@@ -92,7 +96,7 @@ namespace Fudge
         public override object Minimize(object value, ref FudgeFieldType type)
         {
             type = wireType;
-            return outputConverter((T)value);       // TODO t0rx 2009-09-12 -- This could maybe be wireType.Minimize(outputConverter etc), but there may be implications on decoding
+            return outputConverter((T)value);       // TODO 2009-09-12 t0rx -- This could maybe be wireType.Minimize(outputConverter etc), but there may be implications on decoding
         }
 
         public override object ConvertValueFrom(object value)
@@ -118,7 +122,7 @@ namespace Fudge
         /// <summary>
         /// Override ConvertFromWire if you do not wish to use a delegate.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="rawValue"></param>
         /// <returns></returns>
         protected virtual T ConvertFromWire(RawType rawValue)
         {

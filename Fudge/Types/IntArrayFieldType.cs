@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,14 @@ namespace Fudge.Types
     /// </summary>
     public class IntArrayFieldType : FudgeArrayFieldTypeBase<int>
     {
+        /// <summary>
+        /// A type defintion for an array of 32-bit integers.
+        /// </summary>
         public static readonly IntArrayFieldType Instance = new IntArrayFieldType();
 
+        /// <summary>
+        /// Creates a new type definition for an array of 32-bit integers.
+        /// </summary>
         public IntArrayFieldType()
             : base(FudgeTypeDictionary.INT_ARRAY_TYPE_ID, 4, (w, e) => w.Write(e), r => r.ReadInt32())
         {

@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,14 @@ namespace Fudge.Types
     /// </summary>
     public class ShortArrayFieldType : FudgeArrayFieldTypeBase<short>
     {
+        /// <summary>
+        /// A type definition for arrays of signed 16-bit integers.
+        /// </summary>
         public static readonly ShortArrayFieldType Instance = new ShortArrayFieldType();
 
+        /// <summary>
+        /// Creates a type definition for arrays of signed 16-bit integers.
+        /// </summary>
         public ShortArrayFieldType()
             : base(FudgeTypeDictionary.SHORT_ARRAY_TYPE_ID, 2, (w, e) => w.Write(e), r => r.ReadInt16())
         {

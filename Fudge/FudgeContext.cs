@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Fudge.Taxon;
 using System.IO;
@@ -49,12 +49,18 @@ namespace Fudge
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private ITaxonomyResolver taxonomyResolver;
 
+        /// <summary>
+        /// Gets or sets the <c>ITaxonomyResolver</c> for use within this context when encoding or decoding messages.
+        /// </summary>
         public ITaxonomyResolver TaxonomyResolver
         {
             get { return taxonomyResolver; }
             set { taxonomyResolver = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the <c>FudgeTypeDictionary</c> for use within this context when encoding or decoding messages.
+        /// </summary>
         public FudgeTypeDictionary TypeDictionary
         {
             get { return typeDictionary; }
@@ -68,6 +74,10 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Creates a new, empty <c>FudgeMsg</c> object.
+        /// </summary>
+        /// <returns>the <c>FudgeMsg</c> created</returns>
         public FudgeMsg NewMessage()
         {
             return new FudgeMsg(TypeDictionary);
@@ -121,10 +131,10 @@ namespace Fudge
             return stream.ToArray();
         }
 
-        //11/12/09 Andrew: should we have a toByteArray that takes a taxonomy too?
+        // TODO 2009-12-11 Andrew -- should we have a toByteArray that takes a taxonomy too?
 
-        //11/12/09 Andrew: Why serialise out a FudgeMsg (creating the envelope internally) yet deserialise to a FudgeMsgEnvelope  
-
+        // TODO 2009-12-11 Andrew -- should we have a Serialize that takes the envelope as there's no way to control the version field otherwise?
+ 
         /// <summary>
         /// Decodes a <c>FudgeMsg</c> from a <c>Stream</c>.
         /// </summary>
@@ -156,7 +166,7 @@ namespace Fudge
             return Deserialize(stream);
         }
 
-        //11/12/09 Andrew: should we have a version that takes an offset so that arrays with more than one envelope can be processed?
+        // TODO 2009-12-11 Andrew -- should we have a version that takes an offset so that arrays with more than one envelope can be processed?
 
     }
 }

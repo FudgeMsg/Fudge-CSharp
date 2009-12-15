@@ -1,4 +1,4 @@
-﻿/**
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Fudge.Taxon;
-using System.Diagnostics;
 
 namespace Fudge
 {
@@ -30,6 +28,11 @@ namespace Fudge
         private Dictionary<IFudgeTaxonomy, int> sizesByTaxonomy;
         private volatile int noTaxonomySize = -1;
 
+        /// <summary>
+        /// Returns the size, in bytes, of the the object if encoded with a given taxonomy. The size is calculated by <c>ComputeSize</c> and cached by this method.
+        /// </summary>
+        /// <param name="taxonomy">the taxonomy to use for encoding, or null to calculate the size without a taxonomy</param>
+        /// <returns>the size of the encoded object in bytes</returns>
         public int GetSize(IFudgeTaxonomy taxonomy)
         {
             if (taxonomy == null)
@@ -40,7 +43,7 @@ namespace Fudge
                 }
                 return noTaxonomySize;
             }
-            lock (this)     // TODO t0rx 2009-09-01 -- Should this lock something internal in case someone else has us locked?
+            lock (this)     // TODO 2009-09-01 t0rx -- Should this lock something internal in case someone else has us locked?
             {
                 if (sizesByTaxonomy == null)
                 {
@@ -56,6 +59,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Calculates the size, in bytes, of the object if encoded with a given taxonomy. Do not call this directly to get the object size - use <c>GetSize</c> instead.
+        /// </summary>
+        /// <param name="taxonomy">the taxonomy to use for encoding, or null to calculate the size without a taxonomy</param>
+        /// <returns>the size of the encoded object in bytes</returns>
         public abstract int ComputeSize(IFudgeTaxonomy taxonomy);
     }
 }
