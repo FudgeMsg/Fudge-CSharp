@@ -52,7 +52,10 @@ namespace Fudge.Encodings
         public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
         {
             writer.WriteStartElement(name);
-            writer.WriteValue(value);
+            if (type != IndicatorFieldType.Instance)
+            {
+                writer.WriteValue(value);
+            }
             writer.WriteEndElement();
         }
 

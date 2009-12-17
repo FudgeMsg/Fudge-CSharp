@@ -20,6 +20,7 @@ using System.Text;
 using Xunit;
 using System.Xml;
 using Fudge.Encodings;
+using Fudge.Types;
 
 namespace Fudge.Tests.Unit.Encodings
 {
@@ -43,6 +44,21 @@ namespace Fudge.Tests.Unit.Encodings
 
             string s = sb.ToString();
             Assert.Equal("<?xml version=\"1.0\" encoding=\"utf-16\"?><msg><name>Fred</name><address><number>17</number><line1>Our House</line1><line2>In the middle of our street</line2></address></msg>", s);
+        }
+
+        [Fact]
+        public void WriteIndicatorType()
+        {
+            var msg = new FudgeMsg(new Field("blank", IndicatorType.Instance));
+            var sb = new StringBuilder();
+            var xmlWriter = XmlWriter.Create(sb);
+            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg");
+            var reader = new FudgeMsgStreamReader(msg);
+            new FudgeStreamPipe(reader, writer).Process();
+            xmlWriter.Flush();
+
+            string s = sb.ToString();
+            Assert.Equal("<?xml version=\"1.0\" encoding=\"utf-16\"?><msg><blank /></msg>", s);
         }
     }
 }
