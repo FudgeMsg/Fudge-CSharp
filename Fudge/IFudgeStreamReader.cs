@@ -29,14 +29,6 @@ namespace Fudge
 
         FudgeStreamElement CurrentElement { get; }
 
-        int ProcessingDirectives { get; }
-
-        int SchemaVersion { get; }
-
-        int TaxonomyId { get; }
-
-        int EnvelopeSize { get; }
-
         FudgeFieldType FieldType { get; }
 
         int? FieldOrdinal { get; }
@@ -44,7 +36,5 @@ namespace Fudge
         string FieldName { get; }
 
         object FieldValue { get; }
-
-        IFudgeTaxonomy Taxonomy { get; }
     }
 }

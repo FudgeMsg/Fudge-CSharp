@@ -270,26 +270,6 @@ namespace Fudge.Encodings
             get { return currentElement ; }
         }
 
-        public int ProcessingDirectives
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public int SchemaVersion
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public int TaxonomyId
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public int EnvelopeSize
-        {
-            get { throw new NotImplementedException(); }
-        }
-
         public FudgeFieldType FieldType
         {
             get { return fieldType; }
@@ -308,11 +288,6 @@ namespace Fudge.Encodings
         public object FieldValue
         {
             get { return fieldValue; }
-        }
-
-        public IFudgeTaxonomy Taxonomy
-        {
-            get { throw new NotImplementedException(); }
         }
 
         #endregion
