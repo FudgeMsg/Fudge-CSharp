@@ -24,26 +24,19 @@ using Fudge.Taxon;
 
 namespace Fudge.Encodings
 {
-    public class FudgeEncodedStreamReader : IFudgeStreamReader
+    public class FudgeEncodedStreamReader : FudgeStreamReaderBase
     {
         // Injected Inputs:
         private BinaryReader reader;
         private readonly FudgeContext fudgeContext;
         // Runtime State:
         private readonly Stack<MessageProcessingState> processingStack = new Stack<MessageProcessingState>();
-        private FudgeStreamElement currentElement;
         private IFudgeTaxonomy taxonomy;
         // Set for the envelope
         private int processingDirectives;
         private int schemaVersion;
         private short taxonomyId;
         private int envelopeSize;
-
-        // Set for each non-sub-msg field
-        private FudgeFieldType fieldType;
-        private int? fieldOrdinal;
-        private string fieldName;
-        private object fieldValue;
 
         public FudgeEncodedStreamReader(FudgeContext fudgeContext)
         {
@@ -82,7 +75,7 @@ namespace Fudge.Encodings
                 throw new ArgumentNullException("reader", "Must provide a DataInput to consume data from.");
             }
             this.reader = reader;
-            currentElement = FudgeStreamElement.NoElement;
+            CurrentElement = FudgeStreamElement.NoElement;
             processingStack.Clear();
 
             processingDirectives = 0;
@@ -90,10 +83,10 @@ namespace Fudge.Encodings
             taxonomyId = 0;
             envelopeSize = 0;
 
-            fieldType = null;
-            fieldOrdinal = null;
-            fieldName = null;
-            fieldValue = null;
+            FieldType = null;
+            FieldOrdinal = null;
+            FieldName = null;
+            FieldValue = null;
         }
 
         public void Reset(Stream inputStream)
@@ -116,7 +109,7 @@ namespace Fudge.Encodings
             }
         }
 
-        public FudgeStreamElement MoveNext()
+        public override FudgeStreamElement MoveNext()
         {
             try
             {
@@ -127,10 +120,10 @@ namespace Fudge.Encodings
                 }
                 else if (IsEndOfSubMessage)
                 {
-                    currentElement = FudgeStreamElement.SubmessageFieldEnd;
-                    fieldName = null;
-                    fieldOrdinal = null;
-                    fieldType = null;
+                    CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
+                    FieldName = null;
+                    FieldOrdinal = null;
+                    FieldType = null;
                 }
                 else
                 {
@@ -141,8 +134,8 @@ namespace Fudge.Encodings
             {
                 throw new FudgeRuntimeException("Unable to consume data", ioe);
             }
-            Debug.Assert(currentElement != FudgeStreamElement.NoElement);
-            return currentElement;
+            Debug.Assert(CurrentElement != FudgeStreamElement.NoElement);
+            return CurrentElement;
         }
 
         /**
@@ -227,15 +220,15 @@ namespace Fudge.Encodings
                 }
             }
 
-            fieldName = name;
-            fieldOrdinal = ordinal;
-            fieldType = type;
+            FieldName = name;
+            FieldOrdinal = ordinal;
+            FieldType = type;
             MessageProcessingState currMsgProcessingState = processingStack.Peek();
             currMsgProcessingState.Consumed += nRead;
             if (typeId == FudgeTypeDictionary.FUDGE_MSG_TYPE_ID)
             {
-                currentElement = FudgeStreamElement.SubmessageFieldStart;
-                fieldValue = null;
+                CurrentElement = FudgeStreamElement.SubmessageFieldStart;
+                FieldValue = null;
                 MessageProcessingState subState = new MessageProcessingState();
                 subState.MessageSize = varSize;
                 subState.Consumed = 0;
@@ -243,8 +236,8 @@ namespace Fudge.Encodings
             }
             else
             {
-                currentElement = FudgeStreamElement.SimpleField;
-                fieldValue = ReadFieldValue(Reader, fieldType, varSize);
+                CurrentElement = FudgeStreamElement.SimpleField;
+                FieldValue = ReadFieldValue(Reader, FieldType, varSize);
                 if (fixedWidth)
                 {
                     currMsgProcessingState.Consumed += type.FixedSize;
@@ -291,7 +284,7 @@ namespace Fudge.Encodings
          */
         protected void ConsumeMessageEnvelope() //throws IOException
         {
-            currentElement = FudgeStreamElement.MessageEnvelope;
+            CurrentElement = FudgeStreamElement.MessageEnvelope;
             processingDirectives = Reader.ReadByte();
             schemaVersion = Reader.ReadByte();
             taxonomyId = Reader.ReadInt16();
@@ -307,7 +300,7 @@ namespace Fudge.Encodings
             processingStack.Push(processingState);
         }
 
-        public bool HasNext
+        public override bool HasNext
         {
             get
             {
@@ -326,17 +319,6 @@ namespace Fudge.Encodings
                     // Always have the envelope to read.
                     return true;
                 }
-            }
-        }
-
-        /**
-         * @return the currentElement
-         */
-        public FudgeStreamElement CurrentElement
-        {
-            get
-            {
-                return currentElement;
             }
         }
 
@@ -381,50 +363,6 @@ namespace Fudge.Encodings
             get
             {
                 return envelopeSize;
-            }
-        }
-
-        /**
-         * @return the fieldType
-         */
-        public FudgeFieldType FieldType
-        {
-            get
-            {
-                return fieldType;
-            }
-        }
-
-        /**
-         * @return the fieldOrdinal
-         */
-        public int? FieldOrdinal
-        {
-            get
-            {
-                return fieldOrdinal;
-            }
-        }
-
-        /**
-         * @return the fieldName
-         */
-        public string FieldName
-        {
-            get
-            {
-                return fieldName;
-            }
-        }
-
-        /**
-         * @return the fieldValue
-         */
-        public object FieldValue
-        {
-            get
-            {
-                return fieldValue;
             }
         }
 
