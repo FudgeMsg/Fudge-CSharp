@@ -197,30 +197,9 @@ namespace Fudge
         /// <returns>the size in bytes of the encoded value</returns>
         public abstract int GetVariableSize(object value, IFudgeTaxonomy taxonomy);
 
-        /// <summary>
-        /// Writes an encoded value. The output must contain only the value data, no header or prefix is required.
-        /// If the type is a variable size, the number of bytes written must be equal to the value returned by
-        /// <c>GetVariableSize</c> or the resulting message will not be valid.
-        /// </summary>
-        /// <param name="output">the target to write to</param>
-        /// <param name="value">the value to write</param>
-        /// <param name="taxonomy"></param>
-        public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy);
+        public abstract void WriteValue(BinaryWriter output, object value);
 
-        /// <summary>
-        /// Reads an encoded value. The input contains only the value data, no header or prefix is available. The
-        /// reader must read the full number of bytes available. Reading too few or too many may result in subsequent
-        /// reads to fail or the message to be corrupted.
-        /// </summary>
-        /// <param name="input">the source to read from</param>
-        /// <param name="dataSize">the number of bytes available for the value</param>
-        /// <param name="typeDictionary"></param>
-        /// <returns>the decoded value</returns>
-        public abstract object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary);
-
-        // TODO 2009-12-14 Andrew -- instead of the TypeDictionary, we should pass the current FudgeContext
-        // TODO 2009-12-14 Andrew -- passing in the current taxonomy could be jolly useful too when reading a submessage, or are we happy doing the "fixup" afterwards
-        // TODO 2009-12-14 Andrew -- how about a default implementation of these that calls a simpler abstract form for the typical cases which don't require context or taxonomy data?
+        public abstract object ReadValue(BinaryReader input, int dataSize);
     }
 
     /// <summary>
@@ -266,8 +245,7 @@ namespace Fudge
             return FixedSize;
         }
 
-        /// <inheritdoc />
-        public virtual void WriteValue(BinaryWriter output, TValue value, IFudgeTaxonomy taxonomy) //throws IOException
+        public virtual void WriteValue(BinaryWriter output, TValue value) //throws IOException
         {
             if (IsVariableSize)
             {
@@ -275,8 +253,7 @@ namespace Fudge
             }
         }
 
-        /// <inheritdoc cref="FudgeFieldType.ReadValue(System.IO.BinaryReader,System.Int32,Fudge.FudgeTypeDictionary)" />
-        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
+        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             // TODO 2009-08-30 t0rx -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
@@ -309,16 +286,14 @@ namespace Fudge
             return GetVariableSize((TValue)value, taxonomy);
         }
 
-        /// <inheritdoc />
-        public sealed override void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy)
+        public sealed override void WriteValue(BinaryWriter output, object value)
         {
-            WriteValue(output, (TValue)value, taxonomy);
+            WriteValue(output, (TValue)value);
         }
 
-        /// <inheritdoc />
-        public sealed override object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public sealed override object ReadValue(BinaryReader input, int dataSize)
         {
-            return ReadTypedValue(input, dataSize, typeDictionary);
+            return ReadTypedValue(input, dataSize);
         }
         #endregion
     }

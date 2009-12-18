@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * -->
  */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Fudge
@@ -37,11 +37,11 @@ namespace Fudge
     /// </example>
     public class Field : IFudgeField
     {
-
         private readonly object value;
         private readonly FudgeFieldType type;
         private readonly short? ordinal;
         private readonly string name;
+        private static readonly FudgeContext emptyContext = new FudgeContext();
 
         public Field(string name, object value) : this(name, null, value)
         {
@@ -64,7 +64,7 @@ namespace Fudge
             this.name = name;
             this.ordinal = (short?)ordinal;
             this.value = value;
-            this.type = FudgeMsg.DetermineTypeFromValue(value, FudgeTypeDictionary.Instance);
+            this.type = FudgeMsg.DetermineTypeFromValue(value, emptyContext);
         }
 
         #region IFudgeField Members

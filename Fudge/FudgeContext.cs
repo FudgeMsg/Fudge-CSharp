@@ -20,6 +20,7 @@ using System.Text;
 using Fudge.Taxon;
 using System.IO;
 using Fudge.Util;
+using Fudge.Encodings;
 
 namespace Fudge
 {
@@ -48,6 +49,12 @@ namespace Fudge
     {
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private ITaxonomyResolver taxonomyResolver;
+        private FudgeStreamParser parser;
+
+        public FudgeContext()
+        {
+            parser = new FudgeStreamParser(this);
+        }
 
         /// <summary>
         /// Gets or sets the <c>ITaxonomyResolver</c> for use within this context when encoding or decoding messages.
@@ -80,7 +87,12 @@ namespace Fudge
         /// <returns>the <c>FudgeMsg</c> created</returns>
         public FudgeMsg NewMessage()
         {
-            return new FudgeMsg(TypeDictionary);
+            return new FudgeMsg(this);
+        }
+
+        public FudgeMsg NewMessage(params IFudgeField[] fields)
+        {
+            return new FudgeMsg(this, fields);
         }
 
         /// <summary>
@@ -90,7 +102,12 @@ namespace Fudge
         /// <param name="s">The stream to serialise to</param>
         public void Serialize(FudgeMsg msg, Stream s)
         {
-            Serialize(msg, null, s);
+            Serialize(msg, null, new FudgeBinaryWriter(s));
+        }
+
+        public void Serialize(FudgeMsg msg, BinaryWriter bw)
+        {
+            Serialize(msg, null, bw);
         }
 
         /// <summary>
@@ -103,15 +120,19 @@ namespace Fudge
         /// <param name="s">the <c>Stream</c> to write to</param>
         public void Serialize(FudgeMsg msg, short? taxonomyId, Stream s)
         {
-            IFudgeTaxonomy taxonomy = null;
-            if ((TaxonomyResolver != null) && (taxonomyId != null))
-            {
-                taxonomy = TaxonomyResolver.ResolveTaxonomy(taxonomyId.Value);
-            }
-            BinaryWriter bw = new FudgeBinaryWriter(s);
+            Serialize(msg, taxonomyId, new FudgeBinaryWriter(s));
+        }
+
+        public void Serialize(FudgeMsg msg, short? taxonomyId, BinaryWriter bw)
+        {
             try
             {
-                FudgeStreamEncoder.WriteMsg(bw, new FudgeMsgEnvelope(msg), TypeDictionary, taxonomy, taxonomyId ?? 0);
+                var writer = new FudgeEncodedStreamWriter(this);            // TODO t0rx 2009-11-12 -- Fudge-Java gets this from an allocated queue
+                writer.TaxonomyId = taxonomyId;
+                writer.Reset(bw);
+                writer.StartSubMessage(null, null);
+                writer.WriteFields(msg.GetAllFields());
+                writer.EndSubMessage();
             }
             catch (IOException e)
             {
@@ -146,7 +167,7 @@ namespace Fudge
             FudgeMsgEnvelope envelope;
             try
             {
-                envelope = FudgeStreamDecoder.ReadMsg(br, TypeDictionary, TaxonomyResolver);
+                envelope = parser.Parse(br);
             }
             catch (IOException e)
             {

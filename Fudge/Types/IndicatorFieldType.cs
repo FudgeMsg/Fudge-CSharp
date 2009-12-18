@@ -41,14 +41,12 @@ namespace Fudge.Types
         {
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
-        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
+        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             return IndicatorType.Instance;
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
-        public override void WriteValue(BinaryWriter output, IndicatorType value, IFudgeTaxonomy taxonomy) //throws IOException
+        public override void WriteValue(BinaryWriter output, IndicatorType value) //throws IOException
         {
             // Intentional no-op.
         }

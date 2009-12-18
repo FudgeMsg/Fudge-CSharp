@@ -80,14 +80,12 @@ namespace Fudge
             throw new NotSupportedException("Secondary type should never have to get a value size, the wire type should handle this");
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
-        public override T ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public override T ReadTypedValue(BinaryReader input, int dataSize)
         {
             throw new NotSupportedException("Secondary type should never have to read a value, the wire type should handle this");
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
-        public override void WriteValue(BinaryWriter output, T value, IFudgeTaxonomy taxonomy)
+        public override void WriteValue(BinaryWriter output, T value)
         {
             throw new NotSupportedException("Secondary type should never have to write a value, the wire type should handle this");
         }

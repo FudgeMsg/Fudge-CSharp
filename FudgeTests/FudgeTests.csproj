@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{21CF7F0A-1BE0-4E54-9BDA-A31089802967}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -67,11 +67,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Unit\Encodings\FudgeJSONStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeMsgStreamTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamWriterTest.cs" />
     <Compile Include="Unit\FudgeContextTest.cs" />
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
+    <Compile Include="Unit\FudgeStreamParserTest.cs" />
     <Compile Include="Unit\FudgeUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />
@@ -90,7 +95,6 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

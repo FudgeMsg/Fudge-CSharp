@@ -22,6 +22,8 @@ using System.Diagnostics;
 using System.IO;
 using Fudge.Types;
 using System.Collections;
+using Fudge.Encodings;
+using Fudge.Util;
 
 namespace Fudge
 {
@@ -41,25 +43,23 @@ namespace Fudge
     /// </remarks>
     public class FudgeMsg : FudgeEncodingObject, IMutableFudgeFieldContainer
     {
-        private readonly FudgeTypeDictionary typeDictionary;
+        private readonly FudgeContext fudgeContext;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
-        public FudgeMsg() : this(FudgeTypeDictionary.Instance)
+        public FudgeMsg() : this(new FudgeContext())
         {
         }
 
         // TODO 2009-12-14 Andrew -- lose the constructor above; static type dictionary is not good
 
-        public FudgeMsg(FudgeTypeDictionary typeDictionary)
+        public FudgeMsg(FudgeContext context)
         {
-            if (typeDictionary == null)
+            if (context == null)
             {
-                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided");
+                throw new ArgumentNullException("context", "Context must be provided");
             }
-            this.typeDictionary = typeDictionary;
+            this.fudgeContext = context;
         }
-
-        // TODO 2009-12-14 Andrew -- construct with the context instead of the type dictionary
 
         /// <summary>
         /// Creates a new <c>FudgeMsg</c> object as a copy of another.
@@ -71,11 +71,11 @@ namespace Fudge
             {
                 throw new ArgumentNullException("Cannot initialize from a null other FudgeMsg");
             }
+            this.fudgeContext = other.fudgeContext;
             InitializeFromByteArray(other.ToByteArray());
-            this.typeDictionary = other.typeDictionary;
         }
 
-        public FudgeMsg(params IFudgeField[] fields) : this(FudgeTypeDictionary.Instance)
+        public FudgeMsg(params IFudgeField[] fields) : this()
         {
             foreach (var field in fields)
             {
@@ -83,19 +83,22 @@ namespace Fudge
             }
         }
 
-        // TODO 2009-12-14 Andrew -- lose the constructor above
-
-        public FudgeMsg(byte[] byteArray, FudgeTypeDictionary typeDictionary, IFudgeTaxonomy taxonomy)
+        public FudgeMsg(FudgeContext context, params IFudgeField[] fields)
+            : this(context)
         {
-            if (typeDictionary == null)
+            foreach (var field in fields)
             {
-                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided");
+                Add(field);
             }
-            this.typeDictionary = typeDictionary;
-            InitializeFromByteArray(byteArray);
         }
 
-        // TODO 2009-12-14 Andrew -- pass in the context instead of the dictionary. doesn't need a taxonomy reference here (the context will provider a resolver)
+        public FudgeMsg(byte[] byteArray, FudgeContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context", "Context must be provided");
+            }
+        }
 
         /// <summary>
         /// Populates the message fields from the encoded data. If the array is larger than the Fudge envelope, any additional data is ignored.
@@ -103,23 +106,13 @@ namespace Fudge
         /// <param name="byteArray">the encoded data to populate this message with</param>
         protected void InitializeFromByteArray(byte[] byteArray)
         {
-            MemoryStream stream = new MemoryStream(byteArray);
-            BinaryReader bw = new BinaryReader(stream);
-            FudgeMsgEnvelope other;
-            try
-            {
-                other = FudgeStreamDecoder.ReadMsg(bw);
-            }
-            catch (IOException e)
-            {
-                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO 2009-08-31 t0rx -- This is just RuntimeException in Fudge-Java
-            }
+            FudgeMsgEnvelope other = fudgeContext.Deserialize(byteArray);
             fields.AddRange(other.Message.fields);
         }
 
-        public FudgeTypeDictionary TypeDictionary
+        public FudgeContext FudgeContext
         {
-            get { return typeDictionary; }
+            get { return fudgeContext; }
         }
 
         // TODO 2009-12-14 Andrew -- replace the TypeDictionary with a FudgeContext reference
@@ -151,7 +144,7 @@ namespace Fudge
         /// <inheritdoc />
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = DetermineTypeFromValue(value, typeDictionary);
+            FudgeFieldType type = DetermineTypeFromValue(value, fudgeContext);
             if (type == null)
             {
                 throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
@@ -188,13 +181,13 @@ namespace Fudge
         /// <param name="value">value whose type is to be determined</param>
         /// <param name="typeDictionary">the <c>FudgeTypeDictionary</c> to use</param>
         /// <returns>the appropriate <c>FudgeFieldType</c> instance</returns>
-        protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeTypeDictionary typeDictionary)
+        protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeContext context)
         {
             if (value == null)
             {
                 throw new ArgumentNullException("Cannot determine type for null value.");
             }
-            FudgeFieldType type = typeDictionary.GetByCSharpType(value.GetType());
+            FudgeFieldType type = context.TypeDictionary.GetByCSharpType(value.GetType());
             if ((type == null) && (value is UnknownFudgeFieldValue))
             {
                 UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
@@ -631,10 +624,14 @@ namespace Fudge
         public byte[] ToByteArray()
         {
             MemoryStream stream = new MemoryStream(ComputeSize(null));
-            BinaryWriter bw = new BinaryWriter(stream);
+            BinaryWriter bw = new FudgeBinaryWriter(stream);
             try
             {
-                FudgeStreamEncoder.WriteMsg(bw, this);
+                var writer = new FudgeEncodedStreamWriter(FudgeContext);        // TODO t0rx 2009-11-12 -- In Fudge-Java this is obtained from the context
+                writer.Reset(bw);
+                writer.StartSubMessage(null, null);
+                writer.WriteFields(GetAllFields());
+                writer.EndSubMessage();
                 bw.Flush();
             }
             catch (IOException e)
@@ -747,7 +744,7 @@ namespace Fudge
 
             if (!type.IsAssignableFrom(value.GetType()))
             {
-                FudgeFieldType fieldType = TypeDictionary.GetByCSharpType(type);
+                FudgeFieldType fieldType = fudgeContext.TypeDictionary.GetByCSharpType(type);
                 if (fieldType == null)
                     throw new InvalidCastException("No registered field type for " + type.Name);
 
@@ -774,6 +771,7 @@ namespace Fudge
             var copy = new List<FudgeMsgField>(fields);
             return copy.GetEnumerator();
         }
+
 
         #endregion
 
