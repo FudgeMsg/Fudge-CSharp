@@ -39,7 +39,7 @@ namespace Fudge.Serialization
             markers = new List<bool>();
         }
 
-        public TrackingFudgeMsg(FudgeMsg other) : base(other.TypeDictionary)
+        public TrackingFudgeMsg(FudgeMsg other)
         {
             // We don't use the equivalent FudgeMsg constructor as it takes a byte copy which is slow
             // and here we don't care about mutability of the source

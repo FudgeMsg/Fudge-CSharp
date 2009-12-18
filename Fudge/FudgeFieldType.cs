@@ -157,9 +157,9 @@ namespace Fudge
 
         public abstract int GetVariableSize(object value, IFudgeTaxonomy taxonomy);
 
-        public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy);
+        public abstract void WriteValue(BinaryWriter output, object value);
 
-        public abstract object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary);
+        public abstract object ReadValue(BinaryReader input, int dataSize);
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ namespace Fudge
             return FixedSize;
         }
 
-        public virtual void WriteValue(BinaryWriter output, TValue value, IFudgeTaxonomy taxonomy) //throws IOException
+        public virtual void WriteValue(BinaryWriter output, TValue value) //throws IOException
         {
             if (IsVariableSize)
             {
@@ -211,7 +211,7 @@ namespace Fudge
             }
         }
 
-        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
+        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             // TODO t0rx 2009-08-30 -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
@@ -237,14 +237,14 @@ namespace Fudge
             return GetVariableSize((TValue)value, taxonomy);
         }
 
-        public sealed override void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy)
+        public sealed override void WriteValue(BinaryWriter output, object value)
         {
-            WriteValue(output, (TValue)value, taxonomy);
+            WriteValue(output, (TValue)value);
         }
 
-        public sealed override object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public sealed override object ReadValue(BinaryReader input, int dataSize)
         {
-            return ReadTypedValue(input, dataSize, typeDictionary);
+            return ReadTypedValue(input, dataSize);
         }
         #endregion
     }

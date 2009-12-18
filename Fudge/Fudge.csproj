@@ -53,11 +53,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Encodings\FudgeEncodedStreamReader.cs" />
+    <Compile Include="Encodings\FudgeEncodedStreamWriter.cs" />
+    <Compile Include="Encodings\FudgeEncodingExtensions.cs" />
+    <Compile Include="Encodings\FudgeJSONStreamReader.cs" />
+    <Compile Include="Encodings\FudgeMsgStreamReader.cs" />
+    <Compile Include="Encodings\FudgeMsgStreamWriter.cs" />
+    <Compile Include="Encodings\FudgeParseException.cs" />
+    <Compile Include="Encodings\FudgeStreamReaderBase.cs" />
+    <Compile Include="Encodings\FudgeXmlStreamReader.cs" />
+    <Compile Include="Encodings\FudgeXmlStreamWriter.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeEncodingObject.cs" />
     <Compile Include="FudgeExtensions.cs" />
     <Compile Include="FudgeFieldPrefixCodec.cs" />
+    <Compile Include="FudgeStreamElement.cs" />
+    <Compile Include="FudgeStreamParser.cs" />
+    <Compile Include="FudgeStreamPipe.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />
@@ -65,10 +78,10 @@
     <Compile Include="FudgeMsgField.cs" />
     <Compile Include="FudgeMsgFormatter.cs" />
     <Compile Include="FudgeRuntimeException.cs" />
-    <Compile Include="FudgeStreamDecoder.cs" />
-    <Compile Include="FudgeStreamEncoder.cs" />
     <Compile Include="FudgeTypeDictionary.cs" />
     <Compile Include="IFudgeField.cs" />
+    <Compile Include="IFudgeStreamReader.cs" />
+    <Compile Include="IFudgeStreamWriter.cs" />
     <Compile Include="IMutableFudgeFieldContainer.cs" />
     <Compile Include="Linq\ExpressionTreeStructureHasher.cs" />
     <Compile Include="Linq\FudgeExpressionTranslator.cs" />

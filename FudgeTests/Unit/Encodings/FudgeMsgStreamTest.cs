@@ -18,35 +18,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using System.IO;
-using Fudge.Util;
-using Fudge.Types;
+using Fudge.Encodings;
 
-namespace Fudge.Tests.Unit.Types
+namespace Fudge.Tests.Unit.Encodings
 {
-    public class StringArrayFieldTypeTest
+    public class FudgeMsgStreamTest
     {
         [Fact]
-        public void SimpleExample()
+        public void GeneralTest()
         {
-            string[] array = { "Fred", "Bob" };
-            var fieldType = new StringArrayFieldType();
+            var context = new FudgeContext();
 
-            var stream = new MemoryStream();
-            var writer = new FudgeBinaryWriter(stream);
+            var msg = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
+            var reader = new FudgeMsgStreamReader(msg);
+            var writer = new FudgeMsgStreamWriter();
 
-            int len = fieldType.GetVariableSize(array, null);
-            fieldType.WriteValue(writer, array);
+            var pipe = new FudgeStreamPipe(reader, writer);
+            pipe.Process();
 
-            byte[] bytes = stream.ToArray();
+            var newMsg = writer.Message;
 
-            Assert.Equal(len, bytes.Length);
-
-            stream = new MemoryStream(bytes);
-            var reader = new FudgeBinaryReader(stream);
-
-            var array2 = fieldType.ReadTypedValue(reader, len);
-            Assert.Equal(array, array2);
+            FudgeUtils.AssertAllFieldsMatch(msg, newMsg);
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Fudge.Types
             return size;
         }
 
-        public override string[] ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public override string[] ReadTypedValue(BinaryReader input, int dataSize)
         {
             var strings = new List<string>();
             int size = 0;
@@ -62,7 +62,7 @@ namespace Fudge.Types
             return strings.ToArray();
         }
 
-        public override void WriteValue(BinaryWriter output, string[] value, IFudgeTaxonomy taxonomy)
+        public override void WriteValue(BinaryWriter output, string[] value)
         {
             foreach (string s in value)
             {

@@ -17,28 +17,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Fudge.Taxon;
-using System.IO;
 
-namespace Fudge.Types
+namespace Fudge.Encodings
 {
-    public class IndicatorFieldType : FudgeFieldType<IndicatorType>
+    public static class FudgeEncodingExtensions
     {
-        public static readonly IndicatorFieldType Instance = new IndicatorFieldType();
-
-        public IndicatorFieldType()
-            : base(FudgeTypeDictionary.INDICATOR_TYPE_ID, false, 0)
+        /// <summary>
+        /// Convenience method for reading a <see cref="FudgeMsg"/> from a <see cref="IFudgeStreamReader"/>.
+        /// </summary>
+        /// <param name="reader">Reader providing the data for the message.</param>
+        /// <returns>New message containing data from the reader.</returns>
+        public static FudgeMsg ReadToMsg(this IFudgeStreamReader reader)
         {
-        }
+            var writer = new FudgeMsgStreamWriter();
+            var pipe = new FudgeStreamPipe(reader, writer);
+            pipe.Process();
 
-        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
-        {
-            return IndicatorType.Instance;
-        }
-
-        public override void WriteValue(BinaryWriter output, IndicatorType value) //throws IOException
-        {
-            // Intentional no-op.
+            return writer.Message;
         }
     }
 }

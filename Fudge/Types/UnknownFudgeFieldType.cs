@@ -39,14 +39,14 @@ namespace Fudge.Types
             return value.Contents.Length;
         }
 
-        public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize)
         {
             byte[] contents = new byte[dataSize];
             input.Read(contents, 0, dataSize);
             return new UnknownFudgeFieldValue(contents, this);
         }
 
-        public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value, IFudgeTaxonomy taxonomy)
+        public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value)
         {
             output.Write(value.Contents);
         }

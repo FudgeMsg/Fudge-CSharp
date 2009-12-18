@@ -78,12 +78,12 @@ namespace Fudge
             throw new NotSupportedException("Secondary type should never have to get a value size, the wire type should handle this");
         }
 
-        public override T ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public override T ReadTypedValue(BinaryReader input, int dataSize)
         {
             throw new NotSupportedException("Secondary type should never have to read a value, the wire type should handle this");
         }
 
-        public override void WriteValue(BinaryWriter output, T value, IFudgeTaxonomy taxonomy)
+        public override void WriteValue(BinaryWriter output, T value)
         {
             throw new NotSupportedException("Secondary type should never have to write a value, the wire type should handle this");
         }

@@ -17,28 +17,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Fudge.Taxon;
-using System.IO;
 
-namespace Fudge.Types
+namespace Fudge
 {
-    public class IndicatorFieldType : FudgeFieldType<IndicatorType>
+    public interface IFudgeStreamWriter
     {
-        public static readonly IndicatorFieldType Instance = new IndicatorFieldType();
+        // TODO t0rx 2009-11-12 -- Figure out how to handle the envelope
 
-        public IndicatorFieldType()
-            : base(FudgeTypeDictionary.INDICATOR_TYPE_ID, false, 0)
-        {
-        }
+        void StartSubMessage(string name, int? ordinal);
 
-        public override IndicatorType ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
-        {
-            return IndicatorType.Instance;
-        }
+        void WriteField(string name, int? ordinal, FudgeFieldType type, object value);     // TODO t0rx 2009-11-12 -- Do we need overloads of this, and auto-derivation of type? 
 
-        public override void WriteValue(BinaryWriter output, IndicatorType value) //throws IOException
-        {
-            // Intentional no-op.
-        }
+        void WriteFields(IEnumerable<IFudgeField> fields);
+
+        void EndSubMessage();
+
+        void End();
     }
 }
