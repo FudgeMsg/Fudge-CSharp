@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using Fudge.Taxon;
@@ -23,6 +23,13 @@ using System.Diagnostics;
 
 namespace Fudge
 {
+
+    // TODO 2009-12-11 Andrew -- I'm not too sure about having the read message functions here mixed with the lower level fudge stream components - it clutters the API space and might confuse library users. I think break into a Decoder/Encoder which does the low level stuff and a separate Reader/Writer built on top that can read whole messages
+
+    // TODO 2009-12-14 Andrew -- e.g. Create a StreamReader on top of a BinaryReader. Create a MessageReader on top of a StreamReader for whole messages
+    
+    // TODO 2009-12-14 Andrew -- would this approach extend to higher layers which can process more complex C# data / RPC etc ... ?
+
     public class FudgeStreamDecoder
     {
         public static FudgeMsgEnvelope ReadMsg(BinaryReader br) //throws IOException
@@ -64,7 +71,7 @@ namespace Fudge
 
             if ((size > 0) && (nRead != size))
             {
-                throw new FudgeRuntimeException("Expected to read " + size + " but only had " + nRead + " in message.");      // TODO t0rx 2009-08-31 -- This is just RuntimeException in Fudge-Java
+                throw new FudgeRuntimeException("Expected to read " + size + " but only had " + nRead + " in message.");      // TODO 2009-08-31 t0rx -- This is just RuntimeException in Fudge-Java
             }
 
             FudgeMsgEnvelope envelope = new FudgeMsgEnvelope(msg, version);
@@ -133,7 +140,7 @@ namespace Fudge
             {
                 if (fixedWidth)
                 {
-                    throw new FudgeRuntimeException("Unknown fixed width type " + typeId + " for field " + ordinal + ":" + name + " cannot be handled.");       // TODO t0rx 2009-09-09 -- In Fudge-Java this is just RuntimeException
+                    throw new FudgeRuntimeException("Unknown fixed width type " + typeId + " for field " + ordinal + ":" + name + " cannot be handled.");       // TODO 2009-09-09 t0rx -- In Fudge-Java this is just RuntimeException
                 }
                 type = typeDictionary.GetUnknownType(typeId);
             }
@@ -144,11 +151,11 @@ namespace Fudge
                 {
                     case 0: varSize = 0; break;
                     case 1: varSize = br.ReadByte(); nRead += 1; break;
-                    case 2: varSize = br.ReadInt16(); nRead += 2; break;      // TODO t0rx 2009-08-31 -- Review whether this should be signed or not
+                    case 2: varSize = br.ReadInt16(); nRead += 2; break;      // TODO 2009-08-31 t0rx -- Review whether this should be signed or not
                     // Yes, this is right. We only have 2 bits here.
                     case 3: varSize = br.ReadInt32(); nRead += 4; break;
                     default:
-                        throw new FudgeRuntimeException("Illegal number of bytes indicated for variable width encoding: " + varSizeBytes);        // TODO t0rx 2009-08-31 -- In Fudge-Java this is just a RuntimeException
+                        throw new FudgeRuntimeException("Illegal number of bytes indicated for variable width encoding: " + varSizeBytes);        // TODO 2009-08-31 t0rx -- In Fudge-Java this is just a RuntimeException
                 }
 
             }

@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
-using System.Diagnostics;
 using Fudge.Util;
 
 namespace Fudge
@@ -33,6 +30,11 @@ namespace Fudge
     {
         public static readonly ModifiedUTF8Encoding Encoding = new ModifiedUTF8Encoding();
 
+        /// <summary>
+        /// Returns the length, in bytes, of an encoded string.
+        /// </summary>
+        /// <param name="str">string to encode</param>
+        /// <returns>length in bytes</returns>
         public static int ModifiedUTF8Length(string str)
         {
             int utflen = Encoding.GetByteCount(str.ToCharArray(), 0, str.Length);
@@ -42,6 +44,12 @@ namespace Fudge
             return utflen;
         }
 
+        /// <summary>
+        /// Writes a string with the modified UTF-8 encoding.
+        /// </summary>
+        /// <param name="str">string to write</param>
+        /// <param name="output">target to write to</param>
+        /// <returns>number of bytes written</returns>
         public static int WriteModifiedUTF8(string str, BinaryWriter output) //throws IOException
         {
             // Note that we're not prefixing with the length
@@ -56,11 +64,24 @@ namespace Fudge
             return utflen;
         }
 
+        /// <summary>
+        /// Returns the number of characters encoded by a byte sequence.
+        /// </summary>
+        /// <param name="bytes">array of encoded data</param>
+        /// <param name="byteIndex">offset into the array to start</param>
+        /// <param name="byteCount">number of bytes to process</param>
+        /// <returns>number of characters</returns>
         public static int GetCharCount(byte[] bytes, int byteIndex, int byteCount)
         {
             return Encoding.GetCharCount(bytes, byteIndex, byteCount);
         }
 
+        /// <summary>
+        /// Returns the number of bytes and returns the string encoded by them.
+        /// </summary>
+        /// <param name="input">source of data</param>
+        /// <param name="utflen">number of bytes to read</param>
+        /// <returns>the string</returns>
         public static string ReadString(BinaryReader input, int utflen) //throws IOException
         {
             byte[] bytearr = new byte[utflen];

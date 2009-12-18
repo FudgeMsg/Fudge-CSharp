@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using Fudge.Taxon;
@@ -23,6 +23,9 @@ using System.Diagnostics;
 
 namespace Fudge
 {
+
+    // TODO 2009-12-14 Andrew -- see comments in the Decoder class
+
     public class FudgeStreamEncoder
     {
         public static void WriteMsg(BinaryWriter bw, FudgeMsg msg) //throws IOException
@@ -73,7 +76,7 @@ namespace Fudge
             nWritten += 1;
             bw.Write((byte)version);
             nWritten += 1;
-            bw.Write((short)taxonomy);      // TODO t0rx 2009-10-04 -- This should probably be ushort, but we'll need to change throughout
+            bw.Write((short)taxonomy);      // TODO 2009-10-04 t0rx -- This should probably be ushort, but we'll need to change throughout
             nWritten += 2;
             bw.Write(messageSize);
             nWritten += 4;

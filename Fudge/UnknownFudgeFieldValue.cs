@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Fudge.Types;
 
@@ -36,6 +36,11 @@ namespace Fudge
         private readonly byte[] contents;
         private readonly UnknownFudgeFieldType type;
 
+        /// <summary>
+        /// Creates a new unknown value.
+        /// </summary>
+        /// <param name="contents">the binary data from the fudge message</param>
+        /// <param name="type">the unknown type placeholder</param>
         public UnknownFudgeFieldValue(byte[] contents, UnknownFudgeFieldType type)
         {
             if (contents == null)
@@ -50,11 +55,17 @@ namespace Fudge
             this.type = type;
         }
 
+        /// <summary>
+        /// Gets the binary data value
+        /// </summary>
         public byte[] Contents
         {
             get { return contents; }
         }
 
+        /// <summary>
+        /// Gets the unknown type definition
+        /// </summary>
         public UnknownFudgeFieldType Type
         {
             get { return type; }
