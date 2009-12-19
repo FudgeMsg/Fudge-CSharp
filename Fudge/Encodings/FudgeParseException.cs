@@ -19,8 +19,15 @@ using System.Text;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// FudgeParseException is thrown when bad data is encountered by an <see cref="IStreamReader"/>.
+    /// </summary>
     public class FudgeParseException : FudgeRuntimeException
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="message"></param>
         public FudgeParseException(string message) : base(message)
         {
         }
