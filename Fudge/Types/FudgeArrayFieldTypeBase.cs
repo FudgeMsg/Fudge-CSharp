@@ -55,6 +55,7 @@ namespace Fudge.Types
             return value.Length * elementSize;
         }
 
+        /// <inheritdoc />
         public override T[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             int nElements = dataSize / elementSize;
@@ -66,6 +67,7 @@ namespace Fudge.Types
             return result;
         }
 
+        /// <inheritdoc />
         public override void WriteValue(BinaryWriter output, T[] value)  //throws IOException
         {
             foreach (T element in value)

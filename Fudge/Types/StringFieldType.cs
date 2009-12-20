@@ -49,11 +49,13 @@ namespace Fudge.Types
             return ModifiedUTF8Util.ModifiedUTF8Length(value);
         }
 
+        /// <inheritdoc/>
         public override string ReadTypedValue(BinaryReader input, int dataSize)
         {
             return ModifiedUTF8Util.ReadString(input, dataSize);
         }
 
+        /// <inheritdoc/>
         public override void WriteValue(BinaryWriter output, string value)
         {
             ModifiedUTF8Util.WriteModifiedUTF8(value, output);

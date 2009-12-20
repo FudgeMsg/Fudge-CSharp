@@ -28,6 +28,7 @@ namespace Fudge
     /// </remarks>
     public static class ModifiedUTF8Util
     {
+        /// <summary>Singleton instance to avoid unnecessary construction.</summary>
         public static readonly ModifiedUTF8Encoding Encoding = new ModifiedUTF8Encoding();
 
         /// <summary>

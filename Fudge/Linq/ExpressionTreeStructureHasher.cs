@@ -31,11 +31,19 @@ namespace Fudge.Linq
         private readonly Expression expression;
         private int currentHash;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="e"></param>
         public ExpressionTreeStructureHasher(Expression e)
         {
             this.expression = e;
         }
 
+        /// <summary>
+        /// Computes the hash of the expression tree.
+        /// </summary>
+        /// <returns></returns>
         public int ComputeHash()
         {
             currentHash = 11;        // Starter value
@@ -45,11 +53,17 @@ namespace Fudge.Linq
             return currentHash;
         }
 
+        /// <summary>
+        /// Computes the hash of a supplied expression tree.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns>Tree to calculate the hash for.</returns>
         public static int ComputeHash(Expression e)
         {
             return new ExpressionTreeStructureHasher(e).ComputeHash();
         }
 
+        /// <inheritdoc/>
         protected override Expression Visit(Expression exp)
         {
             if (exp == null)

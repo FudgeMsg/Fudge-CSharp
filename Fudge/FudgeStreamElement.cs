@@ -20,8 +20,13 @@ using System.Text;
 
 namespace Fudge
 {
+    /// <summary>
+    /// <c>FudgeStreamElement</c> indicates the type of the next element in a Fudge data stream read from an
+    /// <see cref="IFudgeStreamReader"/> or written to an <see cref="IFudgeStreamWriter"/>.
+    /// </summary>
     public enum FudgeStreamElement
     {
+        /// <summary>Indicates stream has not current element.</summary>
         NoElement,
         /// <summary>Issued when the envelope header is parsed.</summary>
         MessageEnvelope,

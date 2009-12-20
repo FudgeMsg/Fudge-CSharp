@@ -31,6 +31,10 @@ namespace Fudge.Util
     /// </remarks>
     public class FudgeBinaryWriter : BinaryNBOWriter
     {
+        /// <summary>
+        /// Cosntructs a new <c>FudgeBinaryWriter</c> on an output <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="output">Stream to write binary data to.</param>
         public FudgeBinaryWriter(Stream output) : base(output, new ModifiedUTF8Encoding())
         {
         }

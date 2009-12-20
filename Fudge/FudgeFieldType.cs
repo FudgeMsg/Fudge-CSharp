@@ -197,8 +197,19 @@ namespace Fudge
         /// <returns>the size in bytes of the encoded value</returns>
         public abstract int GetVariableSize(object value, IFudgeTaxonomy taxonomy);
 
+        /// <summary>
+        /// Writes a values to an output <see cref="BinaryWriter"/>.
+        /// </summary>
+        /// <param name="output"><see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="value">Value to write.</param>
         public abstract void WriteValue(BinaryWriter output, object value);
 
+        /// <summary>
+        /// Reads a values from an input <see cref="BinaryReader"/>.
+        /// </summary>
+        /// <param name="input"><see cref="BinaryReader"/> to read the data from.</param>
+        /// <param name="dataSize">Number of bytes for the data representation.</param>
+        /// <returns>Decoded object.</returns>
         public abstract object ReadValue(BinaryReader input, int dataSize);
     }
 
@@ -224,11 +235,25 @@ namespace Fudge
 
         private readonly FudgeValueMinimizer<TValue> minimizer;
 
+        /// <summary>
+        /// Cosntructs a new <c>FudgeFieldType</c>.
+        /// </summary>
+        /// <param name="typeId">ID of the type, as defined at http://wiki.fudgemsg.org/display/FDG/Types</param>
+        /// <param name="isVariableSize">If true then the size of the binary representation depends upon the value (e.g. a string).</param>
+        /// <param name="fixedSize">If not variable sized, then the number of bytes to encode values of this type.</param>
         public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize)
             : this(typeId, isVariableSize, fixedSize, null)
         {
         }
 
+        /// <summary>
+        /// Cosntructs a new <c>FudgeFieldType</c> but with a minimizer function.
+        /// </summary>
+        /// <param name="typeId">ID of the type, as defined at http://wiki.fudgemsg.org/display/FDG/Types</param>
+        /// <param name="isVariableSize">If true then the size of the binary representation depends upon the value (e.g. a string).</param>
+        /// <param name="fixedSize">If not variable sized, then the number of bytes to encode values of this type.</param>
+        /// <param name="minimizer">Function used to reduce values of this type to their canonical form.</param>
+        /// <remarks>Minimization functions are used for example to reduce integers down to their smallest form.</remarks>
         public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize, FudgeValueMinimizer<TValue> minimizer)
             : base(typeId, typeof(TValue), isVariableSize, fixedSize)
         {
@@ -245,6 +270,12 @@ namespace Fudge
             return FixedSize;
         }
 
+        /// <summary>
+        /// Override this method to write a typed value to an output <see cref="BinaryWriter"/>.
+        /// </summary>
+        /// <param name="output"><see cref="BinaryWriter"/> to use to output data.</param>
+        /// <param name="value">Value to write.</param>
+        /// <remarks>This method provides a typed value compared to <see cref="FudgeFieldType.WriteValue"/>.</remarks>
         public virtual void WriteValue(BinaryWriter output, TValue value) //throws IOException
         {
             if (IsVariableSize)
@@ -253,6 +284,13 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Override this method to read a typed value from an input <see cref="BinaryReader"/>.
+        /// </summary>
+        /// <param name="input"><see cref="BinaryReader"/> to read data from.</param>
+        /// <param name="dataSize">The number of bytes to read from the <see cref="BinaryReader"/>.</param>
+        /// <returns>Decoded object.</returns>
+        /// <remarks>This method is a typed version of <see cref="FudgeFieldType.ReadValue"/>.</remarks>
         public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             // TODO 2009-08-30 t0rx -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
@@ -286,11 +324,13 @@ namespace Fudge
             return GetVariableSize((TValue)value, taxonomy);
         }
 
+        /// <inheritdoc />
         public sealed override void WriteValue(BinaryWriter output, object value)
         {
             WriteValue(output, (TValue)value);
         }
 
+        /// <inheritdoc />
         public sealed override object ReadValue(BinaryReader input, int dataSize)
         {
             return ReadTypedValue(input, dataSize);
