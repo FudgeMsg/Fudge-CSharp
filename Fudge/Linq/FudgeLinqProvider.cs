@@ -60,10 +60,21 @@ namespace Fudge.Linq
         private readonly IEnumerable<IFudgeFieldContainer> source;
         private readonly bool useCache;
 
+        /// <summary>
+        /// Constructs a new <c>FudgeLinqProvider</c> from a set of <see cref="IFudgeFieldContainer"/>s (e.g. <see cref="FudgeMsg"/>s),
+        /// using a cache to avoid recompilation of expressions we have already seen.
+        /// </summary>
+        /// <param name="source">Set of messages to operate on.</param>
         public FudgeLinqProvider(IEnumerable<IFudgeFieldContainer> source) : this(source, true)
         {
         }
 
+        /// <summary>
+        /// Constructs a new <c>FudgeLinqProvider</c> from a set of <see cref="IFudgeFieldContainer"/>s (e.g. <see cref="FudgeMsg"/>s),
+        /// giving explicit control over whether to use a cache to avoid recompilation of expressions we have already seen.
+        /// </summary>
+        /// <param name="source">Set of messages to operate on.</param>
+        /// <param name="useCache">If true then compiled expressions are cached and reused.</param>
         public FudgeLinqProvider(IEnumerable<IFudgeFieldContainer> source, bool useCache)
         {
             if (source == null)
@@ -73,16 +84,21 @@ namespace Fudge.Linq
             this.useCache = useCache;
         }
 
+        /// <summary>
+        /// Gets the source of messages used by this provider.
+        /// </summary>
         public IEnumerable<IFudgeFieldContainer> Source
         {
             get { return source; }
         }
 
+        /// <inheritdoc/>
         public override string GetQueryText(Expression expression)
         {
             return expression.ToString();
         }
 
+        /// <inheritdoc/>
         public override object Execute(Expression expression)
         {
             if (expression.NodeType != ExpressionType.Call)

@@ -29,6 +29,9 @@ namespace Fudge.Types
     /// </summary>
     public class FudgeMsgFieldType : FudgeFieldType<FudgeMsg>
     {
+        /// <summary>
+        /// A type definition for values that are sub-messages.
+        /// </summary>
         public static readonly FudgeMsgFieldType Instance = new FudgeMsgFieldType();
 
         FudgeMsgFieldType()
@@ -42,11 +45,13 @@ namespace Fudge.Types
             return value.GetSize(taxonomy);
         }
 
+        /// <inheritdoc/>
         public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             throw new NotSupportedException("Sub-messages can only be decoded from FudgeStreamParser.");
         }
 
+        /// <inheritdoc/>
         public override void WriteValue(BinaryWriter output, FudgeMsg value) //throws IOException
         {
             throw new NotSupportedException("Sub-messages can only be written using FudgeStreamWriter.");

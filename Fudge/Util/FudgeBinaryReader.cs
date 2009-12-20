@@ -31,6 +31,10 @@ namespace Fudge.Util
     /// </remarks>
     public class FudgeBinaryReader : BinaryNBOReader
     {
+        /// <summary>
+        /// Cosntructs a new <c>FudgeBinaryReader</c> on an input <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="input">Stream to read binary data from.</param>
         public FudgeBinaryReader(Stream input)
             : base(input, new ModifiedUTF8Encoding())
         {

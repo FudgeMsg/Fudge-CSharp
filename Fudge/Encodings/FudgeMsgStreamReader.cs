@@ -22,6 +22,9 @@ using Fudge.Types;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeMsgStreamReader</c> allows a <see cref="FudgeMsg"/> to be read as if it were a stream source of data.
+    /// </summary>
     public class FudgeMsgStreamReader : IFudgeStreamReader
     {
         // TODO t0rx 2009-11-13 -- What about envelopes?
@@ -32,10 +35,18 @@ namespace Fudge.Encodings
         private IEnumerator<FudgeMsg> messageSource;
         private FudgeMsg nextMessage;
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a given <see cref="FudgeMsg"/> for data.
+        /// </summary>
+        /// <param name="msg"><see cref="FudgeMsg"/> to provide as a stream.</param>
         public FudgeMsgStreamReader(FudgeMsg msg) : this(new FudgeMsg[] {msg})
         {
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a set of <see cref="FudgeMsg"/>s for data.
+        /// </summary>
+        /// <param name="messages">Set <see cref="FudgeMsg"/>s to provide as a stream.</param>
         public FudgeMsgStreamReader(IEnumerable<FudgeMsg> messages)
         {
             messageSource = messages.GetEnumerator();
@@ -44,6 +55,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public bool HasNext
         {
             get
@@ -60,6 +72,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public FudgeStreamElement MoveNext()
         {
             if (currentState == null)
@@ -106,26 +119,31 @@ namespace Fudge.Encodings
             return element;
         }
 
+        /// <inheritdoc/>
         public FudgeStreamElement CurrentElement
         {
             get { return element; }
         }
 
+        /// <inheritdoc/>
         public FudgeFieldType FieldType
         {
             get { return field.Type; }
         }
 
+        /// <inheritdoc/>
         public int? FieldOrdinal
         {
             get { return field.Ordinal; }
         }
 
+        /// <inheritdoc/>
         public string FieldName
         {
             get { return field.Name; }
         }
 
+        /// <inheritdoc/>
         public object FieldValue
         {
             get { return field.Value; }

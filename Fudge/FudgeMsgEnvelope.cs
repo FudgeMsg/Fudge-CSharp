@@ -31,6 +31,9 @@ namespace Fudge
         private readonly FudgeMsg message;
         private readonly int version;
 
+        /// <summary>
+        /// Constructs a new envelope containing an emtpy message.
+        /// </summary>
         public FudgeMsgEnvelope()
             : this(new FudgeMsg())
         {

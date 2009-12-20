@@ -98,7 +98,7 @@ namespace Fudge
 
         #region ICloneable Members
 
-        /// <inheritdoc cref="System.Object.Clone()" />
+        /// <inheritdoc cref="ICloneable.Clone" />
         public virtual object Clone()
         {
             return MemberwiseClone();

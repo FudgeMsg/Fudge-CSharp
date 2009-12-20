@@ -20,17 +20,34 @@ using System.Text;
 
 namespace Fudge
 {
+    /// <summary>
+    /// <c>FudgeStreamPipe</c> is used to automatically push all data read from an input data stream via an <see cref="IFudgeStreamReader"/>
+    /// to an output data stream via an <see cref="IFudgeStreamWriter"/>.
+    /// </summary>
     public class FudgeStreamPipe
     {
         private readonly IFudgeStreamReader reader;
         private readonly IFudgeStreamWriter writer;
 
+        /// <summary>
+        /// Constructs a new pipe from an <see cref="IFudgeStreamReader"/> to an <see cref="IFudgeStreamWriter"/>.
+        /// </summary>
+        /// <param name="reader"><see cref="IFudgeStreamReader"/> from which to fetch the data.</param>
+        /// <param name="writer"><see cref="IFudgeStreamWriter"/> to output the data.</param>
         public FudgeStreamPipe(IFudgeStreamReader reader, IFudgeStreamWriter writer)
         {
             this.reader = reader;
             this.writer = writer;
         }
 
+        /// <summary>
+        /// Passes all elements from the <see cref="IFudgeStreamReader"/> to the <see cref="IFudgeStreamWriter"/> until the
+        /// reader indicates it has no more data.
+        /// </summary>
+        /// <remarks>
+        /// If the reader is processing an asynchronous source (e.g. a socket) then <c>Process()</c> may block whilst the
+        /// reader is waiting for data.
+        /// </remarks>
         public void Process()
         {
             while (reader.HasNext)
@@ -39,6 +56,9 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Reads the next complete message from the <see cref="IFudgeStreamReader"/> and sends it to the <see cref="IFudgeStreamWriter"/>.
+        /// </summary>
         public void ProcessOne()
         {
             while (reader.HasNext)

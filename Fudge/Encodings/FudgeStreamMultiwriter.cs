@@ -28,6 +28,10 @@ namespace Fudge.Encodings
     {
         private readonly IFudgeStreamWriter[] writers;
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeStreamMultiwriter"/>.
+        /// </summary>
+        /// <param name="writers">The set of <see cref="IFudgeStreamWriter"/>s that this <see cref="FudgeStreamMultiwriter"/> will use.</param>
         public FudgeStreamMultiwriter(params IFudgeStreamWriter[] writers)
         {
             this.writers = writers;
@@ -35,36 +39,42 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamWriter Members
 
+        /// <inheritdoc/>
         public void StartMessage()
         {
             foreach (var writer in writers)
                 writer.StartMessage();
         }
 
+        /// <inheritdoc/>
         public void StartSubMessage(string name, int? ordinal)
         {
             foreach (var writer in writers)
                 writer.StartSubMessage(name, ordinal);
         }
 
+        /// <inheritdoc/>
         public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
         {
             foreach (var writer in writers)
                 writer.WriteField(name, ordinal, type, value);
         }
 
+        /// <inheritdoc/>
         public void WriteFields(IEnumerable<IFudgeField> fields)
         {
             foreach (var writer in writers)
                 writer.WriteFields(fields);
         }
 
+        /// <inheritdoc/>
         public void EndSubMessage()
         {
             foreach (var writer in writers)
                 writer.EndSubMessage();
         }
 
+        /// <inheritdoc/>
         public void EndMessage()
         {
             foreach (var writer in writers)

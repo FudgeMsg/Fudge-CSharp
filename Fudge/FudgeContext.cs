@@ -51,6 +51,9 @@ namespace Fudge
         private ITaxonomyResolver taxonomyResolver;
         private FudgeStreamParser parser;
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeContext"/>.
+        /// </summary>
         public FudgeContext()
         {
             parser = new FudgeStreamParser(this);
@@ -90,6 +93,11 @@ namespace Fudge
             return new FudgeMsg(this);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="FudgeMsg"/> containing the given fields.
+        /// </summary>
+        /// <param name="fields">Fields to add to message.</param>
+        /// <returns>The new <see cref="FudgeMsg"/>.</returns>
         public FudgeMsg NewMessage(params IFudgeField[] fields)
         {
             return new FudgeMsg(this, fields);
@@ -105,6 +113,11 @@ namespace Fudge
             Serialize(msg, null, new FudgeBinaryWriter(s));
         }
 
+        /// <summary>
+        /// Encodes a <c>FudgeMsg</c> object to a <see cref="BinaryWriter"/> without any taxonomy reference.
+        /// </summary>
+        /// <param name="msg">The message to serialise</param>
+        /// <param name="bw">The <see cref="BinaryWriter"/> to serialise to</param>
         public void Serialize(FudgeMsg msg, BinaryWriter bw)
         {
             Serialize(msg, null, bw);
@@ -123,6 +136,14 @@ namespace Fudge
             Serialize(msg, taxonomyId, new FudgeBinaryWriter(s));
         }
 
+        /// <summary>
+        /// Encodes a <c>FudgeMsg</c> object to a <c>Stream</c> with an optional taxonomy reference.
+        /// If a taxonomy is supplied it may be used to optimize the output by writing ordinals instead
+        /// of field names.
+        /// </summary>
+        /// <param name="msg">the <c>FudgeMessage</c> to write</param>
+        /// <param name="taxonomyId">the identifier of the taxonomy to use. Specify <c>null</c> for no taxonomy</param>
+        /// <param name="bw">The <see cref="BinaryWriter"/> to serialise to</param>
         public void Serialize(FudgeMsg msg, short? taxonomyId, BinaryWriter bw)
         {
             try

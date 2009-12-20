@@ -25,6 +25,14 @@ using System.IO;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeXmlStreamReader</c> provides a way of reading XML data as a Fudge stream.
+    /// </summary>
+    /// <remarks>
+    /// There is not a 1-1 mapping between XML structure and Fudge message structure.  In particular, attributes are treated in the same way as
+    /// child elements (i.e. as fields of the Fudge message), so a message that is read from a <see cref="FudgeXmlStreamReader"/> and written
+    /// to a <see cref="FudgeXmlStreamWriter"/> may not come out identical.
+    /// </remarks>
     public class FudgeXmlStreamReader : FudgeStreamReaderBase
     {
         private readonly XmlReader reader;
@@ -33,6 +41,10 @@ namespace Fudge.Encodings
         private readonly Queue<KeyValuePair<string, string>> pendingAttributes = new Queue<KeyValuePair<string, string>>();
         private bool oneTokenAhead = false;
 
+        /// <summary>
+        /// Constructs a new <c>FudgeXmlStreamReader</c> using a given <see cref="XmlReader"/> as the source of the XML data.
+        /// </summary>
+        /// <param name="reader"><see cref="XmlReader"/> providing the XML data</param>
         public FudgeXmlStreamReader(XmlReader reader)
         {
             if (reader == null)
@@ -40,6 +52,10 @@ namespace Fudge.Encodings
             this.reader = reader;
         }
 
+        /// <summary>
+        /// Constructs a new <c>FudgeXmlStreamReader</c> with the XML data coming from a string.
+        /// </summary>
+        /// <param name="xml"></param>
         public FudgeXmlStreamReader(string xml)
             : this(XmlReader.Create(new StringReader(xml), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment }))
         {
@@ -47,6 +63,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public override bool HasNext
         {
             get
@@ -58,6 +75,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public override FudgeStreamElement MoveNext()
         {
             CurrentElement = FudgeStreamElement.NoElement;

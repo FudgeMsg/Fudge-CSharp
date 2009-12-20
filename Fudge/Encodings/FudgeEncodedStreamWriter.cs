@@ -24,6 +24,12 @@ using System.Diagnostics;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeEncodedStreamWriter</c> writes Fudge messages using the Fudge Encoding Specification.
+    /// </summary>
+    /// <remarks>
+    /// The full specification can be found at http://wiki.fudgemsg.org/display/FDG/Encoding+Specification
+    /// </remarks>
     public class FudgeEncodedStreamWriter : IFudgeStreamWriter
     {
         // TODO t0rx 2009-11-12 -- Currently using FudgeMsg to hold fields because of size, but need to do better.  See FRJ-23
@@ -33,6 +39,10 @@ namespace Fudge.Encodings
         private FudgeMsg currentMessage;
         private const int EnvelopeVersion = 0;      // TODO t0rx 2009-11-12 -- Is this the Fudge encoding version, or what?
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeEncodedStreamWriter"/> using a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use to write messages.</param>
         public FudgeEncodedStreamWriter(FudgeContext context)
         {
             if (context == null)
@@ -42,12 +52,19 @@ namespace Fudge.Encodings
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets and sets the taxonomy ID used for messages.
+        /// </summary>
         public short? TaxonomyId
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// Resets the <see cref="FudgeEncodedStreamWriter"/> to use a different <see cref="Stream"/> for output.
+        /// </summary>
+        /// <param name="stream"></param>
         public void Reset(Stream stream)
         {
             if (stream == null)
@@ -57,6 +74,10 @@ namespace Fudge.Encodings
             Reset(new FudgeBinaryWriter(stream));
         }
 
+        /// <summary>
+        /// Resets the <see cref="FudgeEncodedStreamWriter"/> to use a different <see cref="BinaryWriter"/> for output.
+        /// </summary>
+        /// <param name="writer"><see cref="BinaryWriter"/> to use for output.</param>
         public void Reset(BinaryWriter writer)
         {
             if (writer == null)
@@ -68,10 +89,12 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamWriter Members
 
+        /// <inheritdoc/>
         public void StartMessage()
         {
         }
 
+        /// <inheritdoc/>
         public void StartSubMessage(string name, int? ordinal)
         {
             var newMsg = new FudgeMsg();
@@ -83,11 +106,13 @@ namespace Fudge.Encodings
             currentMessage = newMsg;
         }
 
+        /// <inheritdoc/>
         public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
         {
             currentMessage.Add(name, ordinal, type, value);
         }
 
+        /// <inheritdoc/>
         public void WriteFields(IEnumerable<IFudgeField> fields)
         {
             foreach (var field in fields)
@@ -96,6 +121,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public void EndSubMessage()
         {
             if (messageStack.Count == 0)
@@ -120,6 +146,7 @@ namespace Fudge.Encodings
             currentMessage = newCurrentMessage;
         }
 
+        /// <inheritdoc/>
         public void EndMessage()
         {
             // Noop

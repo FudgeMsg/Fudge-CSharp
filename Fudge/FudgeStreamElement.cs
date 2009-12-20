@@ -22,12 +22,12 @@ using System.Text;
 namespace Fudge
 {
     /// <summary>
-    /// Used by <see cref="IFudgeStreamReader"/>s to indicate the type of element at the current position
-    /// in a stream.
+    /// <c>FudgeStreamElement</c> indicates the type of the next element in a Fudge data stream read from an
+    /// <see cref="IFudgeStreamReader"/> or written to an <see cref="IFudgeStreamWriter"/>.
     /// </summary>
     public enum FudgeStreamElement
     {
-        /// <summary>State before message has started, or at end of stream.</summary>
+        /// <summary>Indicates stream has not current element.</summary>
         NoElement,
         /// <summary>Issued when a new outermost message is started.</summary>
         MessageStart,
