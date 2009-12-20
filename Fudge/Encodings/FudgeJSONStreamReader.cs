@@ -36,11 +36,25 @@ namespace Fudge.Encodings
         private bool done = false;
         private Stack<State> stack = new Stack<State>();
 
+        /// <summary>
+        /// Constructs a <see cref="FudgeJSONStreamReader"/> on a given <see cref="TextReader"/>.
+        /// </summary>
+        /// <param name="reader"><see cref="TextReader"/> providing the data.</param>
         public FudgeJSONStreamReader(TextReader reader)
         {
             this.reader = reader;
         }
 
+        /// <summary>
+        /// Constructs a <see cref="FudgeJSONStreamReader"/> using a <c>string</c> for the underlying data.
+        /// </summary>
+        /// <param name="text">Text containing JSON message.</param>
+        /// <example>This example shows a simple JSON string being converted into a <see cref="FudgeMsg"/> object:
+        /// <code>
+        /// string json = @"{""name"" : ""fred""}";
+        /// FudgeMsg msg = new FudgeJSONStreamReader(json).ReadToMsg();
+        /// </code>
+        /// </example>
         public FudgeJSONStreamReader(string text)
             : this(new StringReader(text))
         {
@@ -48,6 +62,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public override bool HasNext
         {
             get
@@ -56,6 +71,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public override FudgeStreamElement MoveNext()
         {
             Token token;

@@ -25,6 +25,9 @@ namespace Fudge.Encodings
     /// </summary>
     public abstract class FudgeStreamReaderBase : IFudgeStreamReader
     {
+        /// <summary>
+        /// Cosntructs a new <c>FudgeStreamReaderBase</c>
+        /// </summary>
         protected FudgeStreamReaderBase()
         {
             CurrentElement = FudgeStreamElement.NoElement;
@@ -32,34 +35,41 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamReader Members
 
-        public abstract bool HasNext {get;}
+        /// <inheritdoc/>
+        public abstract bool HasNext { get; }
 
+        /// <inheritdoc/>
         public abstract FudgeStreamElement MoveNext();
 
+        /// <inheritdoc/>
         public FudgeStreamElement CurrentElement
         {
             get;
             protected set;
         }
 
+        /// <inheritdoc/>
         public FudgeFieldType FieldType
         {
             get;
             protected set;
         }
 
+        /// <inheritdoc/>
         public int? FieldOrdinal
         {
             get;
             protected set;
         }
 
+        /// <inheritdoc/>
         public string FieldName
         {
             get;
             protected set;
         }
 
+        /// <inheritdoc/>
         public object FieldValue
         {
             get;
