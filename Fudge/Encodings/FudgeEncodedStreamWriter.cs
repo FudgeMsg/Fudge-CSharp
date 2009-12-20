@@ -68,6 +68,10 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamWriter Members
 
+        public void StartMessage()
+        {
+        }
+
         public void StartSubMessage(string name, int? ordinal)
         {
             var newMsg = new FudgeMsg();
@@ -116,7 +120,7 @@ namespace Fudge.Encodings
             currentMessage = newCurrentMessage;
         }
 
-        public void End()
+        public void EndMessage()
         {
             // Noop
         }

@@ -284,7 +284,7 @@ namespace Fudge.Encodings
          */
         protected void ConsumeMessageEnvelope() //throws IOException
         {
-            CurrentElement = FudgeStreamElement.MessageEnvelope;
+            CurrentElement = FudgeStreamElement.MessageStart;
             processingDirectives = Reader.ReadByte();
             schemaVersion = Reader.ReadByte();
             taxonomyId = Reader.ReadInt16();

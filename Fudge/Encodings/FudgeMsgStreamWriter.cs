@@ -24,22 +24,27 @@ namespace Fudge.Encodings
     {
         private readonly Stack<FudgeMsg> msgStack = new Stack<FudgeMsg>();
         private readonly FudgeContext context;
-        private readonly FudgeMsg top;
+        private FudgeMsg top;
         private FudgeMsg current;
+        private readonly List<FudgeMsg> messages = new List<FudgeMsg>();
 
         public FudgeMsgStreamWriter()
         {
             context = new FudgeContext();
-            top = context.NewMessage();
-            current = top;
         }
 
-        public FudgeMsg Message
+        public IList<FudgeMsg> Messages
         {
-            get { return top; }
+            get { return messages; }
         }
 
         #region IFudgeStreamWriter Members
+
+        public void StartMessage()
+        {
+            top = context.NewMessage();
+            current = top;
+        }
 
         public void StartSubMessage(string name, int? ordinal)
         {
@@ -66,14 +71,20 @@ namespace Fudge.Encodings
         {
             if (msgStack.Count == 0)
             {
-                throw new InvalidOperationException("Ending more messages than started");
+                throw new InvalidOperationException("Ending more sub-messages than started");
             }
             current = msgStack.Pop();
         }
 
-        public void End()
+        public void EndMessage()
         {
-            // Noop
+            if (msgStack.Count > 0)
+            {
+                throw new InvalidOperationException("Ending message prematurely");
+            }
+            messages.Add(top);
+            top = null;
+            current = null;
         }
 
         #endregion

@@ -29,10 +29,17 @@ namespace Fudge.Encodings
         private State currentState;
         private FudgeStreamElement element = FudgeStreamElement.NoElement;
         private IFudgeField field;
+        private IEnumerator<FudgeMsg> messageSource;
+        private FudgeMsg nextMessage;
 
-        public FudgeMsgStreamReader(FudgeMsg msg)
+        public FudgeMsgStreamReader(FudgeMsg msg) : this(new FudgeMsg[] {msg})
         {
-            currentState = new State(msg);
+        }
+
+        public FudgeMsgStreamReader(IEnumerable<FudgeMsg> messages)
+        {
+            messageSource = messages.GetEnumerator();
+            currentState = null;
         }
 
         #region IFudgeStreamReader Members
@@ -41,19 +48,46 @@ namespace Fudge.Encodings
         {
             get
             {
-                return (stack.Count > 0 || currentState.Fields.Count > 0);
+                if (stack.Count > 0 || currentState != null || nextMessage != null)
+                    return true;
+
+                // See if there's another message
+                if (!messageSource.MoveNext())
+                    return false;
+
+                nextMessage = messageSource.Current;
+                return true;
             }
         }
 
         public FudgeStreamElement MoveNext()
         {
-            if (currentState.Fields.Count == 0)
+            if (currentState == null)
+            {
+                if (!HasNext)       // Will fetch the next if required
+                {
+                    element = FudgeStreamElement.NoElement;
+                }
+                else
+                {
+                    currentState = new State(nextMessage);
+                    nextMessage = null;
+                    element = FudgeStreamElement.MessageStart;
+                }
+            }
+            else if (currentState.Fields.Count == 0)
             {
                 if (stack.Count == 0)
+                {
+                    // Finished the message
                     currentState = null;
+                    element = FudgeStreamElement.MessageEnd;
+                }
                 else
+                {
                     currentState = stack.Pop();
-                return FudgeStreamElement.SubmessageFieldEnd;
+                    element = FudgeStreamElement.SubmessageFieldEnd;
+                }
             }
             else
             {
@@ -62,13 +96,14 @@ namespace Fudge.Encodings
                 {
                     stack.Push(currentState);
                     currentState = new State((FudgeMsg)field.Value);
-                    return FudgeStreamElement.SubmessageFieldStart;
+                    element = FudgeStreamElement.SubmessageFieldStart;
                 }
                 else
                 {
-                    return FudgeStreamElement.SimpleField;
+                    element = FudgeStreamElement.SimpleField;
                 }
             }
+            return element;
         }
 
         public FudgeStreamElement CurrentElement

@@ -1,4 +1,4 @@
-﻿/*
+﻿/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -82,7 +83,7 @@ namespace Fudge.Tests.Unit.Encodings
             var writer = new FudgeMsgStreamWriter();
             new FudgeStreamPipe(reader, writer).Process();
 
-            var msg = writer.Message;
+            var msg = writer.Messages[0];
 
             Assert.Equal("Our House", msg.GetMessage("address").GetString("line1"));
 
@@ -90,11 +91,27 @@ namespace Fudge.Tests.Unit.Encodings
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb);
             var reader2 = new FudgeMsgStreamReader(msg);
-            var writer2 = new FudgeXmlStreamWriter(xmlWriter, "msg");
+            var writer2 = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
             new FudgeStreamPipe(reader2, writer2).Process();
 
             var xml2 = sb.ToString();
             Assert.Equal(xml, xml2);
+        }
+
+        [Fact]
+        public void MultipleMessages()
+        {
+            string inputXml = "<msg><name>Fred</name></msg><msg><name>Bob</name></msg>";
+            var reader = new FudgeXmlStreamReader(inputXml);
+
+            var sb = new StringBuilder();
+            var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings {OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Fragment});
+            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+            var multiwriter = new FudgeStreamMultiwriter(new DebuggingWriter(), writer);
+            new FudgeStreamPipe(reader, multiwriter).Process();
+            string outputXml = sb.ToString();
+
+            Assert.Equal(inputXml, outputXml);
         }
     }
 }

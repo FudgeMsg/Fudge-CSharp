@@ -38,11 +38,19 @@ namespace Fudge.Encodings
 
             this.writer = writer;
             this.outerElementName = outerElementName;
-
-            writer.WriteStartElement(outerElementName);
         }
 
+        /// <summary>
+        /// If true, the <c>FudgeXmlStreamWriter</c> will flush the <see cref="XmlWriter"/> whenever a top-level message is completed.
+        /// </summary>
+        public bool AutoFlushOnMessageEnd { get; set; }
+
         #region IFudgeStreamWriter Members
+
+        public void StartMessage()
+        {
+            writer.WriteStartElement(outerElementName);
+        }
 
         public void StartSubMessage(string name, int? ordinal)
         {
@@ -81,10 +89,12 @@ namespace Fudge.Encodings
             writer.WriteEndElement();
         }
 
-        public void End()
+        public void EndMessage()
         {
             writer.WriteEndElement();
-            writer.Flush();
+
+            if (AutoFlushOnMessageEnd)
+                writer.Flush();
         }
 
         #endregion

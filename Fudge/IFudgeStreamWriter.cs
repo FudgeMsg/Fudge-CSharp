@@ -22,7 +22,7 @@ namespace Fudge
 {
     public interface IFudgeStreamWriter
     {
-        // TODO t0rx 2009-11-12 -- Figure out how to handle the envelope
+        void StartMessage();
 
         void StartSubMessage(string name, int? ordinal);
 
@@ -32,6 +32,6 @@ namespace Fudge
 
         void EndSubMessage();
 
-        void End();
+        void EndMessage();
     }
 }

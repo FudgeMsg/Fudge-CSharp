@@ -29,6 +29,11 @@ namespace Fudge.Tests.Unit.Encodings
     {
         #region IFudgeStreamWriter Members
 
+        public void StartMessage()
+        {
+            Debug.WriteLine("Start message");
+        }
+
         public void StartSubMessage(string name, int? ordinal)
         {
             Debug.WriteLine(string.Format("Start sub-message (\"{0}\", {1})", name, ordinal));
@@ -49,9 +54,9 @@ namespace Fudge.Tests.Unit.Encodings
             Debug.WriteLine("End sub-message");
         }
 
-        public void End()
+        public void EndMessage()
         {
-            Debug.WriteLine("End");
+            Debug.WriteLine("End message");
         }
 
         #endregion

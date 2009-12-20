@@ -36,9 +36,26 @@ namespace Fudge.Tests.Unit.Encodings
             var pipe = new FudgeStreamPipe(reader, writer);
             pipe.Process();
 
-            var newMsg = writer.Message;
+            var newMsg = writer.Messages[0];
 
             FudgeUtils.AssertAllFieldsMatch(msg, newMsg);
+        }
+
+        [Fact]
+        public void MultipleMessages()
+        {
+            var context = new FudgeContext();
+
+            var msg1 = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
+            var msg2 = StandardFudgeMessages.CreateMessageAllNames(context);
+            var reader = new FudgeMsgStreamReader(new FudgeMsg[] {msg1, msg2});
+            var writer = new FudgeMsgStreamWriter();
+
+            var pipe = new FudgeStreamPipe(reader, writer);
+            pipe.Process();
+
+            FudgeUtils.AssertAllFieldsMatch(msg1, writer.Messages[0]);
+            FudgeUtils.AssertAllFieldsMatch(msg2, writer.Messages[1]);
         }
     }
 }

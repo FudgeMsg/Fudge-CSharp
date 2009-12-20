@@ -31,9 +31,9 @@ namespace Fudge.Encodings
         {
             var writer = new FudgeMsgStreamWriter();
             var pipe = new FudgeStreamPipe(reader, writer);
-            pipe.Process();
+            pipe.ProcessOne();
 
-            return writer.Message;
+            return writer.Messages[0];
         }
     }
 }

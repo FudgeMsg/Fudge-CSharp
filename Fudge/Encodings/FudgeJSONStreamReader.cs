@@ -69,6 +69,8 @@ namespace Fudge.Encodings
                     throw new FudgeParseException("Expected '{' at start of JSON stream");
                 }
                 stack.Push(State.InObject);
+                CurrentElement = FudgeStreamElement.MessageStart;
+                return CurrentElement;
             }
 
             token = GetNextToken();
@@ -110,17 +112,20 @@ namespace Fudge.Encodings
 
         private void HandleObjectEnd(Token token)
         {
-            CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
-
             stack.Pop();
-            var top = stack.Peek();
-            if (top.IsInArray)
+            if (stack.Count == 0)
             {
-                SkipCommaPostValue(token.ToString());
+                CurrentElement = FudgeStreamElement.MessageEnd;
             }
             else
             {
-                CheckIfDone();
+                CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
+
+                var top = stack.Peek();
+                if (top.IsInArray)
+                {
+                    SkipCommaPostValue(token.ToString());
+                }
             }
         }
 
@@ -148,19 +153,6 @@ namespace Fudge.Encodings
         }
 
         private int Depth { get { return stack.Count; } }
-
-        private void CheckIfDone()
-        {
-            if (Depth == 1)
-            {
-                // Check to see if we're at the end
-                if (PeekNextToken() == Token.ObjectEnd)
-                {
-                    stack.Pop();
-                    done = true;
-                }
-            }
-        }
 
         private void HandleSimpleValue(Token token)
         {
@@ -222,7 +214,6 @@ namespace Fudge.Encodings
                 }
                 else if (token == Token.ObjectEnd)
                 {
-                    CheckIfDone();
                     return;
                 }
                 else
@@ -415,7 +406,6 @@ namespace Fudge.Encodings
                                     sb.Append('\t');
                                     break;
                                 case 'u':
-                                    // TODO 2009-12-18 t0rx -- Handle \u in JSON
                                     sb.Append(ReadUnicode());
                                     break;
                             }

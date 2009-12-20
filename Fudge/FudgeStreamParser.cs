@@ -58,7 +58,7 @@ namespace Fudge
             {
                 return null;
             }
-            if (element != FudgeStreamElement.MessageEnvelope)
+            if (element != FudgeStreamElement.MessageStart)
             {
                 throw new ArgumentException("First element in encoding stream wasn't a message element.");
             }

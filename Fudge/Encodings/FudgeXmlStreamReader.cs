@@ -31,38 +31,31 @@ namespace Fudge.Encodings
         private int depth = 0;
         private bool atEnd;
         private readonly Queue<KeyValuePair<string, string>> pendingAttributes = new Queue<KeyValuePair<string, string>>();
+        private bool oneTokenAhead = false;
 
         public FudgeXmlStreamReader(XmlReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException("reader");
             this.reader = reader;
-            Begin();
         }
 
-        public FudgeXmlStreamReader(string xml) : this(XmlReader.Create(new StringReader(xml)))
+        public FudgeXmlStreamReader(string xml)
+            : this(XmlReader.Create(new StringReader(xml), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment }))
         {
-        }
-
-        private void Begin()
-        {
-            // Move to first element
-            ReadNext();
-
-            // Now get inside the outermost message
-            while (true)
-            {
-                var element = MoveNext();
-                if (element == FudgeStreamElement.SubmessageFieldStart)
-                    break;
-            }
         }
 
         #region IFudgeStreamReader Members
 
         public override bool HasNext
         {
-            get { return !atEnd; }
+            get
+            {
+                if (oneTokenAhead)
+                    return true;
+                oneTokenAhead = ReadNext();
+                return oneTokenAhead;
+            }
         }
 
         public override FudgeStreamElement MoveNext()
@@ -75,7 +68,7 @@ namespace Fudge.Encodings
             }
             else
             {
-                while (!atEnd)
+                while (HasNext)
                 {
                     switch (reader.NodeType)
                     {
@@ -120,24 +113,17 @@ namespace Fudge.Encodings
 
         private void ConsumeEndElement()
         {
-            CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
-            depth--;
-            ReadNext();
-
-            // Check if we've reached the end of the message
-            CheckIfReachedEnd();
+            HandleEndDepth();
+            oneTokenAhead = false;
         }
 
-        private void CheckIfReachedEnd()
+        private void HandleEndDepth()
         {
-            if (depth == 1)
-            {
-                ReadToNextOfInterest();
-                if (reader.NodeType == XmlNodeType.EndElement)
-                {
-                    atEnd = true;
-                }
-            }
+            depth--;
+            if (depth > 0)
+                CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
+            else
+                CurrentElement = FudgeStreamElement.MessageEnd;
         }
 
         private void ConsumePendingAttribute()
@@ -145,9 +131,7 @@ namespace Fudge.Encodings
             var pair = pendingAttributes.Dequeue();
             if (pair.Key == null)
             {
-                CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
-                depth--;
-                CheckIfReachedEnd();                                    // Case of last field in outermost message (e.g. <msg><a b="c" d="e" /></msg>)
+                HandleEndDepth();
             }
             else
             {
@@ -188,7 +172,7 @@ namespace Fudge.Encodings
         private void ConsumeElement()
         {
             FieldName = reader.Name;
-            if (reader.IsEmptyElement && !reader.HasAttributes)
+            if (reader.IsEmptyElement && !reader.HasAttributes && depth > 0)
             {
                 FieldValue = IndicatorType.Instance;
                 CurrentElement = FudgeStreamElement.SimpleField;
@@ -213,7 +197,10 @@ namespace Fudge.Encodings
                 {
                     case XmlNodeType.Element:
                         // Must be in a message
-                        CurrentElement = FudgeStreamElement.SubmessageFieldStart;
+                        if (depth == 0)
+                            CurrentElement = FudgeStreamElement.MessageStart;
+                        else
+                            CurrentElement = FudgeStreamElement.SubmessageFieldStart;
                         depth++;
                         break;
                     case XmlNodeType.Text:
@@ -231,21 +218,19 @@ namespace Fudge.Encodings
         {
             CurrentElement = FudgeStreamElement.SimpleField;
             FieldValue = GetValue(reader.Value);
-            bool stop = false;
-            while (!atEnd)
+            while (true)
             {
                 if (!reader.Read())
                 {
                     // Bad XML?
                     throw new FudgeRuntimeException("XML ends prematurely at element " + FieldName);
                 }
-                if (stop)
-                    break;
 
                 if (reader.NodeType == XmlNodeType.EndElement)
                 {
                     // Read the next node and stop
-                    stop = true;
+                    oneTokenAhead = false;
+                    break;
                 }
                 else
                 {

@@ -35,6 +35,12 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamWriter Members
 
+        public void StartMessage()
+        {
+            foreach (var writer in writers)
+                writer.StartMessage();
+        }
+
         public void StartSubMessage(string name, int? ordinal)
         {
             foreach (var writer in writers)
@@ -59,10 +65,10 @@ namespace Fudge.Encodings
                 writer.EndSubMessage();
         }
 
-        public void End()
+        public void EndMessage()
         {
             foreach (var writer in writers)
-                writer.End();
+                writer.EndMessage();
         }
 
         #endregion

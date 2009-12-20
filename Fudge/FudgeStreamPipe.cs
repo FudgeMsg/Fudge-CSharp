@@ -35,8 +35,22 @@ namespace Fudge
         {
             while (reader.HasNext)
             {
+                ProcessOne();
+            }
+        }
+
+        public void ProcessOne()
+        {
+            while (reader.HasNext)
+            {
                 switch (reader.MoveNext())
                 {
+                    case FudgeStreamElement.MessageStart:
+                        writer.StartMessage();
+                        break;
+                    case FudgeStreamElement.MessageEnd:
+                        writer.EndMessage();
+                        return;                 // We're done now
                     case FudgeStreamElement.SimpleField:
                         writer.WriteField(reader.FieldName, reader.FieldOrdinal, reader.FieldType, reader.FieldValue);
                         break;
@@ -50,7 +64,6 @@ namespace Fudge
                         break;      // Unknown
                 }
             }
-            writer.End();
         }
     }
 }
