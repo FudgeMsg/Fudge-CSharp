@@ -30,6 +30,10 @@ namespace Fudge
     {
         private readonly FudgeContext fudgeContext;
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeStreamParser"/>.
+        /// </summary>
+        /// <param name="fudgeContext"></param>
         public FudgeStreamParser(FudgeContext fudgeContext)
         {
             if (fudgeContext == null)
@@ -39,16 +43,29 @@ namespace Fudge
             this.fudgeContext = fudgeContext;
         }
 
+        /// <summary>
+        /// Gets the <see cref="FudgeContext"/> used by the parser.
+        /// </summary>
         public FudgeContext FudgeContext
         {
             get { return fudgeContext; }
         }
 
+        /// <summary>
+        /// Parses a given stream.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <returns></returns>
         public FudgeMsgEnvelope Parse(Stream stream)
         {
             return Parse(new FudgeBinaryReader(stream));
         }
 
+        /// <summary>
+        /// Parses data from a given <see cref="BinaryReader"/>.
+        /// </summary>
+        /// <param name="binaryReader"></param>
+        /// <returns></returns>
         public FudgeMsgEnvelope Parse(BinaryReader binaryReader)
         {
             FudgeEncodedStreamReader reader = new FudgeEncodedStreamReader(FudgeContext);       // TODO t0rx 2009-11-12 -- In Fudge-Java this is retrieved from the context

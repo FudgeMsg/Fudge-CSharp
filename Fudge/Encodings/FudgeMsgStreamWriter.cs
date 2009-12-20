@@ -20,6 +20,9 @@ using System.Text;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeMsgStreamWriter</c> allows the streaming API to be used to construct <see cref="FudgeMsg"/>s.
+    /// </summary>
     public class FudgeMsgStreamWriter : IFudgeStreamWriter
     {
         private readonly Stack<FudgeMsg> msgStack = new Stack<FudgeMsg>();
@@ -27,13 +30,27 @@ namespace Fudge.Encodings
         private readonly FudgeMsg top;
         private FudgeMsg current;
 
-        public FudgeMsgStreamWriter()
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamWriter"/> which will use a default <see cref="FudgeContext"/>.
+        /// </summary>
+        public FudgeMsgStreamWriter() : this(new FudgeContext())
         {
-            context = new FudgeContext();
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamWriter"/> using a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use to construct messages.</param>
+        public FudgeMsgStreamWriter(FudgeContext context)
+        {
+            this.context = context;
             top = context.NewMessage();
             current = top;
         }
 
+        /// <summary>
+        /// Gets the constructed message.
+        /// </summary>
         public FudgeMsg Message
         {
             get { return top; }
@@ -41,6 +58,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamWriter Members
 
+        /// <inheritdoc/>
         public void StartSubMessage(string name, int? ordinal)
         {
             msgStack.Push(current);
@@ -49,11 +67,13 @@ namespace Fudge.Encodings
             current = newMsg;
         }
 
+        /// <inheritdoc/>
         public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
         {
             current.Add(name, ordinal, type, value);
         }
 
+        /// <inheritdoc/>
         public void WriteFields(IEnumerable<IFudgeField> fields)
         {
             foreach (var field in fields)
@@ -62,6 +82,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public void EndSubMessage()
         {
             if (msgStack.Count == 0)
@@ -71,6 +92,7 @@ namespace Fudge.Encodings
             current = msgStack.Pop();
         }
 
+        /// <inheritdoc/>
         public void End()
         {
             // Noop

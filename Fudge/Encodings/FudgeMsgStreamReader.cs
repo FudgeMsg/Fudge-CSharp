@@ -22,6 +22,9 @@ using Fudge.Types;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeMsgStreamReader</c> allows a <see cref="FudgeMsg"/> to be read as if it were a stream source of data.
+    /// </summary>
     public class FudgeMsgStreamReader : IFudgeStreamReader
     {
         // TODO t0rx 2009-11-13 -- What about envelopes?
@@ -30,6 +33,10 @@ namespace Fudge.Encodings
         private FudgeStreamElement element = FudgeStreamElement.NoElement;
         private IFudgeField field;
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a given <see cref="FudgeMsg"/> for data.
+        /// </summary>
+        /// <param name="msg"><see cref="FudgeMsg"/> to provide as a stream.</param>
         public FudgeMsgStreamReader(FudgeMsg msg)
         {
             currentState = new State(msg);
@@ -37,6 +44,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public bool HasNext
         {
             get
@@ -45,6 +53,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public FudgeStreamElement MoveNext()
         {
             if (currentState.Fields.Count == 0)
@@ -71,26 +80,31 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public FudgeStreamElement CurrentElement
         {
             get { return element; }
         }
 
+        /// <inheritdoc/>
         public FudgeFieldType FieldType
         {
             get { return field.Type; }
         }
 
+        /// <inheritdoc/>
         public int? FieldOrdinal
         {
             get { return field.Ordinal; }
         }
 
+        /// <inheritdoc/>
         public string FieldName
         {
             get { return field.Name; }
         }
 
+        /// <inheritdoc/>
         public object FieldValue
         {
             get { return field.Value; }
