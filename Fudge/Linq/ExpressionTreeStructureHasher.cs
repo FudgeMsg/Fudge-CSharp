@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -30,11 +31,19 @@ namespace Fudge.Linq
         private readonly Expression expression;
         private int currentHash;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="e"></param>
         public ExpressionTreeStructureHasher(Expression e)
         {
             this.expression = e;
         }
 
+        /// <summary>
+        /// Computes the hash of the expression tree.
+        /// </summary>
+        /// <returns></returns>
         public int ComputeHash()
         {
             currentHash = 11;        // Starter value
@@ -44,11 +53,17 @@ namespace Fudge.Linq
             return currentHash;
         }
 
+        /// <summary>
+        /// Computes the hash of a supplied expression tree.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns>Tree to calculate the hash for.</returns>
         public static int ComputeHash(Expression e)
         {
             return new ExpressionTreeStructureHasher(e).ComputeHash();
         }
 
+        /// <inheritdoc/>
         protected override Expression Visit(Expression exp)
         {
             if (exp == null)

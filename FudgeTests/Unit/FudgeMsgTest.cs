@@ -24,10 +24,12 @@ namespace Fudge.Tests.Unit
 {
     public class FudgeMsgTest
     {
+        private static readonly FudgeContext fudgeContext = new FudgeContext();
+
         [Fact]
         public void LookupByNameSingleValue()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             IFudgeField field = null;
             IList<IFudgeField> fields = null;
 
@@ -62,7 +64,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void LookupByNameMultipleValues()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             IFudgeField field = null;
             IList<IFudgeField> fields = null;
 
@@ -97,7 +99,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesNamesMatch()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
 
             Assert.Equal((sbyte)5, msg.GetSByte("byte"));
             Assert.Equal((sbyte)5, msg.GetSByte("Byte"));
@@ -125,7 +127,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesNamesNoMatch()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
 
             Assert.Throws<OverflowException>(() => msg.GetSByte("int"));
             Assert.Throws<OverflowException>(() => msg.GetShort("int"));
@@ -138,7 +140,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesNoNames()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
 
             Assert.Null(msg.GetSByte("foobar"));
             Assert.Null(msg.GetShort("foobar"));
@@ -152,7 +154,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AsQueriesToLongNames()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
 
             Assert.Equal((long?)((sbyte)5), msg.GetLong("byte"));
             Assert.Equal((long?)((sbyte)5), msg.GetLong("Byte"));
@@ -179,7 +181,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void GetValueTyped()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             long longValue = ((long)int.MaxValue) + 5;
             Assert.Equal(longValue, msg.GetValue<long>("long"));
             Assert.Equal(5, msg.GetValue<long>("byte"));
@@ -188,7 +190,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AsQueriesToLongNoNames()        // TODO t0rx 2009-08-31 -- This test from Fudge-Java doesn't make sense
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
 
             Assert.Null(msg.GetSByte("foobar"));
             Assert.Null(msg.GetShort("foobar"));
@@ -204,7 +206,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesOrdinalsMatch()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals(fudgeContext);
 
             Assert.Equal((sbyte)5, msg.GetSByte((short)3));
             Assert.Equal((sbyte)5, msg.GetSByte((short)4));
@@ -232,7 +234,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactQueriesOrdinalsNoMatch()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals(fudgeContext);
 
             Assert.Throws<OverflowException>(() => msg.GetSByte(7));
             Assert.Throws<OverflowException>(() => msg.GetShort(7));
@@ -245,7 +247,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void PrimitiveExactOrdinalsNoOrdinals()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals(fudgeContext);
 
             Assert.Null(msg.GetSByte((short)100));
             Assert.Null(msg.GetShort((short)100));
@@ -259,7 +261,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AsQueriesToLongOrdinals()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllOrdinals(fudgeContext);
 
             Assert.Equal((long)((sbyte)5), msg.GetLong((short)3));
             Assert.Equal((long)((sbyte)5), msg.GetLong((short)4));
@@ -285,7 +287,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void ToByteArray()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             byte[] bytes = msg.ToByteArray();
             Assert.NotNull(bytes);
             Assert.True(bytes.Length > 10);
@@ -303,7 +305,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void FixedLengthByteArrays()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllByteArrayLengths();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllByteArrayLengths(fudgeContext);
             Assert.Same(ByteArrayFieldType.Length4Instance, msg.GetByName("byte[4]").Type);
             Assert.Same(ByteArrayFieldType.Length8Instance, msg.GetByName("byte[8]").Type);
             Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("byte[16]").Type);
@@ -329,12 +331,15 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void SecondaryTypes()
         {
+            FudgeContext context = new FudgeContext();
+
             var guidType = new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray());
             var typeDictionary = new FudgeTypeDictionary();
             typeDictionary.AddType(guidType);
+            context.TypeDictionary = typeDictionary;
 
             Guid guid = Guid.NewGuid();
-            FudgeMsg msg = new FudgeMsg(typeDictionary);
+            FudgeMsg msg = new FudgeMsg(context);
             msg.Add("guid", guid);
 
             Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("guid").Type);
@@ -346,7 +351,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void Iterable()
         {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             int fieldCount = 0;
             foreach (IFudgeField field in msg)
             {
@@ -358,13 +363,32 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void IterableContainer()
         {
-            IFudgeFieldContainer msg = StandardFudgeMessages.CreateMessageAllNames();
+            IFudgeFieldContainer msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             int fieldCount = 0;
             foreach (IFudgeField field in msg)
             {
                 fieldCount++;
             }
             Assert.Equal(msg.GetNumFields(), fieldCount);
+        }
+
+        [Fact]
+        public void AddingFieldContainerCopiesFields()
+        {
+            var msg = new FudgeMsg();
+
+            // Add a normal sub-message (shouldn't copy)
+            IFudgeFieldContainer sub1 = new FudgeMsg(new Field("age", 37));
+            msg.Add("sub1", sub1);
+            Assert.Same(sub1, msg.GetValue("sub1"));
+
+            // Add a sub-message that isn't a FudgeMsg (should copy)
+            IFudgeFieldContainer sub2 = (IFudgeFieldContainer)new Field("dummy", new Field("colour", "blue")).Value;
+            Assert.IsNotType<FudgeMsg>(sub2);       // Just making sure
+            msg.Add("sub2", sub2);
+            Assert.NotSame(sub2, msg.GetValue("sub2"));
+            Assert.IsType<FudgeMsg>(msg.GetValue("sub2"));
+            Assert.Equal("blue", msg.GetMessage("sub2").GetString("colour"));
         }
 
         [Fact]
@@ -383,7 +407,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void GetMessageMethodsFRN5()
         {
-            var msg = StandardFudgeMessages.CreateMessageWithSubMsgs();
+            var msg = StandardFudgeMessages.CreateMessageWithSubMsgs(fudgeContext);
             Assert.Null(msg.GetMessage(42));
             Assert.Null(msg.GetMessage("No Such Field"));
             Assert.True(msg.GetMessage("sub1") is IFudgeFieldContainer);

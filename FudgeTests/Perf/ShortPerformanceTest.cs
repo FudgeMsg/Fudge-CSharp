@@ -31,6 +31,7 @@ namespace Fudge.Tests.Perf
     public class ShortPerformanceTest
     {
         private const int HOT_SPOT_WARMUP_CYCLES = 1000;
+        private static readonly FudgeContext fudgeContext = new FudgeContext();
 
         public ShortPerformanceTest()
         {
@@ -181,13 +182,13 @@ namespace Fudge.Tests.Perf
                 msg.Add(4, tick.BidVolume);
                 msg.Add(5, tick.Timestamp);
             }
-            FudgeStreamEncoder.WriteMsg(bw, msg);
+            //FudgeStreamEncoder.WriteMsg(bw, msg);     // TODO t0rx 2009-11-12 -- Put back in performance test
 
             byte[] data = outputStream.ToArray();
 
             MemoryStream inputstream = new MemoryStream(data);
             var br = new FudgeBinaryReader(inputstream);
-            msg = FudgeStreamDecoder.ReadMsg(br).Message;
+            //msg = FudgeStreamDecoder.ReadMsg(br).Message;     // TODO t0rx 2009-11-12 -- Put back in performance test
 
             tick = new SmallFinancialTick();
             if (useOrdinals)

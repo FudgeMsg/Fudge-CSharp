@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,30 +12,156 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 using Fudge.Taxon;
+using Fudge.Util;
 using System.Diagnostics;
 
-namespace Fudge
+namespace Fudge.Encodings
 {
-    public class FudgeStreamEncoder
+    /// <summary>
+    /// <c>FudgeEncodedStreamWriter</c> writes Fudge messages using the Fudge Encoding Specification.
+    /// </summary>
+    /// <remarks>
+    /// The full specification can be found at http://wiki.fudgemsg.org/display/FDG/Encoding+Specification
+    /// </remarks>
+    public class FudgeEncodedStreamWriter : IFudgeStreamWriter
     {
-        public static void WriteMsg(BinaryWriter bw, FudgeMsg msg) //throws IOException
+        // TODO t0rx 2009-11-12 -- Currently using FudgeMsg to hold fields because of size, but need to do better.  See FRJ-23
+        private readonly FudgeContext context;
+        private BinaryWriter writer;
+        private readonly Stack<FudgeMsg> messageStack = new Stack<FudgeMsg>();
+        private FudgeMsg currentMessage;
+        private const int EnvelopeVersion = 0;      // TODO t0rx 2009-11-12 -- Is this the Fudge encoding version, or what?
+
+        /// <summary>
+        /// Constructs a new <see cref="FudgeEncodedStreamWriter"/> using a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use to write messages.</param>
+        public FudgeEncodedStreamWriter(FudgeContext context)
         {
-            WriteMsg(bw, new FudgeMsgEnvelope(msg));
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+            this.context = context;
         }
 
-        public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope)// throws IOException
+        /// <summary>
+        /// Gets and sets the taxonomy ID used for messages.
+        /// </summary>
+        public short? TaxonomyId
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Resets the <see cref="FudgeEncodedStreamWriter"/> to use a different <see cref="Stream"/> for output.
+        /// </summary>
+        /// <param name="stream"></param>
+        public void Reset(Stream stream)
+        {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+            Reset(new FudgeBinaryWriter(stream));
+        }
+
+        /// <summary>
+        /// Resets the <see cref="FudgeEncodedStreamWriter"/> to use a different <see cref="BinaryWriter"/> for output.
+        /// </summary>
+        /// <param name="writer"><see cref="BinaryWriter"/> to use for output.</param>
+        public void Reset(BinaryWriter writer)
+        {
+            if (writer == null)
+            {
+                throw new ArgumentNullException("writer");
+            }
+            this.writer = writer;
+        }
+
+        #region IFudgeStreamWriter Members
+
+        /// <inheritdoc/>
+        public void StartMessage()
+        {
+        }
+
+        /// <inheritdoc/>
+        public void StartSubMessage(string name, int? ordinal)
+        {
+            var newMsg = new FudgeMsg();
+            if (currentMessage != null)
+            {
+                currentMessage.Add(name, ordinal, newMsg);
+            }
+            messageStack.Push(currentMessage);
+            currentMessage = newMsg;
+        }
+
+        /// <inheritdoc/>
+        public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
+        {
+            currentMessage.Add(name, ordinal, type, value);
+        }
+
+        /// <inheritdoc/>
+        public void WriteFields(IEnumerable<IFudgeField> fields)
+        {
+            foreach (var field in fields)
+            {
+                currentMessage.Add(field);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void EndSubMessage()
+        {
+            if (messageStack.Count == 0)
+            {
+                throw new InvalidOperationException("Ended more sub-messages than started!");
+            }
+
+            var newCurrentMessage = messageStack.Pop();
+
+            if (newCurrentMessage == null)
+            {
+                // We're back to the top so now we can write
+                var env = new FudgeMsgEnvelope(currentMessage, EnvelopeVersion);
+                IFudgeTaxonomy taxonomy = null;
+                if ((context.TaxonomyResolver != null) && (TaxonomyId != null))
+                {
+                    taxonomy = context.TaxonomyResolver.ResolveTaxonomy(TaxonomyId.Value);
+                }
+
+                WriteMsg(writer, env, context.TypeDictionary, taxonomy, TaxonomyId ?? 0);
+            }
+            currentMessage = newCurrentMessage;
+        }
+
+        /// <inheritdoc/>
+        public void EndMessage()
+        {
+            // Noop
+        }
+
+        #endregion
+
+        #region Main encoding stuff
+
+        private static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope)// throws IOException
         {
             WriteMsg(bw, envelope, FudgeTypeDictionary.Instance, null, 0);
         }
 
-        public static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope, FudgeTypeDictionary typeDictionary, IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
+        private static void WriteMsg(BinaryWriter bw, FudgeMsgEnvelope envelope, FudgeTypeDictionary typeDictionary, IFudgeTaxonomy taxonomy, short taxonomyId)// throws IOException
         {
             CheckOutputStream(bw);
             if (envelope == null)
@@ -54,17 +180,17 @@ namespace Fudge
             Debug.Assert(nWritten == msgSize, "Expected to write " + msgSize + " but actually wrote " + nWritten);
         }
 
-        public static int WriteMsgFields(BinaryWriter bw, FudgeMsg msg, IFudgeTaxonomy taxonomy) //throws IOException
+        private static int WriteMsgFields(BinaryWriter bw, IFudgeFieldContainer container, IFudgeTaxonomy taxonomy) //throws IOException
         {
             int nWritten = 0;
-            foreach (IFudgeField field in msg.GetAllFields())
+            foreach (IFudgeField field in container.GetAllFields())
             {
                 nWritten += WriteField(bw, field.Type, field.Value, field.Ordinal, field.Name, taxonomy);
             }
             return nWritten;
         }
 
-        public static int WriteMsgEnvelopeHeader(BinaryWriter bw, int taxonomy, int messageSize, int version)// throws IOException
+        private static int WriteMsgEnvelopeHeader(BinaryWriter bw, int taxonomy, int messageSize, int version)// throws IOException
         {
             CheckOutputStream(bw);
             int nWritten = 0;
@@ -73,19 +199,19 @@ namespace Fudge
             nWritten += 1;
             bw.Write((byte)version);
             nWritten += 1;
-            bw.Write((short)taxonomy);      // TODO t0rx 2009-10-04 -- This should probably be ushort, but we'll need to change throughout
+            bw.Write((short)taxonomy);      // TODO 2009-10-04 t0rx -- This should probably be ushort, but we'll need to change throughout
             nWritten += 2;
             bw.Write(messageSize);
             nWritten += 4;
             return nWritten;
         }
 
-        public static int WriteField(BinaryWriter bw, FudgeFieldType type, object value, short? ordinal, string name)// throws IOException
+        private static int WriteField(BinaryWriter bw, FudgeFieldType type, object value, short? ordinal, string name)// throws IOException
         {
             return WriteField(bw, type, value, ordinal, name, null);
         }
 
-        public static int WriteField(BinaryWriter bw, FudgeFieldType type,
+        private static int WriteField(BinaryWriter bw, FudgeFieldType type,
               object value, short? ordinal, string name,
               IFudgeTaxonomy taxonomy)// throws IOException
         {
@@ -120,11 +246,11 @@ namespace Fudge
             }
 
             int valueSize = type.IsVariableSize ? type.GetVariableSize(value, taxonomy) : type.FixedSize;
-            int nWritten = WriteFieldContents(bw, value, type, taxonomy, valueSize, type.IsVariableSize, type.TypeId, ordinal, name);
+            int nWritten = WriteFieldContents(bw, value, type, valueSize, type.IsVariableSize, type.TypeId, ordinal, name, taxonomy);
             return nWritten;
         }
 
-        private static int WriteFieldContents(BinaryWriter bw, object value, FudgeFieldType type, IFudgeTaxonomy taxonomy, int valueSize, bool variableSize, int typeId, short? ordinal, string name)
+        private static int WriteFieldContents(BinaryWriter bw, object value, FudgeFieldType type, int valueSize, bool variableSize, int typeId, short? ordinal, string name, IFudgeTaxonomy taxonomy)
         {
             int nWritten = 0;
 
@@ -157,7 +283,7 @@ namespace Fudge
             return nWritten;
         }
 
-        protected static int WriteFieldValue(BinaryWriter bw, FudgeFieldType type, object value, int valueSize, IFudgeTaxonomy taxonomy) //throws IOException
+        private static int WriteFieldValue(BinaryWriter bw, FudgeFieldType type, object value, int valueSize, IFudgeTaxonomy taxonomy) //throws IOException
         {
             // Note that we fast-path types for which at compile time we know how to handle
             // in an optimized way. This is because this particular method is known to
@@ -194,6 +320,7 @@ namespace Fudge
                     nWritten = 8;
                     break;
             }
+
             if (nWritten == 0)
             {
                 if (type.IsVariableSize)
@@ -220,17 +347,28 @@ namespace Fudge
                 {
                     nWritten = type.FixedSize;
                 }
-                type.WriteValue(bw, value, taxonomy);
+
+                if (value is IFudgeFieldContainer)
+                {
+                    IFudgeFieldContainer subMsg = (IFudgeFieldContainer)value;
+                    WriteMsgFields(bw, subMsg, taxonomy);
+                }
+                else
+                {
+                    type.WriteValue(bw, value);
+                }
             }
             return nWritten;
         }
 
-        protected static void CheckOutputStream(BinaryWriter bw)
+        private static void CheckOutputStream(BinaryWriter bw)
         {
             if (bw == null)
             {
                 throw new ArgumentNullException("Must specify a BinaryWriter for processing.");
             }
         }
+
+        #endregion
     }
 }

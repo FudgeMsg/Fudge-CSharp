@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Fudge.Taxon
 {
     /// <summary>
     /// An implementation of <see cref="IFudgeTaxonomy"/> where all lookups are specified
-    /// at construction time and held in a <c>Dictionary</c>.
+    /// at construction time and held in a <see cref="Dictionary{TKey,TValue}"/>.
     /// This is extremely useful in a case where the taxonomy is generated dynamically,
     /// or as a building block for loading taxonomy definitions from persistent
     /// storage.
@@ -33,11 +34,18 @@ namespace Fudge.Taxon
         private readonly Dictionary<string, int> ordinalsByName;
         private static readonly Dictionary<int, string> emptyDictionary = new Dictionary<int, string>();
 
+        /// <summary>
+        /// Creates a new taxonomy with an empty dictionary.
+        /// </summary>
         public MapFudgeTaxonomy() :
             this(emptyDictionary)
         {
         }
 
+        /// <summary>
+        /// Creates a new taxonomy with a default dictionary to map field names to/from ordinal values.
+        /// </summary>
+        /// <param name="namesByOrdinal">initial mapping of ordinals to field names</param>
         public MapFudgeTaxonomy(Dictionary<int, string> namesByOrdinal)
         {
             if (namesByOrdinal == null)
@@ -52,6 +60,11 @@ namespace Fudge.Taxon
             }
         }
 
+        /// <summary>
+        /// Creates a new taxonomy from a set of ordinals and the corresponding set of field names. The arrays must be of equal length.
+        /// </summary>
+        /// <param name="ordinals">array of ordinal values</param>
+        /// <param name="names">array of field names</param>
         public MapFudgeTaxonomy(int[] ordinals, string[] names)
         {
             if (ordinals == null)
@@ -77,12 +90,14 @@ namespace Fudge.Taxon
 
         #region IFudgeTaxonomy Members
 
+        /// <inheritdoc />
         public string GetFieldName(short ordinal)
         {
             string result;
             return namesByOrdinal.TryGetValue(ordinal, out result) ? result : null;
         }
 
+        /// <inheritdoc />
         public short? GetFieldOrdinal(string fieldName)
         {
             int result;

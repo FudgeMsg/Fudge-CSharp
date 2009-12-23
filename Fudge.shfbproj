@@ -17,9 +17,8 @@
     <OutputPath>.\Help\</OutputPath>
     <HtmlHelpName>FudgeDocs</HtmlHelpName>
     <DocumentationSources>
-      <DocumentationSource sourceFile="Fudge\bin\Debug\Fudge.dll" xmlns="" />
-      <DocumentationSource sourceFile="Fudge\bin\Debug\Fudge.XML" xmlns="" />
-    </DocumentationSources>
+      <DocumentationSource sourceFile="Fudge\bin\Debug\comments.xml" />
+<DocumentationSource sourceFile="Fudge\bin\Debug\Fudge.dll" /></DocumentationSources>
     <HelpFileFormat>HtmlHelp1x</HelpFileFormat>
     <HelpTitle>FudgeMsg API reference</HelpTitle>
   </PropertyGroup>

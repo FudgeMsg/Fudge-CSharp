@@ -68,11 +68,17 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Unit\FudgeContextPropertyTest.cs" />
+    <Compile Include="Unit\Encodings\DebuggingWriter.cs" />
+    <Compile Include="Unit\Encodings\FudgeJSONStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeMsgStreamTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamWriterTest.cs" />
     <Compile Include="Unit\FudgeContextTest.cs" />
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
+    <Compile Include="Unit\FudgeStreamParserTest.cs" />
     <Compile Include="Unit\FudgeUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />

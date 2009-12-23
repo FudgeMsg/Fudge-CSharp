@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{109A43D4-CE96-41E7-9FFC-D7A30D238E06}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -22,8 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>bin\Debug\Fudge.XML</DocumentationFile>
-    <NoWarn>1591</NoWarn>
+    <DocumentationFile>bin\Debug\comments.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -53,11 +52,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Encodings\FudgeEncodedStreamReader.cs" />
+    <Compile Include="Encodings\FudgeEncodedStreamWriter.cs" />
+    <Compile Include="Encodings\FudgeEncodingExtensions.cs" />
+    <Compile Include="Encodings\FudgeJSONStreamReader.cs" />
+    <Compile Include="Encodings\FudgeMsgStreamReader.cs" />
+    <Compile Include="Encodings\FudgeMsgStreamWriter.cs" />
+    <Compile Include="Encodings\FudgeStreamMultiwriter.cs" />
+    <Compile Include="Encodings\FudgeParseException.cs" />
+    <Compile Include="Encodings\FudgeStreamReaderBase.cs" />
+    <Compile Include="Encodings\FudgeXmlStreamReader.cs" />
+    <Compile Include="Encodings\FudgeXmlStreamWriter.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeContextProperty.cs" />
     <Compile Include="FudgeEncodingObject.cs" />
     <Compile Include="FudgeFieldPrefixCodec.cs" />
+    <Compile Include="FudgeStreamElement.cs" />
+    <Compile Include="FudgeStreamParser.cs" />
+    <Compile Include="FudgeStreamPipe.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />
@@ -65,10 +78,10 @@
     <Compile Include="FudgeMsgField.cs" />
     <Compile Include="FudgeMsgFormatter.cs" />
     <Compile Include="FudgeRuntimeException.cs" />
-    <Compile Include="FudgeStreamDecoder.cs" />
-    <Compile Include="FudgeStreamEncoder.cs" />
     <Compile Include="FudgeTypeDictionary.cs" />
     <Compile Include="IFudgeField.cs" />
+    <Compile Include="IFudgeStreamReader.cs" />
+    <Compile Include="IFudgeStreamWriter.cs" />
     <Compile Include="IMutableFudgeFieldContainer.cs" />
     <Compile Include="Linq\ExpressionTreeStructureHasher.cs" />
     <Compile Include="Linq\FudgeExpressionTranslator.cs" />
@@ -101,6 +114,14 @@
     <Compile Include="Util\FudgeBinaryReader.cs" />
     <Compile Include="Util\FudgeBinaryWriter.cs" />
     <Compile Include="Util\ModifiedUTF8Encoding.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="docs\sandcastle.bat" />
+    <None Include="docs\sandcastle.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="docs\fudge_content.xml" />
+    <Content Include="docs\summary.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

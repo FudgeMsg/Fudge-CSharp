@@ -23,9 +23,9 @@ namespace Fudge.Tests.Unit
 {
     public class StandardFudgeMessages
     {
-        internal static FudgeMsg CreateMessageAllNames()
+        internal static FudgeMsg CreateMessageAllNames(FudgeContext context)
         {
-            FudgeMsg msg = new FudgeMsg();
+            FudgeMsg msg = context.NewMessage();
 
             msg.Add("boolean", true);
             msg.Add("Boolean", (object)false);
@@ -59,9 +59,9 @@ namespace Fudge.Tests.Unit
             return msg;
         }
 
-        internal static FudgeMsg CreateMessageAllOrdinals()
+        internal static FudgeMsg CreateMessageAllOrdinals(FudgeContext context)
         {
-            FudgeMsg msg = new FudgeMsg();
+            FudgeMsg msg = context.NewMessage();
 
             msg.Add(1, true);
             msg.Add(2, (object)(false));
@@ -90,9 +90,9 @@ namespace Fudge.Tests.Unit
             return msg;
         }
 
-        internal static FudgeMsg CreateMessageAllByteArrayLengths()
+        internal static FudgeMsg CreateMessageAllByteArrayLengths(FudgeContext context)
         {
-            FudgeMsg msg = new FudgeMsg();
+            FudgeMsg msg = context.NewMessage();
             msg.Add("byte[4]", new byte[4]);
             msg.Add("byte[8]", new byte[8]);
             msg.Add("byte[16]", new byte[16]);
@@ -107,9 +107,9 @@ namespace Fudge.Tests.Unit
             return msg;
         }
 
-        public static FudgeMsg CreateMessageWithSubMsgs()
+        public static FudgeMsg CreateMessageWithSubMsgs(FudgeContext context)
         {
-            FudgeMsg inputMsg = new FudgeMsg(
+            FudgeMsg inputMsg = context.NewMessage(
                                     new Field("sub1",
                                         new Field("bibble", "fibble"),
                                         new Field(827, "Blibble")),

@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,10 @@ namespace Fudge.Util
     /// </remarks>
     public class FudgeBinaryWriter : BinaryNBOWriter
     {
+        /// <summary>
+        /// Cosntructs a new <c>FudgeBinaryWriter</c> on an output <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="output">Stream to write binary data to.</param>
         public FudgeBinaryWriter(Stream output) : base(output, new ModifiedUTF8Encoding())
         {
         }
