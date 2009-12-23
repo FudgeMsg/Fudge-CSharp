@@ -28,6 +28,7 @@ set CONFIGURATION=Debug
 set PROJECT=Fudge
 set SANDCASTLE=%DXROOT%
 set HHC="%DXROOT%\..\HTML Help Workshop\hhc.exe"
+set PATH=%DXROOT%\ProductionTools;%PATH%
 
 rem Customise a run by giving parameters
 
