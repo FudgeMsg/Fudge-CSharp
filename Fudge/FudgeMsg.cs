@@ -86,12 +86,8 @@ namespace Fudge
         /// Constructs a new <see cref="FudgeMsg"/> using a default context, and populates with a set of fields.
         /// </summary>
         /// <param name="fields">Fields to populate the message.</param>
-        public FudgeMsg(params IFudgeField[] fields) : this()
+        public FudgeMsg(params IFudgeField[] fields) : this(new FudgeContext(), fields)
         {
-            foreach (var field in fields)
-            {
-                Add(field);
-            }
         }
 
         /// <summary>
@@ -154,24 +150,19 @@ namespace Fudge
         /// <inheritdoc />
         public void Add(string name, object value)
         {
-            Add(name, null, value);
+            Add(name, null, null, value);
         }
 
         /// <inheritdoc />
         public void Add(int? ordinal, object value)
         {
-            Add(null, ordinal, value);
+            Add(null, ordinal, null, value);
         }
 
         /// <inheritdoc />
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
-            if (type == null)
-            {
-                throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
-            }
-            Add(name, ordinal, type, value);
+            Add(name, ordinal, null, value);
         }
 
         /// <inheritdoc />
@@ -181,13 +172,24 @@ namespace Fudge
             {
                 throw new InvalidOperationException("Can only add " + short.MaxValue + " to a single message.");
             }
-            if (type == null)
-            {
-                throw new ArgumentNullException("Cannot add a field without a type specified.");
-            }
             if (ordinal.HasValue && (ordinal < short.MinValue || ordinal > short.MaxValue))
             {
                 throw new ArgumentOutOfRangeException("ordinal", "Ordinal must be within signed 16-bit range");
+            }
+            if (type == null)
+            {
+                // See if we can derive it
+                type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
+                if (type == null)
+                {
+                    throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
+                }
+            }
+
+            if (type == FudgeMsgFieldType.Instance && !(value is FudgeMsg))
+            {
+                // Copy the fields across to a new message
+                value = CopyContainer((IFudgeFieldContainer)value);
             }
 
             // Adjust values to the lowest possible representation.
@@ -199,6 +201,22 @@ namespace Fudge
 
         #endregion
 
+        /// <summary>
+        /// Adds all the fields in the enumerable to this message.
+        /// </summary>
+        /// <param name="fields">Enumerable of fields to add.</param>
+        public void Add(IEnumerable<IFudgeField> fields)
+        {
+            // TODO t0rx 20091017 -- Add this method to IMutableFudgeFieldContainer?
+            if (fields == null)
+                return; // Whatever
+
+            foreach (var field in fields)
+            {
+                Add(field);
+            }
+        }
+        
         #region IFudgeFieldContainer implementation
 
         /// <inheritdoc />
@@ -617,6 +635,13 @@ namespace Fudge
         }
 
         #endregion
+
+        private FudgeMsg CopyContainer(IFudgeFieldContainer container)
+        {
+            var msg = fudgeContext.NewMessage();
+            msg.Add(container);
+            return msg;
+        }
 
         /// <summary>
         /// Returns the Fudge encoded form of this <c>FudgeMsg</c> as a <c>byte</c> array without a taxonomy reference.
