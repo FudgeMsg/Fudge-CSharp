@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -22,12 +23,24 @@ using System.IO;
 
 namespace Fudge.Types
 {
+    /// <summary>
+    /// Base class for arrays of the primitive types predefined within Fudge. This contains all of the common functionality shared by the
+    /// array type implementations.
+    /// </summary>
+    /// <typeparam name="T">base .NET type</typeparam>
     public abstract class FudgeArrayFieldTypeBase<T> : FudgeFieldType<T[]>
     {
         private readonly int elementSize;
         private readonly Action<BinaryWriter, T> writer;
         private readonly Func<BinaryReader, T> reader;
 
+        /// <summary>
+        /// Creates a new base type.
+        /// </summary>
+        /// <param name="typeId">Fudge type ID</param>
+        /// <param name="elementSize">encoded size of an array element (in bytes)</param>
+        /// <param name="writer">delegate for writing an array element</param>
+        /// <param name="reader">delegate for reading an array element</param>
         public FudgeArrayFieldTypeBase(int typeId, int elementSize, Action<BinaryWriter, T> writer, Func<BinaryReader, T> reader)
             : base(typeId, true, 0)
         {
@@ -36,11 +49,13 @@ namespace Fudge.Types
             this.reader = reader;
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.GetVariableSize(System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override int GetVariableSize(T[] value, IFudgeTaxonomy taxonomy)
         {
             return value.Length * elementSize;
         }
 
+        /// <inheritdoc />
         public override T[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             int nElements = dataSize / elementSize;
@@ -52,6 +67,7 @@ namespace Fudge.Types
             return result;
         }
 
+        /// <inheritdoc />
         public override void WriteValue(BinaryWriter output, T[] value)  //throws IOException
         {
             foreach (T element in value)

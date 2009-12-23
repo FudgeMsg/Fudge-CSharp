@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Fudge.Types;
 using System.Diagnostics;
@@ -32,11 +32,16 @@ namespace Fudge
     {
         internal static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
 
+        // TODO 2009-12-14 Andrew -- we shouldn't have a static instance of a dictionary. Everything should track through a context
+
         private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
         private volatile UnknownFudgeFieldType[] unknownTypesById = new UnknownFudgeFieldType[0];
         private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();
         private readonly ReaderWriterLock rwLock = new ReaderWriterLock();      // Synchronisation lock around typesByCSharpType
 
+        /// <summary>
+        /// Creates a new dictionary with the default Fudge types. After construction custom types can be registered using <c>AddType</c>.
+        /// </summary>
         public FudgeTypeDictionary()
         {
             AddType(ByteArrayFieldType.Length4Instance);
@@ -68,6 +73,13 @@ namespace Fudge
             AddType(StringArrayFieldType.Instance);
         }
 
+        /// <summary>
+        /// Registers a type definition with this dictionary. Additional .NET types can be passed that will be translated to the
+        /// type referenced in the type definition. If a type with same numeric type identifier is already in the dictionary it
+        /// will be replaced.
+        /// </summary>
+        /// <param name="type">type definition</param>
+        /// <param name="alternativeTypes">alternative .NET types that map to this type</param>
         public void AddType(FudgeFieldType type, params Type[] alternativeTypes)
         {
             if (type == null)
@@ -78,7 +90,7 @@ namespace Fudge
             rwLock.AcquireWriterLock(Timeout.Infinite);
             try
             {                
-                if (!(type is ISecondaryFieldType))       // TODO t0rx 2009-09-12 -- Don't like this as a way of testing
+                if (!(type is ISecondaryFieldType))       // TODO 2009-09-12 t0rx -- Don't like this as a way of testing
                 {
                     int newLength = Math.Max(type.TypeId + 1, typesById.Length);
                     var newArray = new FudgeFieldType[newLength];
@@ -86,6 +98,8 @@ namespace Fudge
                     newArray[type.TypeId] = type;
                     typesById = newArray;
                 }
+
+                // TODO 2009-12-14 Andrew -- the secondary type mechanism needs review; not sure how best to do it in Java and I would like to keep the APIs similar in spirit
 
                 typesByCSharpType[type.CSharpType] = type;
                 foreach (Type alternativeType in alternativeTypes)
@@ -99,6 +113,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Returns the type definition most appropiate for a value type.
+        /// </summary>
+        /// <param name="csharpType">type of a value</param>
+        /// <returns>type definition</returns>
         public FudgeFieldType GetByCSharpType(Type csharpType)
         {
             if (csharpType == null)
@@ -115,6 +134,8 @@ namespace Fudge
             return result;
         }
 
+        // TODO 2009-12-14 Andrew -- should the name above refer to a .NET type, or should we have wrappers for the other languages?
+
         /// <summary>
         /// Obtain a <em>known</em> type by the type ID specified.
         /// For processing unhandled variable-width field types, this method will return
@@ -129,6 +150,12 @@ namespace Fudge
             return typesById[typeId];
         }
 
+        /// <summary>
+        /// Returns a type definition for a type ID not defined within this dictionary. This can be used
+        /// to allow the message to be partially processed, preserving the unknown aspects of it.
+        /// </summary>
+        /// <param name="typeId">type ID</param>
+        /// <returns>type definition</returns>
         public UnknownFudgeFieldType GetUnknownType(int typeId)
         {
             if ((unknownTypesById.Length <= typeId) || (unknownTypesById[typeId] == null))
@@ -152,33 +179,59 @@ namespace Fudge
         // --------------------------
         // STANDARD FUDGE FIELD TYPES
         // --------------------------
+
+        /// <summary>Predefined constant for IndicatorType - refer to the Fudge encoding specification.</summary>
         public const byte INDICATOR_TYPE_ID = 0;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.BooleanType - refer to the Fudge encoding specification.</summary>
         public const byte BOOLEAN_TYPE_ID = 1;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.SByteType - refer to the Fudge encoding specification.</summary>
         public const byte SBYTE_TYPE_ID = 2;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.ShortType - refer to the Fudge encoding specification.</summary>
         public const byte SHORT_TYPE_ID = 3;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.IntType - refer to the Fudge encoding specification.</summary>
         public const byte INT_TYPE_ID = 4;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.LongType - refer to the Fudge encoding specification.</summary>
         public const byte LONG_TYPE_ID = 5;
+        /// <summary>Predefined constant for ByteArrayFieldType - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARRAY_TYPE_ID = 6;
+        /// <summary>Predefined constant for ShortArrayFieldType - refer to the Fudge encoding specification.</summary>
         public const byte SHORT_ARRAY_TYPE_ID = 7;
+        /// <summary>Predefined constant for IntArrayFieldType - refer to the Fudge encoding specification.</summary>
         public const byte INT_ARRAY_TYPE_ID = 8;
+        /// <summary>Predefined constant for LongArrayFieldType - refer to the Fudge encoding specification.</summary>
         public const byte LONG_ARRAY_TYPE_ID = 9;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.FloatType - refer to the Fudge encoding specification.</summary>
         public const byte FLOAT_TYPE_ID = 10;
+        /// <summary>Predefined constant for PrimitiveFieldTypes.DoubleType - refer to the Fudge encoding specification.</summary>
         public const byte DOUBLE_TYPE_ID = 11;
+        /// <summary>Predefined constant for FloatArrayFieldType - refer to the Fudge encoding specification.</summary>
         public const byte FLOAT_ARRAY_TYPE_ID = 12;
+        /// <summary>Predefined constant for DoubleArrayFieldType - refer to the Fudge encoding specification.</summary>
         public const byte DOUBLE_ARRAY_TYPE_ID = 13;
+        /// <summary>Predefined constant for StringFieldType - refer to the Fudge encoding specification.</summary>
         public const byte STRING_TYPE_ID = 14;
         // Indicators for controlling stack-based sub-message expressions:
+        /// <summary>Predefined constant for FudgeMsgFieldType - refer to the Fudge encoding specification.</summary>
         public const byte FUDGE_MSG_TYPE_ID = 15;
         // End message indicator type removed as unnecessary, so no 16.
         // The fixed-width byte arrays:
+        /// <summary>Predefined constant for a 4-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_4_TYPE_ID = 17;
+        /// <summary>Predefined constant for a 8-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_8_TYPE_ID = 18;
+        /// <summary>Predefined constant for a 16-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_16_TYPE_ID = 19;
+        /// <summary>Predefined constant for a 20-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_20_TYPE_ID = 20;
+        /// <summary>Predefined constant for a 32-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_32_TYPE_ID = 21;
+        /// <summary>Predefined constant for a 64-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_64_TYPE_ID = 22;
+        /// <summary>Predefined constant for a 128-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_128_TYPE_ID = 23;
+        /// <summary>Predefined constant for a 256-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_256_TYPE_ID = 24;
+        /// <summary>Predefined constant for a 512-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_512_TYPE_ID = 25;
         public const byte STRING_ARRAY_TYPE_ID = 26;
     }

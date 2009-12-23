@@ -20,27 +20,51 @@ using System.Text;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeMsgStreamWriter</c> allows the streaming API to be used to construct <see cref="FudgeMsg"/>s.
+    /// </summary>
     public class FudgeMsgStreamWriter : IFudgeStreamWriter
     {
         private readonly Stack<FudgeMsg> msgStack = new Stack<FudgeMsg>();
         private readonly FudgeContext context;
-        private readonly FudgeMsg top;
+        private FudgeMsg top;
         private FudgeMsg current;
+        private readonly List<FudgeMsg> messages = new List<FudgeMsg>();
 
-        public FudgeMsgStreamWriter()
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamWriter"/> which will use a default <see cref="FudgeContext"/>.
+        /// </summary>
+        public FudgeMsgStreamWriter() : this(new FudgeContext())
         {
-            context = new FudgeContext();
-            top = context.NewMessage();
-            current = top;
         }
 
-        public FudgeMsg Message
+         /// <summary>
+         /// Constructs a new <see cref="FudgeMsgStreamWriter"/> using a given <see cref="FudgeContext"/>.
+         /// </summary>
+         /// <param name="context"><see cref="FudgeContext"/> to use to construct messages.</param>
+        public FudgeMsgStreamWriter(FudgeContext context)
         {
-            get { return top; }
+            this.context = context;
+        }
+
+        /// <summary>
+        /// Gets the list of <see cref="FudgeMsg"/>s that have been written.
+        /// </summary>
+        public IList<FudgeMsg> Messages
+        {
+            get { return messages; }
         }
 
         #region IFudgeStreamWriter Members
 
+        /// <inheritdoc/>
+        public void StartMessage()
+        {
+            top = context.NewMessage();
+            current = top;
+        }
+
+        /// <inheritdoc/>
         public void StartSubMessage(string name, int? ordinal)
         {
             msgStack.Push(current);
@@ -49,11 +73,13 @@ namespace Fudge.Encodings
             current = newMsg;
         }
 
+        /// <inheritdoc/>
         public void WriteField(string name, int? ordinal, FudgeFieldType type, object value)
         {
             current.Add(name, ordinal, type, value);
         }
 
+        /// <inheritdoc/>
         public void WriteFields(IEnumerable<IFudgeField> fields)
         {
             foreach (var field in fields)
@@ -62,18 +88,26 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public void EndSubMessage()
         {
             if (msgStack.Count == 0)
             {
-                throw new InvalidOperationException("Ending more messages than started");
+                throw new InvalidOperationException("Ending more sub-messages than started");
             }
             current = msgStack.Pop();
         }
 
-        public void End()
+        /// <inheritdoc/>
+        public void EndMessage()
         {
-            // Noop
+            if (msgStack.Count > 0)
+            {
+                throw new InvalidOperationException("Ending message prematurely");
+            }
+            messages.Add(top);
+            top = null;
+            current = null;
         }
 
         #endregion

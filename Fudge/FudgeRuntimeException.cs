@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Fudge
@@ -26,11 +26,20 @@ namespace Fudge
     /// </summary>
     public class FudgeRuntimeException : Exception
     {
+        /// <summary>
+        /// Creates a new exception object.
+        /// </summary>
+        /// <param name="message">error message</param>
         public FudgeRuntimeException(string message)
             : base(message)
         {
         }
 
+        /// <summary>
+        /// Creates a new exception object in response to an underlying error.
+        /// </summary>
+        /// <param name="message">error message</param>
+        /// <param name="cause">underlying error</param>
         public FudgeRuntimeException(string message, Exception cause)
             : base(message, cause)
         {

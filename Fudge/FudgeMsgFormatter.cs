@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
 
@@ -27,16 +27,28 @@ namespace Fudge
     public class FudgeMsgFormatter
     {
 
+        /// <summary>
+        /// Default indentation (number of spaces) to use when formatting message components.
+        /// </summary>
         public const int DEFAULT_INDENT = 2;
         private readonly TextWriter writer;
         private readonly int indent;
         private readonly string indentText;
 
+        /// <summary>
+        /// Creates a new pretty-printer for formatting messages.
+        /// </summary>
+        /// <param name="textWriter">target for text output</param>
         public FudgeMsgFormatter(TextWriter textWriter)
             : this(textWriter, DEFAULT_INDENT)
         {
         }
 
+        /// <summary>
+        /// Creates a new pretty-printer for formatting messages.
+        /// </summary>
+        /// <param name="writer">target for text output</param>
+        /// <param name="indent">width of each indent (number of spaces)</param>
         public FudgeMsgFormatter(TextWriter writer, int indent)
         {
             if (writer == null)
@@ -52,6 +64,9 @@ namespace Fudge
             this.indentText = ComposeIndentText(indent);
         }
 
+        /// <summary>
+        /// Gets the target for text output.
+        /// </summary>
         public TextWriter Writer
         {
             get
@@ -60,6 +75,9 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Gets the indent width (number of spaces)
+        /// </summary>
         public int Indent
         {
             get
@@ -68,11 +86,20 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Formats a message.
+        /// </summary>
+        /// <param name="msg">message to format</param>
         public void Format(IFudgeFieldContainer msg)
         {
             Format(msg, 0);
         }
 
+        /// <summary>
+        /// Formats a message with a given starting indent.
+        /// </summary>
+        /// <param name="msg">message to format</param>
+        /// <param name="depth">starting indent</param>
         protected void Format(IFudgeFieldContainer msg, int depth)
         {
             if (msg == null)
@@ -99,11 +126,28 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Calculates the length of the field description (physical index, ordinal index if specified, and field name if specified).
+        /// The length includes the indentation prefix.
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="index">physical index within a containing message</param>
+        /// <param name="depth">indentation level</param>
+        /// <returns></returns>
         protected int GetFieldSpecWidth(IFudgeField field, int index, int depth)
         {
             return GetFieldSpec(field, index, depth).Length;
         }
 
+        /// <summary>
+        /// Writes a line describing a field and its value. If the field is a submessage, that message is output at a deeper indentation level.
+        /// </summary>
+        /// <param name="field">field to output</param>
+        /// <param name="index">physical index within containing message</param>
+        /// <param name="depth">indentation level</param>
+        /// <param name="fieldSpec">field description text (includes indent)</param>
+        /// <param name="maxFieldSpecWidth">length of longest field description text (for layout)</param>
+        /// <param name="maxTypeNameWidth">length of longest type name (for layout)</param>
         protected void Format(IFudgeField field, int index, int depth, string fieldSpec, int maxFieldSpecWidth, int maxTypeNameWidth)
         {
             if (field == null)
@@ -141,6 +185,14 @@ namespace Fudge
             Writer.Flush();
         }
 
+        /// <summary>
+        /// Returns a string describing the field with an indentation prefix. The description includes the physical index, ordinal index (if specified),
+        /// and field name (if specified).
+        /// </summary>
+        /// <param name="field">field</param>
+        /// <param name="index">physical index within a message</param>
+        /// <param name="depth">indentation level</param>
+        /// <returns>field description</returns>
         protected string GetFieldSpec(IFudgeField field, int index, int depth)
         {
             StringBuilder sb = new StringBuilder();
@@ -165,6 +217,11 @@ namespace Fudge
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Returns a string for each indentation step.
+        /// </summary>
+        /// <param name="indent">number of spaces to indent at each step</param>
+        /// <returns>indentation string</returns>
         protected string ComposeIndentText(int indent)
         {
             StringBuilder sb = new StringBuilder();
@@ -172,6 +229,11 @@ namespace Fudge
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Gets the .NET name of a <c>FudgeFieldType</c> object.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         protected string GetTypeName(FudgeFieldType type)
         {
             if (type == null)

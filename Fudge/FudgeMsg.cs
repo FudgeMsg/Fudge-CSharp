@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Fudge.Taxon;
 using System.Diagnostics;
@@ -46,10 +46,19 @@ namespace Fudge
         private readonly FudgeContext fudgeContext;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> with a default <see cref="FudgeContext"/>.
+        /// </summary>
         public FudgeMsg() : this(new FudgeContext())
         {
         }
 
+        // TODO 2009-12-14 Andrew -- lose the constructor above; static type dictionary is not good
+
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="context">Context to use for the message.</param>
         public FudgeMsg(FudgeContext context)
         {
             if (context == null)
@@ -59,6 +68,10 @@ namespace Fudge
             this.fudgeContext = context;
         }
 
+        /// <summary>
+        /// Creates a new <c>FudgeMsg</c> object as a copy of another.
+        /// </summary>
+        /// <param name="other">an existing <c>FudgeMsg</c> object to copy</param>
         public FudgeMsg(FudgeMsg other)
         {
             if (other == null)
@@ -69,6 +82,10 @@ namespace Fudge
             InitializeFromByteArray(other.ToByteArray());
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a default context, and populates with a set of fields.
+        /// </summary>
+        /// <param name="fields">Fields to populate the message.</param>
         public FudgeMsg(params IFudgeField[] fields) : this()
         {
             foreach (var field in fields)
@@ -77,6 +94,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a given context, and populates with a set of fields.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use for the message.</param>
+        /// <param name="fields">Fields to populate the message.</param>
         public FudgeMsg(FudgeContext context, params IFudgeField[] fields)
             : this(context)
         {
@@ -86,28 +108,40 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> from raw binary data, using a given context.
+        /// </summary>
+        /// <param name="byteArray">Binary data to use.</param>
+        /// <param name="context"><see cref="FudgeContext"/> for the message.</param>
         public FudgeMsg(byte[] byteArray, FudgeContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException("context", "Context must be provided");
             }
-            this.fudgeContext = context;
-            InitializeFromByteArray(byteArray);
         }
 
+        /// <summary>
+        /// Populates the message fields from the encoded data. If the array is larger than the Fudge envelope, any additional data is ignored.
+        /// </summary>
+        /// <param name="byteArray">the encoded data to populate this message with</param>
         protected void InitializeFromByteArray(byte[] byteArray)
         {
             FudgeMsgEnvelope other = fudgeContext.Deserialize(byteArray);
             fields.AddRange(other.Message.fields);
         }
 
+        /// <summary>
+        /// Gets the <see cref="FudgeContext"/> for this message.
+        /// </summary>
         public FudgeContext FudgeContext
         {
             get { return fudgeContext; }
         }
 
         #region IMutableFudgeFieldContainer implementation
+
+        /// <inheritdoc />
         public void Add(IFudgeField field)
         {
             if (field == null)
@@ -117,19 +151,22 @@ namespace Fudge
             Add(field.Name, field.Ordinal, field.Type, field.Value);
         }
 
+        /// <inheritdoc />
         public void Add(string name, object value)
         {
             Add(name, null, value);
         }
 
+        /// <inheritdoc />
         public void Add(int? ordinal, object value)
         {
             Add(null, ordinal, value);
         }
 
+        /// <inheritdoc />
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = DetermineTypeFromValue(value, fudgeContext);
+            FudgeFieldType type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
             if (type == null)
             {
                 throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
@@ -137,6 +174,7 @@ namespace Fudge
             Add(name, ordinal, type, value);
         }
 
+        /// <inheritdoc />
         public virtual void Add(string name, int? ordinal, FudgeFieldType type, object value)
         {
             if (fields.Count >= short.MaxValue)
@@ -157,21 +195,6 @@ namespace Fudge
 
             FudgeMsgField field = new FudgeMsgField(type, value, name, (short?)ordinal);
             fields.Add(field);
-        }
-
-        protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeContext context)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("Cannot determine type for null value.");
-            }
-            FudgeFieldType type = context.TypeDictionary.GetByCSharpType(value.GetType());
-            if ((type == null) && (value is UnknownFudgeFieldValue))
-            {
-                UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
-                type = unknownValue.Type;
-            }
-            return type;
         }
 
         #endregion
@@ -205,6 +228,8 @@ namespace Fudge
         }
 
         #region IFudgeFieldContainer implementation
+
+        /// <inheritdoc />
         public short GetNumFields()
         {
             int size = fields.Count;
@@ -212,18 +237,16 @@ namespace Fudge
             return (short)size;
         }
 
-        /// <summary>
-        /// Return an unmodifiable list of all the fields in this message, in the index
-        /// order for those fields.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public IList<IFudgeField> GetAllFields()
         {
             // Fudge-Java just returns a read-only wrapper, but we can't do that in a typed way in .net 3.5
-            var copy = new List<IFudgeField>(fields.Cast<IFudgeField>());
-            return copy;
+            //var copy = new List<IFudgeField>(fields.Cast<IFudgeField>()); // Cast is specific to the linq namespace
+            //return copy;
+            return fields.ConvertAll<IFudgeField>(new Converter<FudgeMsgField, IFudgeField>(FudgeMsgField.toIFudgeField));
         }
 
+        /// <inheritdoc />
         public IList<string> GetAllFieldNames()
         {
             // If only there was a set implementation...
@@ -238,6 +261,7 @@ namespace Fudge
             return new List<string>(dict.Keys);
         }
 
+        /// <inheritdoc />
         public IFudgeField GetByIndex(int index)
         {
             if (index < 0)
@@ -251,9 +275,10 @@ namespace Fudge
             return fields[index];
         }
 
-        // REVIEW kirk 2009-08-16 -- All of these getters are currently extremely unoptimized.
+        // REVIEW 2009-08-16 kirk -- All of these getters are currently extremely unoptimized.
         // there may be an option required if we have a lot of random access to the field content
         // to speed things up by building an index.
+        /// <inheritdoc />
         public IList<IFudgeField> GetAllByOrdinal(int ordinal)
         {
             List<IFudgeField> result = new List<IFudgeField>();
@@ -267,6 +292,7 @@ namespace Fudge
             return result;
         }
 
+        /// <inheritdoc />
         public IFudgeField GetByOrdinal(int ordinal)
         {
             foreach (FudgeMsgField field in fields)
@@ -279,6 +305,7 @@ namespace Fudge
             return null;
         }
 
+        /// <inheritdoc />
         public IList<IFudgeField> GetAllByName(string name)
         {
             List<IFudgeField> results = new List<IFudgeField>();
@@ -292,6 +319,7 @@ namespace Fudge
             return results;
         }
 
+        /// <inheritdoc />
         public IFudgeField GetByName(string name)
         {
             foreach (FudgeMsgField field in fields)
@@ -304,6 +332,7 @@ namespace Fudge
             return null;
         }
 
+        /// <inheritdoc />
         public virtual object GetValue(string name)
         {
             foreach (FudgeMsgField field in fields)
@@ -323,7 +352,7 @@ namespace Fudge
             T[] result = new T[nFields];
             for (int i = 0; i < nFields; i++)
             {
-                result[i] = (T)ConvertType(fields[i].Value, typeof(T));
+                result[i] = (T)fudgeContext.TypeHandler.ConvertType(fields[i].Value, typeof(T));
             }
             return result;
         }
@@ -335,22 +364,25 @@ namespace Fudge
             T[] result = new T[nFields];
             for (int i = 0; i < nFields; i++)
             {
-                result[i] = (T)ConvertType(fields[i].Value, typeof(T));
+                result[i] = (T)fudgeContext.TypeHandler.ConvertType(fields[i].Value, typeof(T));
             }
             return result;
         }
 
+        /// <inheritdoc cref="IFudgeFieldContainer.GetValue{T}(System.String)" />
         public T GetValue<T>(string name)
         {
             return (T)GetValue(name, typeof(T));
         }
 
+        /// <inheritdoc />
         public object GetValue(string name, Type type)
         {
             object value = GetValue(name);
-            return ConvertType(value, type);
+            return fudgeContext.TypeHandler.ConvertType(value, type);
         }
 
+        /// <inheritdoc />
         public virtual object GetValue(int ordinal)
         {
             foreach (FudgeMsgField field in fields)
@@ -363,17 +395,20 @@ namespace Fudge
             return null;
         }
 
+        /// <inheritdoc cref="IFudgeFieldContainer.GetValue{T}(System.Int32)" />
         public T GetValue<T>(int ordinal)
         {
             return (T)GetValue(ordinal, typeof(T));
         }
 
+        /// <inheritdoc />
         public object GetValue(int ordinal, Type type)
         {
             object value = GetValue(ordinal);
-            return ConvertType(value, type);
+            return fudgeContext.TypeHandler.ConvertType(value, type);
         }
 
+        /// <inheritdoc />
         public virtual object GetValue(string name, int? ordinal)
         {
             int index = GetIndex(name, ordinal);
@@ -400,35 +435,39 @@ namespace Fudge
             return -1;
         }
 
+        /// <inheritdoc cref="IFudgeFieldContainer.GetValue{T}(System.String,System.Int32?)"/>
         public T GetValue<T>(string name, int? ordinal)
         {
             return (T)GetValue(name, ordinal, typeof(T));
         }
 
+        /// <inheritdoc />
         public object GetValue(string name, int? ordinal, Type type)
         {
             object value = GetValue(name, ordinal);
-            return ConvertType(value, type);
+            return fudgeContext.TypeHandler.ConvertType(value, type);
         }
 
         // Primitive Queries:
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>double</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>double</c></exception>
+        /// <inheritdoc />
         public double? GetDouble(string fieldName)
         {
             return GetAsDoubleInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>double</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>double</c></exception>
+        /// <inheritdoc />
         public double? GetDouble(int ordinal)
         {
             return GetAsDoubleInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetDouble methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a double</returns>
         protected double? GetAsDoubleInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -438,22 +477,24 @@ namespace Fudge
                 return value.ToDouble(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>float</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>float</c></exception>
+        /// <inheritdoc />
         public float? GetFloat(string fieldName)
         {
             return GetAsFloatInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>float</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>float</c></exception>
+        /// <inheritdoc />
         public float? GetFloat(int ordinal)
         {
             return GetAsFloatInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetFloat methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a float</returns>
         protected float? GetAsFloatInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -463,22 +504,24 @@ namespace Fudge
                 return value.ToSingle(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>long</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>long</c></exception>
+        /// <inheritdoc />
         public long? GetLong(string fieldName)
         {
             return GetAsLongInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>long</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>long</c></exception>
+        /// <inheritdoc />
         public long? GetLong(int ordinal)
         {
             return GetAsLongInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetLong methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a long</returns>
         protected long? GetAsLongInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -488,22 +531,24 @@ namespace Fudge
                 return value.ToInt64(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to an <c>int</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within an <c>int</c></exception>
+        /// <inheritdoc />
         public int? GetInt(string fieldName)
         {
             return GetAsIntInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to an <c>int</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within an <c>int</c></exception>
+        /// <inheritdoc />
         public int? GetInt(int ordinal)
         {
             return GetAsIntInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetIntmethods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as an int</returns>
         protected int? GetAsIntInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -513,22 +558,24 @@ namespace Fudge
                 return value.ToInt32(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>short</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>short</c></exception>
+        /// <inheritdoc />
         public short? GetShort(string fieldName)
         {
             return GetAsShortInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>short</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>short</c></exception>
+        /// <inheritdoc />
         public short? GetShort(int ordinal)
         {
             return GetAsShortInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetShort methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a short</returns>
         protected short? GetAsShortInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -538,22 +585,24 @@ namespace Fudge
                 return value.ToInt16(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
+        /// <inheritdoc />
         public sbyte? GetSByte(string fieldName)
         {
             return GetAsSByteInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>byte</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>byte</c></exception>
+        /// <inheritdoc />
         public sbyte? GetSByte(int ordinal)
         {
             return GetAsSByteInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetSByte methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a sbyte</returns>
         protected sbyte? GetAsSByteInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -563,22 +612,24 @@ namespace Fudge
                 return value.ToSByte(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>bool</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>bool</c></exception>
+        /// <inheritdoc />
         public bool? GetBoolean(string fieldName)
         {
             return GetAsBooleanInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>bool</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>bool</c></exception>
+        /// <inheritdoc />
         public bool? GetBoolean(int ordinal)
         {
             return GetAsBooleanInternal(null, ordinal);
         }
 
+        /// <summary>
+        /// Internal implementation for GetBoolean methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a boolean</returns>
         protected bool? GetAsBooleanInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -588,32 +639,36 @@ namespace Fudge
                 return value.ToBoolean(null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>string</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>string</c></exception>
+        /// <inheritdoc />
         public string GetString(string fieldName)
         {
             return GetAsStringInternal(fieldName, null);
         }
 
-        /// <returns>value, or <c>null</c> if field not found.</returns>
-        /// <exception cref="InvalidCastException">Field type could not be converted to a <c>string</c></exception>
-        /// <exception cref="OverflowException">Field value could not fit within a <c>string</c></exception>
+        /// <inheritdoc />
         public string GetString(int ordinal)
         {
             return GetAsStringInternal(null, ordinal);
         }
 
+        /// <inheritdoc />
         public IFudgeFieldContainer GetMessage(string name)
         {
             return (IFudgeFieldContainer)GetFirstTypedValue(name, FudgeTypeDictionary.FUDGE_MSG_TYPE_ID);
         }
 
+        /// <inheritdoc />
         public IFudgeFieldContainer GetMessage(int ordinal)
         {
             return (IFudgeFieldContainer)GetFirstTypedValue(ordinal, FudgeTypeDictionary.FUDGE_MSG_TYPE_ID);
         }
 
+        /// <summary>
+        /// Internal implementation for GetString methods using the behaviour of <see cref="GetValue{T}(string,int?)" />.
+        /// </summary>
+        /// <param name="fieldName">field name, or null to search by ordinal only</param>
+        /// <param name="ordinal">ordinal index, or null to search by field name only</param>
+        /// <returns>field value cast as a string</returns>
         protected string GetAsStringInternal(string fieldName, int? ordinal)
         {
             IConvertible value = GetValue(fieldName, ordinal) as IConvertible;
@@ -623,6 +678,12 @@ namespace Fudge
                 return value.ToString(null);
         }
 
+        #endregion
+
+        /// <summary>
+        /// Returns the Fudge encoded form of this <c>FudgeMsg</c> as a <c>byte</c> array without a taxonomy reference.
+        /// </summary>
+        /// <returns>an array containing the encoded message</returns>
         public byte[] ToByteArray()
         {
             MemoryStream stream = new MemoryStream(ComputeSize(null));
@@ -643,8 +704,11 @@ namespace Fudge
 
             return stream.ToArray();
         }
-        #endregion
 
+        // TODO 2009-12-14 Andrew -- should we have a ToByteArray that accepts a taxonomy ?
+        // TODO 2009-12-14 Andrew -- should we just implement as context.toByteArray(this) ?
+
+        /// <inheritdoc />
         public override int ComputeSize(IFudgeTaxonomy taxonomy)
         {
             int size = 0;
@@ -655,6 +719,12 @@ namespace Fudge
             return size;
         }
 
+        /// <summary>
+        /// Returns the value of the first field with a given name and type identifier.
+        /// </summary>
+        /// <param name="fieldName">field name</param>
+        /// <param name="typeId">type identifier</param>
+        /// <returns>the matching field, or null if none is found</returns>
         protected object GetFirstTypedValue(string fieldName, int typeId)
         {
             foreach (FudgeMsgField field in fields)
@@ -668,6 +738,12 @@ namespace Fudge
             return null;
         }
 
+        /// <summary>
+        /// Returns the value of the first field with a given ordinal index and type identifier.
+        /// </summary>
+        /// <param name="ordinal">ordinal index</param>
+        /// <param name="typeId">type identifier</param>
+        /// <returns>matching field, or null if none found</returns>
         protected object GetFirstTypedValue(int ordinal, int typeId)
         {
             foreach (FudgeMsgField field in fields)
@@ -684,6 +760,11 @@ namespace Fudge
             return null;
         }
 
+        /// <summary>
+        /// Updates any fields which have an ordinal index only to include a field name if one is available in the taxonomy. The
+        /// same taxonomy is passed to any submessages.
+        /// </summary>
+        /// <param name="taxonomy">taxonomy to set field names from</param>
         public void SetNamesFromTaxonomy(IFudgeTaxonomy taxonomy)
         {
             if (taxonomy == null)
@@ -712,23 +793,9 @@ namespace Fudge
             }
         }
 
-        private object ConvertType(object value, Type type)
-        {
-            if (value == null) return null;
-
-            if (!type.IsAssignableFrom(value.GetType()))
-            {
-                FudgeFieldType fieldType = fudgeContext.TypeDictionary.GetByCSharpType(type);
-                if (fieldType == null)
-                    throw new InvalidCastException("No registered field type for " + type.Name);
-
-                value = fieldType.ConvertValueFrom(value);
-            }
-            return value;
-        }
-
         #region IEnumerable<IFudgeField> Members
 
+        /// <inheritdoc />
         public IEnumerator<IFudgeField> GetEnumerator()
         {
             var copy = new List<FudgeMsgField>(fields);
@@ -738,18 +805,20 @@ namespace Fudge
             }
         }
 
-        #endregion
-
-        #region IEnumerable Members
-
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator()
         {
             var copy = new List<FudgeMsgField>(fields);
             return copy.GetEnumerator();
         }
 
+
         #endregion
 
+        /// <summary>
+        /// Returns a string representation of this message.
+        /// </summary>
+        /// <returns>string representation</returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();

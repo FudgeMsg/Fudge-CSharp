@@ -71,6 +71,7 @@
     <Compile Include="Unit\Serialization\SerializableSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\SerializationMessageTest.cs" />
     <Compile Include="Unit\Serialization\TrackingFudgeMsgTest.cs" />
+    <Compile Include="Unit\Encodings\DebuggingWriter.cs" />
     <Compile Include="Unit\Encodings\FudgeJSONStreamReaderTest.cs" />
     <Compile Include="Unit\Encodings\FudgeMsgStreamTest.cs" />
     <Compile Include="Unit\Encodings\FudgeXmlStreamReaderTest.cs" />

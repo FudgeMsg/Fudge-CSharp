@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Fudge.Taxon;
 using System.IO;
@@ -29,23 +29,33 @@ namespace Fudge.Types
     {
         // Note that we ignore the encoder in the BinaryReader or BinaryWriter and just go for Modified UTF-8 anyway.
         // This is because we don't have the writer when we are in GetVariableSize.
+
+        /// <summary>
+        /// A type defintion for string data.
+        /// </summary>
         public static readonly StringFieldType Instance = new StringFieldType();
 
+        /// <summary>
+        /// Creates a type definition for string data.
+        /// </summary>
         public StringFieldType()
             : base(FudgeTypeDictionary.STRING_TYPE_ID, true, 0)
         {
         }
 
+        /// <inheritdoc cref="Fudge.FudgeFieldType.GetVariableSize(System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override int GetVariableSize(string value, IFudgeTaxonomy taxonomy)
         {
             return ModifiedUTF8Util.ModifiedUTF8Length(value);
         }
 
+        /// <inheritdoc/>
         public override string ReadTypedValue(BinaryReader input, int dataSize)
         {
             return ModifiedUTF8Util.ReadString(input, dataSize);
         }
 
+        /// <inheritdoc/>
         public override void WriteValue(BinaryWriter output, string value)
         {
             ModifiedUTF8Util.WriteModifiedUTF8(value, output);

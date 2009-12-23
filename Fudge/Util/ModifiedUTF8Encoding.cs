@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,7 @@ namespace Fudge.Util
     {
         // See the .net implementation of UTF8Encoding for what needs doing.
 
+        /// <inheritdoc />
         public override int GetByteCount(char[] chars, int index, int count)
         {
             // REVIEW wyliekir 2009-08-17 -- This was taken almost verbatim from
@@ -53,6 +55,7 @@ namespace Fudge.Util
             return utflen;
         }
 
+        /// <inheritdoc />
         public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
         {
             int pos = byteIndex;
@@ -89,6 +92,7 @@ namespace Fudge.Util
             return pos - byteIndex;
         }
 
+        /// <inheritdoc />
         public override int GetCharCount(byte[] bytes, int index, int count)
         {
             // MUST KEEP IN SYNC WITH GetChars()
@@ -153,6 +157,7 @@ namespace Fudge.Util
             return chararr_pos;
         }
 
+        /// <inheritdoc />
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             // MUST BE KEPT IN SYNC WITH GetCharCount()
@@ -229,19 +234,28 @@ namespace Fudge.Util
             return chararr_pos - charIndex;
         }
 
+        /// <inheritdoc />
         public override int GetMaxByteCount(int charCount)
         {
             return charCount * 3;
         }
 
+        /// <inheritdoc />
         public override int GetMaxCharCount(int byteCount)
         {
             return byteCount;
         }
 
-        // TODO t0rx 2009-08-30 -- Is there an existing C# exception that is more appropriate?
+        /// <summary>
+        /// <c>UTFDataFormatException</c> is thrown when there is a problem encoding or decoding modified-UTF8 data.
+        /// </summary>
         public class UTFDataFormatException : Exception
         {
+            // TODO 2009-08-30 t0rx -- Is there an existing C# exception that is more appropriate?
+            /// <summary>
+            /// Constructs a new <c>UTFDataFormatException</c>
+            /// </summary>
+            /// <param name="message"></param>
             public UTFDataFormatException(string message)
                 : base(message)
             {

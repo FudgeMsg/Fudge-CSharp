@@ -22,6 +22,9 @@ using Fudge.Types;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeMsgStreamReader</c> allows a <see cref="FudgeMsg"/> to be read as if it were a stream source of data.
+    /// </summary>
     public class FudgeMsgStreamReader : IFudgeStreamReader
     {
         // TODO t0rx 2009-11-13 -- What about envelopes?
@@ -29,31 +32,75 @@ namespace Fudge.Encodings
         private State currentState;
         private FudgeStreamElement element = FudgeStreamElement.NoElement;
         private IFudgeField field;
+        private IEnumerator<FudgeMsg> messageSource;
+        private FudgeMsg nextMessage;
 
-        public FudgeMsgStreamReader(FudgeMsg msg)
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a given <see cref="FudgeMsg"/> for data.
+        /// </summary>
+        /// <param name="msg"><see cref="FudgeMsg"/> to provide as a stream.</param>
+        public FudgeMsgStreamReader(FudgeMsg msg) : this(new FudgeMsg[] {msg})
         {
-            currentState = new State(msg);
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a set of <see cref="FudgeMsg"/>s for data.
+        /// </summary>
+        /// <param name="messages">Set <see cref="FudgeMsg"/>s to provide as a stream.</param>
+        public FudgeMsgStreamReader(IEnumerable<FudgeMsg> messages)
+        {
+            messageSource = messages.GetEnumerator();
+            currentState = null;
         }
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public bool HasNext
         {
             get
             {
-                return (stack.Count > 0 || currentState.Fields.Count > 0);
+                if (stack.Count > 0 || currentState != null || nextMessage != null)
+                    return true;
+
+                // See if there's another message
+                if (!messageSource.MoveNext())
+                    return false;
+
+                nextMessage = messageSource.Current;
+                return true;
             }
         }
 
+        /// <inheritdoc/>
         public FudgeStreamElement MoveNext()
         {
-            if (currentState.Fields.Count == 0)
+            if (currentState == null)
+            {
+                if (!HasNext)       // Will fetch the next if required
+                {
+                    element = FudgeStreamElement.NoElement;
+                }
+                else
+                {
+                    currentState = new State(nextMessage);
+                    nextMessage = null;
+                    element = FudgeStreamElement.MessageStart;
+                }
+            }
+            else if (currentState.Fields.Count == 0)
             {
                 if (stack.Count == 0)
+                {
+                    // Finished the message
                     currentState = null;
+                    element = FudgeStreamElement.MessageEnd;
+                }
                 else
+                {
                     currentState = stack.Pop();
-                return FudgeStreamElement.SubmessageFieldEnd;
+                    element = FudgeStreamElement.SubmessageFieldEnd;
+                }
             }
             else
             {
@@ -62,35 +109,41 @@ namespace Fudge.Encodings
                 {
                     stack.Push(currentState);
                     currentState = new State((FudgeMsg)field.Value);
-                    return FudgeStreamElement.SubmessageFieldStart;
+                    element = FudgeStreamElement.SubmessageFieldStart;
                 }
                 else
                 {
-                    return FudgeStreamElement.SimpleField;
+                    element = FudgeStreamElement.SimpleField;
                 }
             }
+            return element;
         }
 
+        /// <inheritdoc/>
         public FudgeStreamElement CurrentElement
         {
             get { return element; }
         }
 
+        /// <inheritdoc/>
         public FudgeFieldType FieldType
         {
             get { return field.Type; }
         }
 
+        /// <inheritdoc/>
         public int? FieldOrdinal
         {
             get { return field.Ordinal; }
         }
 
+        /// <inheritdoc/>
         public string FieldName
         {
             get { return field.Name; }
         }
 
+        /// <inheritdoc/>
         public object FieldValue
         {
             get { return field.Value; }

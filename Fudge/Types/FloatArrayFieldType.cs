@@ -1,4 +1,4 @@
-﻿/*
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -27,8 +28,14 @@ namespace Fudge.Types
     /// </summary>
     public class FloatArrayFieldType : FudgeArrayFieldTypeBase<float>
     {
+        /// <summary>
+        /// A type definition for arrays of single precision (32-bit) floating point values.
+        /// </summary>
         public static readonly FloatArrayFieldType Instance = new FloatArrayFieldType();
 
+        /// <summary>
+        /// Creates a new type definition for arrays of single precision (32-bit) floating point values.
+        /// </summary>
         public FloatArrayFieldType()
             : base(FudgeTypeDictionary.FLOAT_ARRAY_TYPE_ID, 4, (w, e) => w.Write(e), r => r.ReadSingle())
         {

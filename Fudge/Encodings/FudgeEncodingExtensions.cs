@@ -20,6 +20,9 @@ using System.Text;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// Extension methods for encoding and decoding using the <see cref="IFudgeStreamReader"/> and <see cref="IFudgeStreamWriter"/> classes.
+    /// </summary>
     public static class FudgeEncodingExtensions
     {
         /// <summary>
@@ -31,9 +34,9 @@ namespace Fudge.Encodings
         {
             var writer = new FudgeMsgStreamWriter();
             var pipe = new FudgeStreamPipe(reader, writer);
-            pipe.Process();
+            pipe.ProcessOne();
 
-            return writer.Message;
+            return writer.Messages[0];
         }
     }
 }
