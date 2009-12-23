@@ -21,6 +21,7 @@ using Fudge.Taxon;
 using System.IO;
 using Fudge.Util;
 using Fudge.Encodings;
+using Fudge.Types;
 
 namespace Fudge
 {
@@ -279,10 +280,18 @@ namespace Fudge
                     throw new ArgumentNullException("Cannot determine type for null value.");
                 }
                 FudgeFieldType type = typeDictionary.GetByCSharpType(value.GetType());
-                if ((type == null) && (value is UnknownFudgeFieldValue))
+                if (type == null)
                 {
-                    UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
-                    type = unknownValue.Type;
+                    // Couple of special cases
+                    if (value is UnknownFudgeFieldValue)
+                    {
+                        UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
+                        type = unknownValue.Type;
+                    }
+                    else if (value is IFudgeFieldContainer)
+                    {
+                        type = FudgeMsgFieldType.Instance;
+                    }
                 }
                 return type;
             }

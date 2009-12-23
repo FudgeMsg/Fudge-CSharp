@@ -373,6 +373,25 @@ namespace Fudge.Tests.Unit
         }
 
         [Fact]
+        public void AddingFieldContainerCopiesFields()
+        {
+            var msg = new FudgeMsg();
+
+            // Add a normal sub-message (shouldn't copy)
+            IFudgeFieldContainer sub1 = new FudgeMsg(new Field("age", 37));
+            msg.Add("sub1", sub1);
+            Assert.Same(sub1, msg.GetValue("sub1"));
+
+            // Add a sub-message that isn't a FudgeMsg (should copy)
+            IFudgeFieldContainer sub2 = (IFudgeFieldContainer)new Field("dummy", new Field("colour", "blue")).Value;
+            Assert.IsNotType<FudgeMsg>(sub2);       // Just making sure
+            msg.Add("sub2", sub2);
+            Assert.NotSame(sub2, msg.GetValue("sub2"));
+            Assert.IsType<FudgeMsg>(msg.GetValue("sub2"));
+            Assert.Equal("blue", msg.GetMessage("sub2").GetString("colour"));
+        }
+
+        [Fact]
         public void GetAllNames()
         {
             var msg = new FudgeMsg();
