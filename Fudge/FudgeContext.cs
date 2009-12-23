@@ -48,6 +48,7 @@ namespace Fudge
     public class FudgeContext
     {
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
+        private readonly FudgeTypeHandler typeHandler;
         private ITaxonomyResolver taxonomyResolver;
         private FudgeStreamParser parser;
 
@@ -57,6 +58,7 @@ namespace Fudge
         public FudgeContext()
         {
             parser = new FudgeStreamParser(this);
+            typeHandler = new FudgeTypeHandler(typeDictionary);
         }
 
         /// <summary>
@@ -81,7 +83,16 @@ namespace Fudge
                     throw new ArgumentNullException("value", "Every Fudge context must have a type dictionary.");
                 }
                 typeDictionary = value;
+                typeHandler.TypeDictionary = value;     // TODO 2009-12-23 t0rx -- This smells
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="FudgeTypeHandler"/> for this context.
+        /// </summary>
+        public FudgeTypeHandler TypeHandler
+        {
+            get { return typeHandler; }
         }
 
         /// <summary>
@@ -188,6 +199,7 @@ namespace Fudge
             FudgeMsgEnvelope envelope;
             try
             {
+                // TODO 2009-12-23 t0rx -- Should this now be refactored to use FudgeMsgStreamWriter?
                 envelope = parser.Parse(br);
             }
             catch (IOException e)
@@ -209,6 +221,72 @@ namespace Fudge
         }
 
         // TODO 2009-12-11 Andrew -- should we have a version that takes an offset so that arrays with more than one envelope can be processed?
+        //      2009-12-23 t0rx -- or is that actually about the FudgeEncodedStreamReader?
+
+        /// <summary>
+        /// <c>FudgeTypeHandler</c> provides methods to handle type-related functions.
+        /// </summary>
+        public class FudgeTypeHandler
+        {
+            private FudgeTypeDictionary typeDictionary;
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="typeDictionary"></param>
+            public FudgeTypeHandler(FudgeTypeDictionary typeDictionary)
+            {
+                this.typeDictionary = typeDictionary;
+            }
+
+            internal FudgeTypeDictionary TypeDictionary
+            {
+                set { typeDictionary = value; }
+            }
+
+            /// <summary>
+            /// Converts the supplied value to a base type using the corresponding FudgeFieldType definition. The supplied .NET type
+            /// is resolved to a registered FudgeFieldType. The <c>ConvertValueFrom</c> method on the registered type is then used
+            /// to convert the value.
+            /// </summary>
+            /// <param name="value">value to convert</param>
+            /// <param name="type">.NET target type</param>
+            /// <returns>the converted value</returns>
+            public object ConvertType(object value, Type type)
+            {
+                if (value == null) return null;
+
+                if (!type.IsAssignableFrom(value.GetType()))
+                {
+                    FudgeFieldType fieldType = typeDictionary.GetByCSharpType(type);
+                    if (fieldType == null)
+                        throw new InvalidCastException("No registered field type for " + type.Name);
+
+                    value = fieldType.ConvertValueFrom(value);
+                }
+                return value;
+            }
+
+            /// <summary>
+            /// Determines the <c>FudgeFieldType</c> of a C# value.
+            /// </summary>
+            /// <param name="value">value whose type is to be determined</param>
+            /// <returns>the appropriate <c>FudgeFieldType</c> instance</returns>
+            public FudgeFieldType DetermineTypeFromValue(object value)
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException("Cannot determine type for null value.");
+                }
+                FudgeFieldType type = typeDictionary.GetByCSharpType(value.GetType());
+                if ((type == null) && (value is UnknownFudgeFieldValue))
+                {
+                    UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
+                    type = unknownValue.Type;
+                }
+                return type;
+            }
+        }
 
     }
 }

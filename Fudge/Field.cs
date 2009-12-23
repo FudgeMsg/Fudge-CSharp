@@ -98,7 +98,7 @@ namespace Fudge
             this.name = name;
             this.ordinal = (short?)ordinal;
             this.value = value;
-            this.type = FudgeMsg.DetermineTypeFromValue(value, emptyContext);
+            this.type = emptyContext.TypeHandler.DetermineTypeFromValue(value);
         }
 
         #region IFudgeField Members

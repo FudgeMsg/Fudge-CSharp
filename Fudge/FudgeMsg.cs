@@ -139,8 +139,6 @@ namespace Fudge
             get { return fudgeContext; }
         }
 
-        // TODO 2009-12-14 Andrew -- replace the TypeDictionary with a FudgeContext reference
-
         #region IMutableFudgeFieldContainer implementation
 
         /// <inheritdoc />
@@ -168,7 +166,7 @@ namespace Fudge
         /// <inheritdoc />
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = DetermineTypeFromValue(value, fudgeContext);
+            FudgeFieldType type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
             if (type == null)
             {
                 throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
@@ -197,27 +195,6 @@ namespace Fudge
 
             FudgeMsgField field = new FudgeMsgField(type, value, name, (short?)ordinal);
             fields.Add(field);
-        }
-
-        /// <summary>
-        /// Determines the <c>FudgeFieldType</c> of a C# value.
-        /// </summary>
-        /// <param name="value">value whose type is to be determined</param>
-        /// <param name="context">the <see cref="FudgeContext"/> to use</param>
-        /// <returns>the appropriate <c>FudgeFieldType</c> instance</returns>
-        protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeContext context)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException("Cannot determine type for null value.");
-            }
-            FudgeFieldType type = context.TypeDictionary.GetByCSharpType(value.GetType());
-            if ((type == null) && (value is UnknownFudgeFieldValue))
-            {
-                UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
-                type = unknownValue.Type;
-            }
-            return type;
         }
 
         #endregion
@@ -350,7 +327,7 @@ namespace Fudge
         public object GetValue(string name, Type type)
         {
             object value = GetValue(name);
-            return ConvertType(value, type);
+            return fudgeContext.TypeHandler.ConvertType(value, type);
         }
 
         /// <inheritdoc />
@@ -376,7 +353,7 @@ namespace Fudge
         public object GetValue(int ordinal, Type type)
         {
             object value = GetValue(ordinal);
-            return ConvertType(value, type);
+            return fudgeContext.TypeHandler.ConvertType(value, type);
         }
 
         /// <inheritdoc />
@@ -406,7 +383,7 @@ namespace Fudge
         public object GetValue(string name, int? ordinal, Type type)
         {
             object value = GetValue(name, ordinal);
-            return ConvertType(value, type);
+            return fudgeContext.TypeHandler.ConvertType(value, type);
         }
 
         // Primitive Queries:
@@ -752,29 +729,6 @@ namespace Fudge
                     subMsg.SetNamesFromTaxonomy(taxonomy);
                 }
             }
-        }
-
-        /// <summary>
-        /// Converts the supplied value to a base type using the corresponding FudgeFieldType definition. The supplied .NET type
-        /// is resolved to a registered FudgeFieldType. The <c>ConvertValueFrom</c> method on the registered type is then used
-        /// to convert the value.
-        /// </summary>
-        /// <param name="value">value to convert</param>
-        /// <param name="type">.NET target type</param>
-        /// <returns>the converted value</returns>
-        private object ConvertType(object value, Type type)
-        {
-            if (value == null) return null;
-
-            if (!type.IsAssignableFrom(value.GetType()))
-            {
-                FudgeFieldType fieldType = fudgeContext.TypeDictionary.GetByCSharpType(type);
-                if (fieldType == null)
-                    throw new InvalidCastException("No registered field type for " + type.Name);
-
-                value = fieldType.ConvertValueFrom(value);
-            }
-            return value;
         }
 
         #region IEnumerable<IFudgeField> Members
