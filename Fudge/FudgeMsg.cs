@@ -46,12 +46,19 @@ namespace Fudge
         private readonly FudgeContext fudgeContext;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> with a default <see cref="FudgeContext"/>.
+        /// </summary>
         public FudgeMsg() : this(new FudgeContext())
         {
         }
 
         // TODO 2009-12-14 Andrew -- lose the constructor above; static type dictionary is not good
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="context">Context to use for the message.</param>
         public FudgeMsg(FudgeContext context)
         {
             if (context == null)
@@ -75,6 +82,10 @@ namespace Fudge
             InitializeFromByteArray(other.ToByteArray());
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a default context, and populates with a set of fields.
+        /// </summary>
+        /// <param name="fields">Fields to populate the message.</param>
         public FudgeMsg(params IFudgeField[] fields) : this()
         {
             foreach (var field in fields)
@@ -83,6 +94,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a given context, and populates with a set of fields.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use for the message.</param>
+        /// <param name="fields">Fields to populate the message.</param>
         public FudgeMsg(FudgeContext context, params IFudgeField[] fields)
             : this(context)
         {
@@ -92,6 +108,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> from raw binary data, using a given context.
+        /// </summary>
+        /// <param name="byteArray">Binary data to use.</param>
+        /// <param name="context"><see cref="FudgeContext"/> for the message.</param>
         public FudgeMsg(byte[] byteArray, FudgeContext context)
         {
             if (context == null)
@@ -110,6 +131,9 @@ namespace Fudge
             fields.AddRange(other.Message.fields);
         }
 
+        /// <summary>
+        /// Gets the <see cref="FudgeContext"/> for this message.
+        /// </summary>
         public FudgeContext FudgeContext
         {
             get { return fudgeContext; }
@@ -179,7 +203,7 @@ namespace Fudge
         /// Determines the <c>FudgeFieldType</c> of a C# value.
         /// </summary>
         /// <param name="value">value whose type is to be determined</param>
-        /// <param name="typeDictionary">the <c>FudgeTypeDictionary</c> to use</param>
+        /// <param name="context">the <see cref="FudgeContext"/> to use</param>
         /// <returns>the appropriate <c>FudgeFieldType</c> instance</returns>
         protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeContext context)
         {

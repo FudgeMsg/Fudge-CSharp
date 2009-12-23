@@ -27,6 +27,37 @@ namespace Fudge.Tests.Unit.Encodings
     public class FudgeXmlStreamWriterTest
     {
         [Fact]
+        public void SimpleTest()
+        {
+            var sb = new StringBuilder();
+            var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
+            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+
+            writer.StartMessage();
+            writer.WriteField("name", null, StringFieldType.Instance, "Bob");
+            writer.EndMessage();
+
+            Assert.Equal("<msg><name>Bob</name></msg>", sb.ToString());
+        }
+
+        [Fact]
+        public void MultipleMessages()
+        {
+            var sb = new StringBuilder();
+            var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Fragment });
+            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+
+            writer.StartMessage();
+            writer.WriteField("name", null, StringFieldType.Instance, "Bob");
+            writer.EndMessage();
+            writer.StartMessage();
+            writer.WriteField("hat", null, StringFieldType.Instance, "Stand");
+            writer.EndMessage();
+
+            Assert.Equal("<msg><name>Bob</name></msg><msg><hat>Stand</hat></msg>", sb.ToString());
+        }
+
+        [Fact]
         public void NestedMessages()
         {
             var msg = new FudgeMsg(new Field("name", "Fred"),
@@ -36,14 +67,14 @@ namespace Fudge.Tests.Unit.Encodings
                                        new Field("line2", "In the middle of our street")));
 
             var sb = new StringBuilder();
-            var xmlWriter = XmlWriter.Create(sb);
+            var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
             var writer = new FudgeXmlStreamWriter(xmlWriter, "msg");
             var reader = new FudgeMsgStreamReader(msg);
             new FudgeStreamPipe(reader, writer).Process();
             xmlWriter.Flush();
 
             string s = sb.ToString();
-            Assert.Equal("<?xml version=\"1.0\" encoding=\"utf-16\"?><msg><name>Fred</name><address><number>17</number><line1>Our House</line1><line2>In the middle of our street</line2></address></msg>", s);
+            Assert.Equal("<msg><name>Fred</name><address><number>17</number><line1>Our House</line1><line2>In the middle of our street</line2></address></msg>", s);
         }
 
         [Fact]
@@ -51,14 +82,14 @@ namespace Fudge.Tests.Unit.Encodings
         {
             var msg = new FudgeMsg(new Field("blank", IndicatorType.Instance));
             var sb = new StringBuilder();
-            var xmlWriter = XmlWriter.Create(sb);
-            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg");
+            var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
+            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
             var reader = new FudgeMsgStreamReader(msg);
             new FudgeStreamPipe(reader, writer).Process();
             xmlWriter.Flush();
 
             string s = sb.ToString();
-            Assert.Equal("<?xml version=\"1.0\" encoding=\"utf-16\"?><msg><blank /></msg>", s);
+            Assert.Equal("<msg><blank /></msg>", s);
         }
     }
 }

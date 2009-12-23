@@ -36,11 +36,25 @@ namespace Fudge.Encodings
         private bool done = false;
         private Stack<State> stack = new Stack<State>();
 
+        /// <summary>
+        /// Constructs a <see cref="FudgeJSONStreamReader"/> on a given <see cref="TextReader"/>.
+        /// </summary>
+        /// <param name="reader"><see cref="TextReader"/> providing the data.</param>
         public FudgeJSONStreamReader(TextReader reader)
         {
             this.reader = reader;
         }
 
+        /// <summary>
+        /// Constructs a <see cref="FudgeJSONStreamReader"/> using a <c>string</c> for the underlying data.
+        /// </summary>
+        /// <param name="text">Text containing JSON message.</param>
+        /// <example>This example shows a simple JSON string being converted into a <see cref="FudgeMsg"/> object:
+        /// <code>
+        /// string json = @"{""name"" : ""fred""}";
+        /// FudgeMsg msg = new FudgeJSONStreamReader(json).ReadToMsg();
+        /// </code>
+        /// </example>
         public FudgeJSONStreamReader(string text)
             : this(new StringReader(text))
         {
@@ -48,6 +62,7 @@ namespace Fudge.Encodings
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public override bool HasNext
         {
             get
@@ -56,6 +71,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public override FudgeStreamElement MoveNext()
         {
             Token token;
@@ -69,6 +85,8 @@ namespace Fudge.Encodings
                     throw new FudgeParseException("Expected '{' at start of JSON stream");
                 }
                 stack.Push(State.InObject);
+                CurrentElement = FudgeStreamElement.MessageStart;
+                return CurrentElement;
             }
 
             token = GetNextToken();
@@ -110,17 +128,20 @@ namespace Fudge.Encodings
 
         private void HandleObjectEnd(Token token)
         {
-            CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
-
             stack.Pop();
-            var top = stack.Peek();
-            if (top.IsInArray)
+            if (stack.Count == 0)
             {
-                SkipCommaPostValue(token.ToString());
+                CurrentElement = FudgeStreamElement.MessageEnd;
             }
             else
             {
-                CheckIfDone();
+                CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
+
+                var top = stack.Peek();
+                if (top.IsInArray)
+                {
+                    SkipCommaPostValue(token.ToString());
+                }
             }
         }
 
@@ -148,19 +169,6 @@ namespace Fudge.Encodings
         }
 
         private int Depth { get { return stack.Count; } }
-
-        private void CheckIfDone()
-        {
-            if (Depth == 1)
-            {
-                // Check to see if we're at the end
-                if (PeekNextToken() == Token.ObjectEnd)
-                {
-                    stack.Pop();
-                    done = true;
-                }
-            }
-        }
 
         private void HandleSimpleValue(Token token)
         {
@@ -222,7 +230,6 @@ namespace Fudge.Encodings
                 }
                 else if (token == Token.ObjectEnd)
                 {
-                    CheckIfDone();
                     return;
                 }
                 else
@@ -415,7 +422,6 @@ namespace Fudge.Encodings
                                     sb.Append('\t');
                                     break;
                                 case 'u':
-                                    // TODO 2009-12-18 t0rx -- Handle \u in JSON
                                     sb.Append(ReadUnicode());
                                     break;
                             }

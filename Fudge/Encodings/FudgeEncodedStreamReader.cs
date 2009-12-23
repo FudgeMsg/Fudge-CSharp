@@ -24,6 +24,10 @@ using Fudge.Taxon;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// Provides a streaming way of reading binary streams containing messages encoded using Fudge encoding.
+    /// </summary>
+    /// <remarks>The Fudge Encoding Specification can be found at http://wiki.fudgemsg.org/display/FDG/Encoding+Specification</remarks>
     public class FudgeEncodedStreamReader : FudgeStreamReaderBase
     {
         // Injected Inputs:
@@ -38,6 +42,10 @@ namespace Fudge.Encodings
         private short taxonomyId;
         private int envelopeSize;
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeEncodedStreamReader"/> with a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="fudgeContext"><see cref="FudgeContext"/> to use for messages read from the stream.</param>
         public FudgeEncodedStreamReader(FudgeContext fudgeContext)
         {
             if (fudgeContext == null)
@@ -47,12 +55,20 @@ namespace Fudge.Encodings
             this.fudgeContext = fudgeContext;
         }
 
+        /// <summary>
+        /// Constructs a new <see cref="FudgeEncodedStreamReader"/> with a given <see cref="FudgeContext"/> reading from a specified <see cref="BinaryReader"/>.
+        /// </summary>
+        /// <param name="fudgeContext"><see cref="FudgeContext"/> to use for messages read from the stream.</param>
+        /// <param name="reader"><see cref="BinaryReader"/> to read the binary data from.</param>
         public FudgeEncodedStreamReader(FudgeContext fudgeContext, BinaryReader reader)
             : this(fudgeContext)
         {
             Reset(reader);
         }
 
+        /// <summary>
+        /// Gets the <see cref="BinaryReader"/> used by this <see cref="FudgeEncodedStreamReader"/>.
+        /// </summary>
         protected BinaryReader Reader
         {
             get
@@ -89,6 +105,10 @@ namespace Fudge.Encodings
             FieldValue = null;
         }
 
+        /// <summary>
+        /// Resets the <see cref="FudgeEncodedStreamReader"/> to use a new input stream.
+        /// </summary>
+        /// <param name="inputStream"><see cref="Stream"/> providing the binary data.</param>
         public void Reset(Stream inputStream)
         {
             if (inputStream == null)
@@ -98,9 +118,9 @@ namespace Fudge.Encodings
             Reset(new FudgeBinaryReader(inputStream));
         }
 
-        /**
-         * @return the fudgeContext
-         */
+        /// <summary>
+        /// Gets the <see cref="FudgeContext"/> used by this <see cref="FudgeEncodedStreamReader"/>.
+        /// </summary>
         public FudgeContext FudgeContext
         {
             get
@@ -109,6 +129,7 @@ namespace Fudge.Encodings
             }
         }
 
+        /// <inheritdoc/>
         public override FudgeStreamElement MoveNext()
         {
             try
@@ -249,7 +270,7 @@ namespace Fudge.Encodings
             }
         }
 
-        public static object ReadFieldValue(
+        private static object ReadFieldValue(
             BinaryReader br,
             FudgeFieldType type,
             int varSize) //throws IOException
@@ -284,7 +305,7 @@ namespace Fudge.Encodings
          */
         protected void ConsumeMessageEnvelope() //throws IOException
         {
-            CurrentElement = FudgeStreamElement.MessageEnvelope;
+            CurrentElement = FudgeStreamElement.MessageStart;
             processingDirectives = Reader.ReadByte();
             schemaVersion = Reader.ReadByte();
             taxonomyId = Reader.ReadInt16();
@@ -300,6 +321,7 @@ namespace Fudge.Encodings
             processingStack.Push(processingState);
         }
 
+        /// <inheritdoc/>
         public override bool HasNext
         {
             get

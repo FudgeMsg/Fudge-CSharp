@@ -22,6 +22,9 @@ using IQToolkit;
 
 namespace Fudge.Linq
 {
+    /// <summary>
+    /// Extensions methods for handling Fudge messages with Linq.
+    /// </summary>
     public static class FudgeLinqExtensions
     {
         /// <summary>

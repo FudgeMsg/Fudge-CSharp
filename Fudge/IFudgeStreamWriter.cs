@@ -20,18 +20,49 @@ using System.Text;
 
 namespace Fudge
 {
+    /// <summary>
+    /// <c>IFudgeStreamWriter</c> is implemented by classes wishing to write data streams (e.g. Fudge binary encoding, XML, JSON) of Fudge messages.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="Fudge.Encodings"/> namespace contains a variety of readers and writers for different file formats.
+    /// </remarks>
     public interface IFudgeStreamWriter
     {
-        // TODO t0rx 2009-11-12 -- Figure out how to handle the envelope
+        /// <summary>
+        /// Starts a new top-level message.
+        /// </summary>
+        void StartMessage();
 
+        /// <summary>
+        /// Starts a sub-message within the current message.
+        /// </summary>
+        /// <param name="name">Name of the field, or <c>null</c> if none.</param>
+        /// <param name="ordinal">Ordinal of the field, or <c>null</c> if none.</param>
         void StartSubMessage(string name, int? ordinal);
 
+        /// <summary>
+        /// Writes a simple field to the data stream.
+        /// </summary>
+        /// <param name="name">Name of the field, or <c>null</c> if none.</param>
+        /// <param name="ordinal">Ordinal of the field, or <c>null</c> if none.</param>
+        /// <param name="type">Type of the field, as a <see cref="FudgeFieldType"/>.</param>
+        /// <param name="value">Value of the field.</param>
         void WriteField(string name, int? ordinal, FudgeFieldType type, object value);     // TODO t0rx 2009-11-12 -- Do we need overloads of this, and auto-derivation of type? 
 
+        /// <summary>
+        /// Writes multiple fields to the data stream.
+        /// </summary>
+        /// <param name="fields">Fields to write.</param>
         void WriteFields(IEnumerable<IFudgeField> fields);
 
+        /// <summary>
+        /// Tells the writer that the current sub-message is finished.
+        /// </summary>
         void EndSubMessage();
 
-        void End();
+        /// <summary>
+        /// Tells the writer that we have finished with the whole top-level message.
+        /// </summary>
+        void EndMessage();
     }
 }

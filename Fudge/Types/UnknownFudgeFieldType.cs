@@ -45,6 +45,7 @@ namespace Fudge.Types
             return value.Contents.Length;
         }
 
+        /// <inheritdoc/>
         public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize)
         {
             byte[] contents = new byte[dataSize];
@@ -52,6 +53,7 @@ namespace Fudge.Types
             return new UnknownFudgeFieldValue(contents, this);
         }
 
+        /// <inheritdoc/>
         public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value)
         {
             output.Write(value.Contents);

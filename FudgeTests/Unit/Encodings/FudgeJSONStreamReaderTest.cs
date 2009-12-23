@@ -127,5 +127,18 @@ namespace Fudge.Tests.Unit.Encodings
             string json = @"{""old"" : ";
             Assert.Throws<FudgeParseException>(() => { new FudgeJSONStreamReader(json).ReadToMsg(); });
         }
+
+        [Fact]
+        public void MultipleMessages()
+        {
+            string json = @"{""name"" : ""fred""} {""number"" : 17}";
+            var reader = new FudgeJSONStreamReader(json);
+            var writer = new FudgeMsgStreamWriter();
+            new FudgeStreamPipe(reader, writer).Process();
+
+            Assert.Equal(2, writer.Messages.Count);
+            Assert.Equal("fred", writer.Messages[0].GetString("name"));
+            Assert.Equal(17, writer.Messages[1].GetInt("number"));
+        }
     }
 }

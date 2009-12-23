@@ -25,46 +25,57 @@ using System.IO;
 
 namespace Fudge.Encodings
 {
+    /// <summary>
+    /// <c>FudgeXmlStreamReader</c> provides a way of reading XML data as a Fudge stream.
+    /// </summary>
+    /// <remarks>
+    /// There is not a 1-1 mapping between XML structure and Fudge message structure.  In particular, attributes are treated in the same way as
+    /// child elements (i.e. as fields of the Fudge message), so a message that is read from a <see cref="FudgeXmlStreamReader"/> and written
+    /// to a <see cref="FudgeXmlStreamWriter"/> may not come out identical.
+    /// </remarks>
     public class FudgeXmlStreamReader : FudgeStreamReaderBase
     {
         private readonly XmlReader reader;
         private int depth = 0;
         private bool atEnd;
         private readonly Queue<KeyValuePair<string, string>> pendingAttributes = new Queue<KeyValuePair<string, string>>();
+        private bool oneTokenAhead = false;
 
+        /// <summary>
+        /// Constructs a new <c>FudgeXmlStreamReader</c> using a given <see cref="XmlReader"/> as the source of the XML data.
+        /// </summary>
+        /// <param name="reader"><see cref="XmlReader"/> providing the XML data</param>
         public FudgeXmlStreamReader(XmlReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException("reader");
             this.reader = reader;
-            Begin();
         }
 
-        public FudgeXmlStreamReader(string xml) : this(XmlReader.Create(new StringReader(xml)))
+        /// <summary>
+        /// Constructs a new <c>FudgeXmlStreamReader</c> with the XML data coming from a string.
+        /// </summary>
+        /// <param name="xml"></param>
+        public FudgeXmlStreamReader(string xml)
+            : this(XmlReader.Create(new StringReader(xml), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment }))
         {
-        }
-
-        private void Begin()
-        {
-            // Move to first element
-            ReadNext();
-
-            // Now get inside the outermost message
-            while (true)
-            {
-                var element = MoveNext();
-                if (element == FudgeStreamElement.SubmessageFieldStart)
-                    break;
-            }
         }
 
         #region IFudgeStreamReader Members
 
+        /// <inheritdoc/>
         public override bool HasNext
         {
-            get { return !atEnd; }
+            get
+            {
+                if (oneTokenAhead)
+                    return true;
+                oneTokenAhead = ReadNext();
+                return oneTokenAhead;
+            }
         }
 
+        /// <inheritdoc/>
         public override FudgeStreamElement MoveNext()
         {
             CurrentElement = FudgeStreamElement.NoElement;
@@ -75,7 +86,7 @@ namespace Fudge.Encodings
             }
             else
             {
-                while (!atEnd)
+                while (HasNext)
                 {
                     switch (reader.NodeType)
                     {
@@ -120,24 +131,17 @@ namespace Fudge.Encodings
 
         private void ConsumeEndElement()
         {
-            CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
-            depth--;
-            ReadNext();
-
-            // Check if we've reached the end of the message
-            CheckIfReachedEnd();
+            HandleEndDepth();
+            oneTokenAhead = false;
         }
 
-        private void CheckIfReachedEnd()
+        private void HandleEndDepth()
         {
-            if (depth == 1)
-            {
-                ReadToNextOfInterest();
-                if (reader.NodeType == XmlNodeType.EndElement)
-                {
-                    atEnd = true;
-                }
-            }
+            depth--;
+            if (depth > 0)
+                CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
+            else
+                CurrentElement = FudgeStreamElement.MessageEnd;
         }
 
         private void ConsumePendingAttribute()
@@ -145,9 +149,7 @@ namespace Fudge.Encodings
             var pair = pendingAttributes.Dequeue();
             if (pair.Key == null)
             {
-                CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
-                depth--;
-                CheckIfReachedEnd();                                    // Case of last field in outermost message (e.g. <msg><a b="c" d="e" /></msg>)
+                HandleEndDepth();
             }
             else
             {
@@ -188,7 +190,7 @@ namespace Fudge.Encodings
         private void ConsumeElement()
         {
             FieldName = reader.Name;
-            if (reader.IsEmptyElement && !reader.HasAttributes)
+            if (reader.IsEmptyElement && !reader.HasAttributes && depth > 0)
             {
                 FieldValue = IndicatorType.Instance;
                 CurrentElement = FudgeStreamElement.SimpleField;
@@ -213,7 +215,10 @@ namespace Fudge.Encodings
                 {
                     case XmlNodeType.Element:
                         // Must be in a message
-                        CurrentElement = FudgeStreamElement.SubmessageFieldStart;
+                        if (depth == 0)
+                            CurrentElement = FudgeStreamElement.MessageStart;
+                        else
+                            CurrentElement = FudgeStreamElement.SubmessageFieldStart;
                         depth++;
                         break;
                     case XmlNodeType.Text:
@@ -231,21 +236,19 @@ namespace Fudge.Encodings
         {
             CurrentElement = FudgeStreamElement.SimpleField;
             FieldValue = GetValue(reader.Value);
-            bool stop = false;
-            while (!atEnd)
+            while (true)
             {
                 if (!reader.Read())
                 {
                     // Bad XML?
                     throw new FudgeRuntimeException("XML ends prematurely at element " + FieldName);
                 }
-                if (stop)
-                    break;
 
                 if (reader.NodeType == XmlNodeType.EndElement)
                 {
                     // Read the next node and stop
-                    stop = true;
+                    oneTokenAhead = false;
+                    break;
                 }
                 else
                 {

@@ -43,18 +43,52 @@ namespace Fudge
         private readonly string name;
         private static readonly FudgeContext emptyContext = new FudgeContext();
 
+        /// <summary>
+        /// Constructs a field with a name and value.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         public Field(string name, object value) : this(name, null, value)
         {
         }
 
+        /// <summary>
+        /// Constructs a field with an ordinal and value.
+        /// </summary>
+        /// <param name="ordinal"></param>
+        /// <param name="value"></param>
         public Field(int ordinal, object value) : this(null, ordinal, value)
         {
         }
 
+        /// <summary>
+        /// Constructs a named field that contains a sub-message of other fields.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="subFields"></param>
+        /// <example>
+        /// The following example shows a hierarchical message being created using <see cref="Field"/>.
+        /// <code>
+        /// FudgeMsg inputMsg = context.NewMessage(
+        ///            new Field("sub1",
+        ///                new Field("bibble", "fibble"),
+        ///                new Field(827, "Blibble")),
+        ///            new Field("sub2",
+        ///                new Field("bibble9", 9837438),
+        ///                new Field(828, 82.77f)));
+        /// 
+        /// </code>
+        /// </example>
         public Field(string name, params IFudgeField[] subFields) : this(name, null, new FudgeMsg(subFields))
         {
         }
 
+        /// <summary>
+        /// Constructs a field with both a name and an ordinal plus value.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="ordinal"></param>
+        /// <param name="value"></param>
         public Field(string name, int? ordinal, object value)
         {
             if (ordinal.HasValue && ordinal < short.MinValue || ordinal > short.MaxValue)
@@ -69,21 +103,25 @@ namespace Fudge
 
         #region IFudgeField Members
 
+        /// <inheritdoc/>
         public FudgeFieldType Type
         {
             get { return type; }
         }
 
+        /// <inheritdoc/>
         public object Value
         {
             get { return value; }
         }
 
+        /// <inheritdoc/>
         public short? Ordinal
         {
             get { return ordinal; }
         }
 
+        /// <inheritdoc/>
         public string Name
         {
             get { return name ; }

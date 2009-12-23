@@ -104,6 +104,7 @@ namespace Fudge.Types
             return value.Length;
         }
 
+        /// <inheritdoc />
         public override byte[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             if (!IsVariableSize)
@@ -115,6 +116,7 @@ namespace Fudge.Types
             return result;
         }
 
+        /// <inheritdoc />
         public override void WriteValue(BinaryWriter output, byte[] value) //throws IOException
         {
             if (!IsVariableSize)
