@@ -47,15 +47,6 @@ namespace Fudge
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
         /// <summary>
-        /// Constructs a new <see cref="FudgeMsg"/> with a default <see cref="FudgeContext"/>.
-        /// </summary>
-        public FudgeMsg() : this(new FudgeContext())
-        {
-        }
-
-        // TODO 2009-12-14 Andrew -- lose the constructor above; static type dictionary is not good
-
-        /// <summary>
         /// Constructs a new <see cref="FudgeMsg"/> using a given <see cref="FudgeContext"/>.
         /// </summary>
         /// <param name="context">Context to use for the message.</param>
@@ -649,24 +640,10 @@ namespace Fudge
         /// <returns>an array containing the encoded message</returns>
         public byte[] ToByteArray()
         {
-            MemoryStream stream = new MemoryStream(ComputeSize(null));
-            try
-            {
-                var writer = new FudgeEncodedStreamWriter(FudgeContext, stream);
-                writer.StartMessage();
-                writer.WriteFields(GetAllFields());
-                writer.EndMessage();
-            }
-            catch (IOException e)
-            {
-                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
-            }
-
-            return stream.ToArray();
+            return fudgeContext.ToByteArray(this);
         }
 
         // TODO 2009-12-14 Andrew -- should we have a ToByteArray that accepts a taxonomy ?
-        // TODO 2009-12-14 Andrew -- should we just implement as context.toByteArray(this) ?
 
         /// <inheritdoc />
         public override int ComputeSize(IFudgeTaxonomy taxonomy)

@@ -196,12 +196,11 @@ namespace Fudge
         /// <returns>the next <c>FudgeMsgEnvelope</c> encoded on the stream</returns>
         public FudgeMsgEnvelope Deserialize(Stream s)
         {
-            BinaryReader br = new FudgeBinaryReader(s);
             FudgeMsgEnvelope envelope;
             try
             {
                 // TODO 2009-12-23 t0rx -- Should this now be refactored to use FudgeMsgStreamReader?
-                envelope = parser.Parse(br);
+                envelope = parser.Parse(s);
             }
             catch (IOException e)
             {

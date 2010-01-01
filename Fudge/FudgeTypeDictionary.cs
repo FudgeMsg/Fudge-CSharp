@@ -1,5 +1,5 @@
 /* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,6 @@ namespace Fudge
     /// </summary>
     public sealed class FudgeTypeDictionary
     {
-        internal static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
-
-        // TODO 2009-12-14 Andrew -- we shouldn't have a static instance of a dictionary. Everything should track through a context
-
         private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
         private volatile UnknownFudgeFieldType[] unknownTypesById = new UnknownFudgeFieldType[0];
         private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();
