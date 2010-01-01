@@ -1,5 +1,5 @@
 /* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -650,15 +650,12 @@ namespace Fudge
         public byte[] ToByteArray()
         {
             MemoryStream stream = new MemoryStream(ComputeSize(null));
-            BinaryWriter bw = new FudgeBinaryWriter(stream);
             try
             {
-                var writer = new FudgeEncodedStreamWriter(FudgeContext);        // TODO t0rx 2009-11-12 -- In Fudge-Java this is obtained from the context
-                writer.Reset(bw);
-                writer.StartSubMessage(null, null);
+                var writer = new FudgeEncodedStreamWriter(FudgeContext, stream);
+                writer.StartMessage();
                 writer.WriteFields(GetAllFields());
-                writer.EndSubMessage();
-                bw.Flush();
+                writer.EndMessage();
             }
             catch (IOException e)
             {

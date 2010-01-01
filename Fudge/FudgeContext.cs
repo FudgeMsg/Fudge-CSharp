@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ namespace Fudge
         /// <param name="s">The stream to serialise to</param>
         public void Serialize(FudgeMsg msg, Stream s)
         {
-            Serialize(msg, null, new FudgeBinaryWriter(s));
+            Serialize(msg, null, s);
         }
 
         /// <summary>
@@ -163,9 +163,9 @@ namespace Fudge
                 var writer = new FudgeEncodedStreamWriter(this);            // TODO t0rx 2009-11-12 -- Fudge-Java gets this from an allocated queue
                 writer.TaxonomyId = taxonomyId;
                 writer.Reset(bw);
-                writer.StartSubMessage(null, null);
+                writer.StartMessage();
                 writer.WriteFields(msg.GetAllFields());
-                writer.EndSubMessage();
+                writer.EndMessage();
             }
             catch (IOException e)
             {
@@ -188,7 +188,7 @@ namespace Fudge
         // TODO 2009-12-11 Andrew -- should we have a toByteArray that takes a taxonomy too?
 
         // TODO 2009-12-11 Andrew -- should we have a Serialize that takes the envelope as there's no way to control the version field otherwise?
- 
+
         /// <summary>
         /// Decodes a <c>FudgeMsg</c> from a <c>Stream</c>.
         /// </summary>
@@ -200,7 +200,7 @@ namespace Fudge
             FudgeMsgEnvelope envelope;
             try
             {
-                // TODO 2009-12-23 t0rx -- Should this now be refactored to use FudgeMsgStreamWriter?
+                // TODO 2009-12-23 t0rx -- Should this now be refactored to use FudgeMsgStreamReader?
                 envelope = parser.Parse(br);
             }
             catch (IOException e)
