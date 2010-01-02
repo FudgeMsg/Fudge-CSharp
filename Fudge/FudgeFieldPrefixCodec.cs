@@ -1,5 +1,5 @@
 /* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,17 +91,8 @@ namespace Fudge
             int varDataBits = 0;
             if (!fixedWidth)
             {
-                // This is correct. This is an unsigned value for reading. See note in
-                // writeFieldValue.
-                if (varDataSize <= 255)
-                {
-                    varDataSize = 1;
-                }
-                else if (varDataSize <= short.MaxValue)
-                {
-                    varDataSize = 2;
-                }
-                else
+                varDataSize = CalculateVarSizeSize(varDataSize);
+                if (varDataSize == 4)
                 {
                     // Yes, this is right. Remember, we only have 2 bits here.
                     varDataSize = 3;
@@ -122,6 +113,29 @@ namespace Fudge
                 fieldPrefix |= FIELD_PREFIX_NAME_PROVIDED_MASK;
             }
             return fieldPrefix;
+        }
+
+        /// <summary>
+        /// Calculates the number of bytes needed to write a variable data size.
+        /// </summary>
+        /// <param name="varSize">Data size to write.</param>
+        /// <returns>Number of bytes needed to write the size.</returns>
+        public static int CalculateVarSizeSize(int varSize)
+        {
+            // This is correct. This is an unsigned value for reading. See note in
+            // writeFieldValue.
+            if (varSize <= 255)
+            {
+                return 1;
+            }
+            else if (varSize <= short.MaxValue)
+            {
+                return 2;
+            }
+            else
+            {
+                return 4;
+            }
         }
     }
 }

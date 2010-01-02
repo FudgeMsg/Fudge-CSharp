@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+﻿/* <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,7 @@ namespace Fudge.Encodings
         private int schemaVersion;
         private short taxonomyId;
         private int envelopeSize;
+        private bool eof;
 
         /// <summary>
         /// Constructs a new <see cref="FudgeEncodedStreamReader"/> with a given <see cref="FudgeContext"/>.
@@ -64,6 +66,17 @@ namespace Fudge.Encodings
             : this(fudgeContext)
         {
             Reset(reader);
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="FudgeEncodedStreamReader"/> with a given <see cref="FudgeContext"/> reading from a specified <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="fudgeContext"><see cref="FudgeContext"/> to use for messages read from the stream.</param>
+        /// <param name="stream"><see cref="Stream"/> to read the binary data from.</param>
+        public FudgeEncodedStreamReader(FudgeContext fudgeContext, Stream stream)
+            : this(fudgeContext)
+        {
+            Reset(stream);
         }
 
         /// <summary>
@@ -103,6 +116,7 @@ namespace Fudge.Encodings
             FieldOrdinal = null;
             FieldName = null;
             FieldValue = null;
+            eof = false;
         }
 
         /// <summary>
@@ -134,14 +148,27 @@ namespace Fudge.Encodings
         {
             try
             {
-                if (processingStack.Count == 0)
+                if (eof)
+                {
+                    // Already at the end
+                    Debug.Assert(CurrentElement == FudgeStreamElement.NoElement);
+                    return CurrentElement;
+                }
+                else if (CurrentElement == FudgeStreamElement.MessageEnd)
+                {
+                    // We currently don't support multiple messages in a stream and we've already published MessageEnd, so stop
+                    CurrentElement = FudgeStreamElement.NoElement;
+                    eof = true;
+                    return CurrentElement;
+                }
+                else if (processingStack.Count == 0)
                 {
                     // Must be an envelope.
                     ConsumeMessageEnvelope();
                 }
-                else if (IsEndOfSubMessage)
+                else if (IsEndOfSubMessage())
                 {
-                    CurrentElement = FudgeStreamElement.SubmessageFieldEnd;
+                    CurrentElement = (processingStack.Count == 0) ? FudgeStreamElement.MessageEnd : FudgeStreamElement.SubmessageFieldEnd;
                     FieldName = null;
                     FieldOrdinal = null;
                     FieldType = null;
@@ -159,26 +186,25 @@ namespace Fudge.Encodings
             return CurrentElement;
         }
 
-        /**
-         * @return
-         */
-        protected bool IsEndOfSubMessage
+        /// <summary>
+        /// Checks to see if we're at the end of a sub-message (or message), and if so pops the processing stack
+        /// </summary>
+        /// <returns>True if we were at the end of a sub-message.</returns>
+        protected bool IsEndOfSubMessage()
         {
-            get
+            Debug.Assert(processingStack.Count > 0);
+
+            MessageProcessingState processingState = processingStack.Peek();
+            if (processingState.Consumed >= processingState.MessageSize)
             {
-                if (processingStack.Count == 1)
+                processingStack.Pop();
+                if (processingStack.Count > 0)
                 {
-                    return false;
-                }
-                MessageProcessingState processingState = processingStack.Peek();
-                if (processingState.Consumed >= processingState.MessageSize)
-                {
-                    processingStack.Pop();
                     processingStack.Peek().Consumed += processingState.Consumed;
-                    return true;
                 }
-                return false;
+                return true;
             }
+            return false;
         }
 
         /**
@@ -326,21 +352,10 @@ namespace Fudge.Encodings
         {
             get
             {
-                if (processingStack.Count > 1)
-                {
-                    // Always have at least one more.
-                    return true;
-                }
-                else if (processingStack.Count == 1)
-                {
-                    MessageProcessingState messageProcessingState = processingStack.Peek();
-                    return messageProcessingState.Consumed < messageProcessingState.MessageSize;
-                }
-                else
-                {
-                    // Always have the envelope to read.
-                    return true;
-                }
+                // TODO 2010-01-01 t0rx -- Support multiple binary messages in a stream
+                // We currently stop after a single message, but calling reader.PeekChar() to see
+                // if there's more data will fail on any stream that can't seek (e.g. a socket)
+                return (processingStack.Count > 0 || (CurrentElement != FudgeStreamElement.MessageEnd && !eof));
             }
         }
 

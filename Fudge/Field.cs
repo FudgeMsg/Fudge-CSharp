@@ -17,12 +17,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace Fudge
 {
     /// <summary>
     /// <c>Field</c> is a convenience class to allow functional construction of messages.
     /// </summary>
+    /// <remarks>
+    /// <c>Field</c> merely holds the data until they are added to a <see cref="FudgeMsg"/>, and
+    /// in particular, the field type is not determined by <c>Field</c>.
+    /// </remarks>
     /// <example>
     /// The following example shows constructing a message containing two sub-messages:
     /// <code>
@@ -38,10 +43,8 @@ namespace Fudge
     public class Field : IFudgeField
     {
         private readonly object value;
-        private readonly FudgeFieldType type;
         private readonly short? ordinal;
         private readonly string name;
-        private static readonly FudgeContext emptyContext = new FudgeContext();
 
         /// <summary>
         /// Constructs a field with a name and value.
@@ -79,7 +82,7 @@ namespace Fudge
         /// 
         /// </code>
         /// </example>
-        public Field(string name, params IFudgeField[] subFields) : this(name, null, new FudgeMsg(subFields))
+        public Field(string name, params IFudgeField[] subFields) : this(name, null, new FieldContainer(subFields))
         {
         }
 
@@ -98,15 +101,17 @@ namespace Fudge
             this.name = name;
             this.ordinal = (short?)ordinal;
             this.value = value;
-            this.type = emptyContext.TypeHandler.DetermineTypeFromValue(value);
         }
 
         #region IFudgeField Members
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Returns <c>null</c>.
+        /// </summary>
+        /// <remarks>The field type is not calculated until the field is added to a <see cref="FudgeMsg"/>.</remarks>
         public FudgeFieldType Type
         {
-            get { return type; }
+            get { return null; }
         }
 
         /// <inheritdoc/>
@@ -128,5 +133,216 @@ namespace Fudge
         }
 
         #endregion
+
+        /// <summary>
+        /// Implementation of <see cref="IFudgeFieldContainer"/> purely to hold sub-fields
+        /// </summary>
+        private class FieldContainer : IFudgeFieldContainer
+        {
+            private readonly IFudgeField[] fields;
+
+            public FieldContainer(IFudgeField[] fields)
+            {
+                this.fields = fields;
+            }
+
+            #region IFudgeFieldContainer Members
+
+            public short GetNumFields()
+            {
+                return (short)fields.Length;
+            }
+
+            public IList<IFudgeField> GetAllFields()
+            {
+                return fields;
+            }
+
+            public IList<string> GetAllFieldNames()
+            {
+                throw new NotSupportedException();
+            }
+
+            public IFudgeField GetByIndex(int index)
+            {
+                throw new NotSupportedException();
+            }
+
+            public IList<IFudgeField> GetAllByOrdinal(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public IFudgeField GetByOrdinal(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public IList<IFudgeField> GetAllByName(string name)
+            {
+                throw new NotSupportedException();
+            }
+
+            public IFudgeField GetByName(string name)
+            {
+                throw new NotSupportedException();
+            }
+
+            public object GetValue(string name)
+            {
+                throw new NotSupportedException();
+            }
+
+            public T GetValue<T>(string name)
+            {
+                throw new NotSupportedException();
+            }
+
+            public object GetValue(string name, Type type)
+            {
+                throw new NotSupportedException();
+            }
+
+            public object GetValue(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public T GetValue<T>(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public object GetValue(int ordinal, Type type)
+            {
+                throw new NotSupportedException();
+            }
+
+            public object GetValue(string name, int? ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public T GetValue<T>(string name, int? ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public object GetValue(string name, int? ordinal, Type type)
+            {
+                throw new NotSupportedException();
+            }
+
+            public double? GetDouble(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public double? GetDouble(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public float? GetFloat(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public float? GetFloat(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public long? GetLong(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public long? GetLong(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public int? GetInt(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public int? GetInt(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public short? GetShort(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public short? GetShort(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public sbyte? GetSByte(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public sbyte? GetSByte(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool? GetBoolean(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public bool? GetBoolean(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public string GetString(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public string GetString(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            public IFudgeFieldContainer GetMessage(string fieldName)
+            {
+                throw new NotSupportedException();
+            }
+
+            public IFudgeFieldContainer GetMessage(int ordinal)
+            {
+                throw new NotSupportedException();
+            }
+
+            #endregion
+
+            #region IEnumerable<IFudgeField> Members
+
+            public IEnumerator<IFudgeField> GetEnumerator()
+            {
+                return ((IList<IFudgeField>)fields).GetEnumerator();
+            }
+
+            #endregion
+
+            #region IEnumerable Members
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return fields.GetEnumerator();
+            }
+
+            #endregion
+        }
+
     }
 }

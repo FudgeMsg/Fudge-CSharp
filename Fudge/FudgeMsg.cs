@@ -1,5 +1,5 @@
 /* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,6 @@ namespace Fudge
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
         /// <summary>
-        /// Constructs a new <see cref="FudgeMsg"/> with a default <see cref="FudgeContext"/>.
-        /// </summary>
-        public FudgeMsg() : this(new FudgeContext())
-        {
-        }
-
-        // TODO 2009-12-14 Andrew -- lose the constructor above; static type dictionary is not good
-
-        /// <summary>
         /// Constructs a new <see cref="FudgeMsg"/> using a given <see cref="FudgeContext"/>.
         /// </summary>
         /// <param name="context">Context to use for the message.</param>
@@ -86,12 +77,8 @@ namespace Fudge
         /// Constructs a new <see cref="FudgeMsg"/> using a default context, and populates with a set of fields.
         /// </summary>
         /// <param name="fields">Fields to populate the message.</param>
-        public FudgeMsg(params IFudgeField[] fields) : this()
+        public FudgeMsg(params IFudgeField[] fields) : this(new FudgeContext(), fields)
         {
-            foreach (var field in fields)
-            {
-                Add(field);
-            }
         }
 
         /// <summary>
@@ -154,24 +141,19 @@ namespace Fudge
         /// <inheritdoc />
         public void Add(string name, object value)
         {
-            Add(name, null, value);
+            Add(name, null, null, value);
         }
 
         /// <inheritdoc />
         public void Add(int? ordinal, object value)
         {
-            Add(null, ordinal, value);
+            Add(null, ordinal, null, value);
         }
 
         /// <inheritdoc />
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
-            if (type == null)
-            {
-                throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
-            }
-            Add(name, ordinal, type, value);
+            Add(name, ordinal, null, value);
         }
 
         /// <inheritdoc />
@@ -181,13 +163,24 @@ namespace Fudge
             {
                 throw new InvalidOperationException("Can only add " + short.MaxValue + " to a single message.");
             }
-            if (type == null)
-            {
-                throw new ArgumentNullException("Cannot add a field without a type specified.");
-            }
             if (ordinal.HasValue && (ordinal < short.MinValue || ordinal > short.MaxValue))
             {
                 throw new ArgumentOutOfRangeException("ordinal", "Ordinal must be within signed 16-bit range");
+            }
+            if (type == null)
+            {
+                // See if we can derive it
+                type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
+                if (type == null)
+                {
+                    throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
+                }
+            }
+
+            if (type == FudgeMsgFieldType.Instance && !(value is FudgeMsg))
+            {
+                // Copy the fields across to a new message
+                value = CopyContainer((IFudgeFieldContainer)value);
             }
 
             // Adjust values to the lowest possible representation.
@@ -199,11 +192,15 @@ namespace Fudge
 
         #endregion
 
+        /// <summary>
+        /// Adds all the fields in the enumerable to this message.
+        /// </summary>
+        /// <param name="fields">Enumerable of fields to add.</param>
         public void Add(IEnumerable<IFudgeField> fields)
         {
             // TODO t0rx 20091017 -- Add this method to IMutableFudgeFieldContainer?
             if (fields == null)
-                return;             // Whatever
+                return; // Whatever
 
             foreach (var field in fields)
             {
@@ -680,33 +677,23 @@ namespace Fudge
 
         #endregion
 
+        private FudgeMsg CopyContainer(IFudgeFieldContainer container)
+        {
+            var msg = fudgeContext.NewMessage();
+            msg.Add(container);
+            return msg;
+        }
+
         /// <summary>
         /// Returns the Fudge encoded form of this <c>FudgeMsg</c> as a <c>byte</c> array without a taxonomy reference.
         /// </summary>
         /// <returns>an array containing the encoded message</returns>
         public byte[] ToByteArray()
         {
-            MemoryStream stream = new MemoryStream(ComputeSize(null));
-            BinaryWriter bw = new FudgeBinaryWriter(stream);
-            try
-            {
-                var writer = new FudgeEncodedStreamWriter(FudgeContext);        // TODO t0rx 2009-11-12 -- In Fudge-Java this is obtained from the context
-                writer.Reset(bw);
-                writer.StartSubMessage(null, null);
-                writer.WriteFields(GetAllFields());
-                writer.EndSubMessage();
-                bw.Flush();
-            }
-            catch (IOException e)
-            {
-                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
-            }
-
-            return stream.ToArray();
+            return fudgeContext.ToByteArray(this);
         }
 
         // TODO 2009-12-14 Andrew -- should we have a ToByteArray that accepts a taxonomy ?
-        // TODO 2009-12-14 Andrew -- should we just implement as context.toByteArray(this) ?
 
         /// <inheritdoc />
         public override int ComputeSize(IFudgeTaxonomy taxonomy)
