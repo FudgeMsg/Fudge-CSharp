@@ -32,7 +32,7 @@ namespace Fudge.Tests.Unit.Encodings
             var context = new FudgeContext();
 
             var msg = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
-            var reader = new FudgeMsgStreamReader(msg);
+            var reader = new FudgeMsgStreamReader(context, msg);
             var writer = new FudgeMsgStreamWriter();
 
             var pipe = new FudgeStreamPipe(reader, writer);
@@ -50,7 +50,7 @@ namespace Fudge.Tests.Unit.Encodings
 
             var msg1 = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
             var msg2 = StandardFudgeMessages.CreateMessageAllNames(context);
-            var reader = new FudgeMsgStreamReader(new FudgeMsg[] {msg1, msg2});
+            var reader = new FudgeMsgStreamReader(context, new FudgeMsg[] {msg1, msg2});
             var writer = new FudgeMsgStreamWriter();
 
             var pipe = new FudgeStreamPipe(reader, writer);

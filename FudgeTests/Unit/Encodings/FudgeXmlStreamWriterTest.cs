@@ -28,12 +28,14 @@ namespace Fudge.Tests.Unit.Encodings
 {
     public class FudgeXmlStreamWriterTest
     {
+        private FudgeContext context = new FudgeContext();
+
         [Fact]
         public void SimpleTest()
         {
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
-            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+            var writer = new FudgeXmlStreamWriter(context, xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
 
             writer.StartMessage();
             writer.WriteField("name", null, StringFieldType.Instance, "Bob");
@@ -47,7 +49,7 @@ namespace Fudge.Tests.Unit.Encodings
         {
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Fragment });
-            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+            var writer = new FudgeXmlStreamWriter(context, xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
 
             writer.StartMessage();
             writer.WriteField("name", null, StringFieldType.Instance, "Bob");
@@ -70,8 +72,8 @@ namespace Fudge.Tests.Unit.Encodings
 
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
-            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg");
-            var reader = new FudgeMsgStreamReader(msg);
+            var writer = new FudgeXmlStreamWriter(context, xmlWriter, "msg");
+            var reader = new FudgeMsgStreamReader(context, msg);
             new FudgeStreamPipe(reader, writer).Process();
             xmlWriter.Flush();
 
@@ -85,8 +87,8 @@ namespace Fudge.Tests.Unit.Encodings
             var msg = new FudgeMsg(new Field("blank", IndicatorType.Instance));
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = true });
-            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
-            var reader = new FudgeMsgStreamReader(msg);
+            var writer = new FudgeXmlStreamWriter(context, xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+            var reader = new FudgeMsgStreamReader(context, msg);
             new FudgeStreamPipe(reader, writer).Process();
             xmlWriter.Flush();
 

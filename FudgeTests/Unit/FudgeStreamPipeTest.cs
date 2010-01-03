@@ -35,7 +35,7 @@ namespace Fudge.Tests.Unit
                 new FudgeMsg(context, new Field("test", "data")),
                 new FudgeMsg(context, new Field("life", 42))
             };
-            var reader = new FudgeMsgStreamReader(messages);
+            var reader = new FudgeMsgStreamReader(context, messages);
             var writer = new FudgeMsgStreamWriter(context);
 
             var pipe = new FudgeStreamPipe(reader, writer);

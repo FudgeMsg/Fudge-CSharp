@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,6 +12,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -31,6 +33,7 @@ namespace Fudge.Encodings
     /// </remarks>
     public class FudgeJSONStreamReader : FudgeStreamReaderBase
     {
+        private readonly FudgeContext context;
         private readonly TextReader reader;
         private Token nextToken;
         private bool done = false;
@@ -39,15 +42,23 @@ namespace Fudge.Encodings
         /// <summary>
         /// Constructs a <see cref="FudgeJSONStreamReader"/> on a given <see cref="TextReader"/>.
         /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
         /// <param name="reader"><see cref="TextReader"/> providing the data.</param>
-        public FudgeJSONStreamReader(TextReader reader)
+        public FudgeJSONStreamReader(FudgeContext context, TextReader reader)
         {
+            if (context == null)
+                throw new ArgumentNullException("context");
+            if (reader == null)
+                throw new ArgumentNullException("reader");
+
+            this.context = context;
             this.reader = reader;
         }
 
         /// <summary>
         /// Constructs a <see cref="FudgeJSONStreamReader"/> using a <c>string</c> for the underlying data.
         /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
         /// <param name="text">Text containing JSON message.</param>
         /// <example>This example shows a simple JSON string being converted into a <see cref="FudgeMsg"/> object:
         /// <code>
@@ -55,8 +66,8 @@ namespace Fudge.Encodings
         /// FudgeMsg msg = new FudgeJSONStreamReader(json).ReadToMsg();
         /// </code>
         /// </example>
-        public FudgeJSONStreamReader(string text)
-            : this(new StringReader(text))
+        public FudgeJSONStreamReader(FudgeContext context, string text)
+            : this(context, new StringReader(text))
         {
         }
 

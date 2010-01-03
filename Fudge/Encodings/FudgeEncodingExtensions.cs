@@ -48,7 +48,7 @@ namespace Fudge.Encodings
         /// <param name="msg">Message to write.</param>
         public static void WriteMsg(this IFudgeStreamWriter writer, FudgeMsg msg)
         {
-            var reader = new FudgeMsgStreamReader(msg);
+            var reader = new FudgeMsgStreamReader(msg.FudgeContext, msg);
             var pipe = new FudgeStreamPipe(reader, writer);
             pipe.ProcessOne();
         }

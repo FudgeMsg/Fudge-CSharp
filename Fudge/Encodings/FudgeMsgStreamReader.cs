@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -28,6 +30,7 @@ namespace Fudge.Encodings
     public class FudgeMsgStreamReader : IFudgeStreamReader
     {
         // TODO t0rx 2009-11-13 -- What about envelopes?
+        private readonly FudgeContext context;
         private Stack<State> stack = new Stack<State>();
         private State currentState;
         private FudgeStreamElement element = FudgeStreamElement.NoElement;
@@ -38,17 +41,24 @@ namespace Fudge.Encodings
         /// <summary>
         /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a given <see cref="FudgeMsg"/> for data.
         /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
         /// <param name="msg"><see cref="FudgeMsg"/> to provide as a stream.</param>
-        public FudgeMsgStreamReader(FudgeMsg msg) : this(new FudgeMsg[] {msg})
+        public FudgeMsgStreamReader(FudgeContext context, FudgeMsg msg)
+            : this(context, new FudgeMsg[] { msg })
         {
         }
 
         /// <summary>
         /// Constructs a new <see cref="FudgeMsgStreamReader"/> using a set of <see cref="FudgeMsg"/>s for data.
         /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
         /// <param name="messages">Set <see cref="FudgeMsg"/>s to provide as a stream.</param>
-        public FudgeMsgStreamReader(IEnumerable<FudgeMsg> messages)
+        public FudgeMsgStreamReader(FudgeContext context, IEnumerable<FudgeMsg> messages)
         {
+            if (context == null)
+                throw new ArgumentNullException("context");
+            this.context = context;
+
             messageSource = messages.GetEnumerator();
             currentState = null;
         }
