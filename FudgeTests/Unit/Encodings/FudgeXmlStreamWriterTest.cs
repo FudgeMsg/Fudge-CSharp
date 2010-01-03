@@ -23,6 +23,7 @@ using Xunit;
 using System.Xml;
 using Fudge.Encodings;
 using Fudge.Types;
+using System.IO;
 
 namespace Fudge.Tests.Unit.Encodings
 {
@@ -94,6 +95,19 @@ namespace Fudge.Tests.Unit.Encodings
 
             string s = sb.ToString();
             Assert.Equal("<msg><blank /></msg>", s);
+        }
+
+        [Fact]
+        public void PicksUpPropertiesFromContext()
+        {
+            var newContext = new FudgeContext();
+
+            var writer = new FudgeXmlStreamWriter(newContext, XmlWriter.Create(new MemoryStream()), "msg");
+            Assert.True(writer.AutoFlushOnMessageEnd);
+
+            newContext.SetProperty(FudgeXmlStreamWriter.AutoFlushOnMessageEndProperty, false);
+            writer = new FudgeXmlStreamWriter(newContext, XmlWriter.Create(new MemoryStream()), "msg");
+            Assert.False(writer.AutoFlushOnMessageEnd);
         }
     }
 }
