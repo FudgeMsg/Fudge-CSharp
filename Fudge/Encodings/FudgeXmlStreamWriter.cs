@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -19,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using Fudge.Types;
+using System.IO;
 
 namespace Fudge.Encodings
 {
@@ -46,6 +49,20 @@ namespace Fudge.Encodings
 
             this.writer = writer;
             this.outerElementName = outerElementName;
+            this.AutoFlushOnMessageEnd = true;          // By default, flush the underlying writer whenever we have completed a message
+        }
+
+        /// <summary>
+        /// Constructs a new <c>FudgeXmlStreamWriter</c>, outputting to a given <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="stream"><see cref="Stream"/> to use to output XML.</param>
+        /// <param name="outerElementName">The name of the XML element used for outermost messages.</param>
+        /// <remarks>
+        /// if you want greater control over the way the XML is written, use the constructor that takes an <see cref="XmlWriter"/>.
+        /// </remarks>
+        public FudgeXmlStreamWriter(Stream stream, string outerElementName)
+            : this(XmlWriter.Create(stream, new XmlWriterSettings { OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Fragment }), outerElementName)
+        {
         }
 
         /// <summary>

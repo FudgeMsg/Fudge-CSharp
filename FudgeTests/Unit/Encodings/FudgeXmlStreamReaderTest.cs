@@ -1,5 +1,6 @@
-﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+﻿/*
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +35,7 @@ namespace Fudge.Tests.Unit.Encodings
             string xml = "<msg><name type=\"surname\" value=\"Smith\"/></msg>";
 
             var reader = new FudgeXmlStreamReader(xml);
-            var msg = reader.ReadToMsg();
+            var msg = reader.ReadMsg();
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("name").Type);
             var name = msg.GetMessage("name");
@@ -50,7 +51,7 @@ namespace Fudge.Tests.Unit.Encodings
             string xml = "<msg><name type=\"surname\">Smith</name></msg>";
 
             var reader = new FudgeXmlStreamReader(xml);
-            var msg = reader.ReadToMsg();
+            var msg = reader.ReadMsg();
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("name").Type);
             var name = msg.GetMessage("name");
@@ -66,7 +67,7 @@ namespace Fudge.Tests.Unit.Encodings
             string xml = "<msg><name type=\"surname\"><value>Smith</value></name></msg>";
 
             var reader = new FudgeXmlStreamReader(xml);
-            var msg = reader.ReadToMsg();
+            var msg = reader.ReadMsg();
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("name").Type);
             var name = msg.GetMessage("name");
@@ -83,7 +84,7 @@ namespace Fudge.Tests.Unit.Encodings
             var writer = new FudgeMsgStreamWriter();
             new FudgeStreamPipe(reader, writer).Process();
 
-            var msg = writer.Messages[0];
+            var msg = writer.DequeueMessage();
 
             Assert.Equal("Our House", msg.GetMessage("address").GetString("line1"));
 

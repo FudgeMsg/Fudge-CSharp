@@ -27,7 +27,7 @@ namespace Fudge
     /// <remarks>
     /// <para>
     /// If you simply wish to extract a single message from a stream into a <see cref="FudgeMsg"/> object, then use the
-    /// <see cref="Fudge.Encodings.FudgeEncodingExtensions.ReadToMsg"/> extension method.
+    /// <see cref="Fudge.Encodings.FudgeEncodingExtensions.ReadMsg"/> extension method.
     /// </para>
     /// <para>
     /// The <see cref="Fudge.Encodings"/> namespace contains a variety of readers and writers for different file formats.

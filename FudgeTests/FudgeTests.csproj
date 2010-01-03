@@ -79,6 +79,7 @@
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
     <Compile Include="Unit\FudgeStreamParserTest.cs" />
+    <Compile Include="Unit\FudgeStreamPipeTest.cs" />
     <Compile Include="Unit\FudgeUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />

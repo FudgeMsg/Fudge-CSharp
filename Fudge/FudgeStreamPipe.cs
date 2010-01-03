@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -28,6 +30,7 @@ namespace Fudge
     {
         private readonly IFudgeStreamReader reader;
         private readonly IFudgeStreamWriter writer;
+        private bool aborted;
 
         /// <summary>
         /// Constructs a new pipe from an <see cref="IFudgeStreamReader"/> to an <see cref="IFudgeStreamWriter"/>.
@@ -41,6 +44,11 @@ namespace Fudge
         }
 
         /// <summary>
+        /// MessageProcessed is fired whenever a complete message has been processed by the writer.
+        /// </summary>
+        public event Action MessageProcessed;
+
+        /// <summary>
         /// Passes all elements from the <see cref="IFudgeStreamReader"/> to the <see cref="IFudgeStreamWriter"/> until the
         /// reader indicates it has no more data.
         /// </summary>
@@ -50,10 +58,18 @@ namespace Fudge
         /// </remarks>
         public void Process()
         {
-            while (reader.HasNext)
+            while (!aborted && reader.HasNext)
             {
                 ProcessOne();
             }
+        }
+
+        /// <summary>
+        /// Stops the pipe processing any further
+        /// </summary>
+        public void Abort()
+        {
+            aborted = true;
         }
 
         /// <summary>
@@ -61,7 +77,7 @@ namespace Fudge
         /// </summary>
         public void ProcessOne()
         {
-            while (reader.HasNext)
+            while (!aborted && reader.HasNext)
             {
                 switch (reader.MoveNext())
                 {
@@ -70,6 +86,7 @@ namespace Fudge
                         break;
                     case FudgeStreamElement.MessageEnd:
                         writer.EndMessage();
+                        FireMessageProcessed();
                         return;                 // We're done now
                     case FudgeStreamElement.SimpleField:
                         writer.WriteField(reader.FieldName, reader.FieldOrdinal, reader.FieldType, reader.FieldValue);
@@ -83,6 +100,15 @@ namespace Fudge
                     default:
                         break;      // Unknown
                 }
+            }
+        }
+
+        private void FireMessageProcessed()
+        {
+            // Tell everyone that we've processed a full message
+            if (MessageProcessed != null)
+            {
+                MessageProcessed();
             }
         }
     }
