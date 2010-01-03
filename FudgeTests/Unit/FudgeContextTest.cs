@@ -120,6 +120,51 @@ namespace Fudge.Tests.Unit
             int age = msg2.GetInt("age") ?? 0;
         }
 
+        #region Property tests
+
+        [Fact]
+        public void BasicPropertyTest()
+        {
+            var myProp = new FudgeContextProperty("SomeProp");
+            var context = new FudgeContext();
+
+            Assert.Null(context.GetProperty(myProp));
+            Assert.Equal(12, context.GetProperty(myProp, 12));
+
+            context.SetProperty(myProp, 17);
+
+            Assert.Equal(17, context.GetProperty(myProp));
+            Assert.Equal(17, context.GetProperty(myProp, 12));
+        }
+
+        [Fact]
+        public void PropertyValidationTest()
+        {
+            var myProp = new FudgeContextProperty("EvenProp", x => (int)x % 2 == 0);        // Only accept even integers
+
+            var context = new FudgeContext();
+            context.SetProperty(myProp, 12);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                context.SetProperty(myProp, 17);
+            });
+        }
+
+        [Fact]
+        public void PropertiesCreatedAfterContext()
+        {
+            var context = new FudgeContext();
+
+            var newProp = new FudgeContextProperty("NewProp");
+
+            Assert.Null(context.GetProperty(newProp));
+            context.SetProperty(newProp, "test");
+            Assert.Equal("test", context.GetProperty(newProp));
+        }
+
+        #endregion
+
         private FudgeMsg CycleMessage(FudgeMsg msg, FudgeContext context, short? taxonomy)
         {
             MemoryStream outputStream = new MemoryStream();

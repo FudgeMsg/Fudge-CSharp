@@ -67,6 +67,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Unit\FudgeContextPropertyTest.cs" />
     <Compile Include="Unit\Encodings\DebuggingWriter.cs" />
     <Compile Include="Unit\Encodings\FudgeEncodedStreamReaderTest.cs" />
     <Compile Include="Unit\Encodings\FudgeJSONStreamReaderTest.cs" />
