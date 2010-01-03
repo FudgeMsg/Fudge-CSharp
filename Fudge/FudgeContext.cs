@@ -51,7 +51,7 @@ namespace Fudge
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private readonly FudgeTypeHandler typeHandler;
         private ITaxonomyResolver taxonomyResolver;
-        private readonly object[] properties;     // REVIEW t0rx 2009-11-28 -- Should we only create this on demand?
+        private object[] properties;     // REVIEW t0rx 2009-11-28 -- Should we only create this on demand?
         private FudgeStreamParser parser;
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Fudge
         /// </summary>
         public FudgeContext()
         {
-            properties = new object[FudgeContextProperty.MaxIndex + 1];     // Note that this means you can't set a property if it was created after the context
+            properties = new object[0];              // This will expand on use
             parser = new FudgeStreamParser(this);
             typeHandler = new FudgeTypeHandler(typeDictionary);
         }
@@ -240,7 +240,7 @@ namespace Fudge
 
             int index = prop.Index;
             if (index >= properties.Length)
-                throw new ArgumentOutOfRangeException("Cannot set the value of property " + prop.Name + " as it was created after this context was constructed.");
+                return null;
 
             return properties[index];
         }
@@ -258,13 +258,23 @@ namespace Fudge
         {
             if (prop == null)
                 throw new ArgumentNullException("prop");
+            if (!prop.IsValidValue(value))
+                throw new ArgumentOutOfRangeException("Value is not valid for context property " + prop.Name);
 
             int index = prop.Index;
             if (index >= properties.Length)
-                throw new ArgumentOutOfRangeException("Cannot set the value of property " + prop.Name + " as it was created after this context was constructed.");
-
-            if (!prop.IsValidValue(value))
-                throw new ArgumentOutOfRangeException("Value is not valid for context property " + prop.Name);
+            {
+                lock (this)
+                {
+                    if (index >= properties.Length)
+                    {
+                        int newSize = Math.Max(properties.Length, FudgeContextProperty.MaxIndex + 1);
+                        var newArray = new object[newSize];
+                        properties.CopyTo(newArray, 0);
+                        properties = newArray;
+                    }
+                }
+            }
 
             properties[index] = value;
         }

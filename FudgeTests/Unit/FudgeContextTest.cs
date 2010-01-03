@@ -118,6 +118,8 @@ namespace Fudge.Tests.Unit
             int age = msg2.GetInt("age") ?? 0;
         }
 
+        #region Property tests
+
         [Fact]
         public void BasicPropertyTest()
         {
@@ -144,6 +146,20 @@ namespace Fudge.Tests.Unit
                 context.SetProperty(myProp, 17);
             });
         }
+
+        [Fact]
+        public void PropertiesCreatedAfterContext()
+        {
+            var context = new FudgeContext();
+
+            var newProp = new FudgeContextProperty("NewProp");
+
+            Assert.Null(context.GetProperty(newProp));
+            context.SetProperty(newProp, "test");
+            Assert.Equal("test", context.GetProperty(newProp));
+        }
+
+        #endregion
 
         private FudgeMsg CycleMessage(FudgeMsg msg, FudgeContext context, short? taxonomy)
         {
