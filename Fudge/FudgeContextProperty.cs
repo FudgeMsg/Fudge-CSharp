@@ -26,7 +26,7 @@ namespace Fudge
     /// </summary>
     /// <remarks>
     /// <para>Properties are ussed to control encoding and decoding behaviour.  They are set and retrieved
-    /// through the <see cref="FudgeContext.SetProperty"/> and <see cref="FudgeContext.GetProperty"/>
+    /// through the <see cref="FudgeContext.SetProperty"/> and <see cref="FudgeContext.GetProperty(FudgeContextProperty)"/>
     /// methods of <see cref="FudgeContext"/>.</para>
     /// <para>The validation function can be specified as a parameter to the constructor, or by deriving
     /// from this class and overriding <see cref="IsValidValue"/>.</para>

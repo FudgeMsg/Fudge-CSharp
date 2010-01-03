@@ -127,10 +127,12 @@ namespace Fudge.Tests.Unit
             var context = new FudgeContext();
 
             Assert.Null(context.GetProperty(myProp));
+            Assert.Equal(12, context.GetProperty(myProp, 12));
 
             context.SetProperty(myProp, 17);
 
             Assert.Equal(17, context.GetProperty(myProp));
+            Assert.Equal(17, context.GetProperty(myProp, 12));
         }
 
         [Fact]

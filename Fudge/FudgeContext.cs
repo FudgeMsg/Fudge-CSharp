@@ -190,7 +190,7 @@ namespace Fudge
         // TODO 2009-12-11 Andrew -- should we have a toByteArray that takes a taxonomy too?
 
         // TODO 2009-12-11 Andrew -- should we have a Serialize that takes the envelope as there's no way to control the version field otherwise?
- 
+
         /// <summary>
         /// Decodes a <c>FudgeMsg</c> from a <c>Stream</c>.
         /// </summary>
@@ -243,6 +243,17 @@ namespace Fudge
                 return null;
 
             return properties[index];
+        }
+
+        /// <summary>
+        /// Gets the value of a specific property from this context, or returns <c>defaultValue</c> if not set.
+        /// </summary>
+        /// <param name="prop">Property to retrieve.</param>
+        /// <param name="defaultValue">Value to return if property not set.</param>
+        /// <returns>Property value or <c>defaultValue</c> if not set.</returns>
+        public object GetProperty(FudgeContextProperty prop, object defaultValue)
+        {
+            return GetProperty(prop) ?? defaultValue;
         }
 
         /// <summary>
