@@ -50,6 +50,25 @@ namespace Fudge.Tests.Unit.Encodings
         }
 
         [Fact]
+        public void CheckEndOfStreamWithoutHasNext()
+        {
+            // Same as CheckElementsCorrectForSimpleMessage but without using HasNext
+            var context = new FudgeContext();
+            var msg = context.NewMessage();
+            msg.Add("Test", "Bob");
+            var bytes = context.ToByteArray(msg);
+
+            var stream = new MemoryStream(bytes);
+            var reader = new FudgeEncodedStreamReader(context, stream);
+
+            Assert.Equal(FudgeStreamElement.MessageStart, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.SimpleField, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.MessageEnd, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.NoElement, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.NoElement, reader.MoveNext());
+        }
+
+        [Fact]
         public void CheckElementsCorrectForSubMessage()
         {
             var context = new FudgeContext();
@@ -73,6 +92,33 @@ namespace Fudge.Tests.Unit.Encodings
             Assert.True(reader.HasNext);
             Assert.Equal(FudgeStreamElement.MessageEnd, reader.MoveNext());
             Assert.False(reader.HasNext);
+        }
+
+        [Fact]
+        public void MultipleMessages()
+        {
+            // Same as CheckElementsCorrectForSimpleMessage but without using HasNext
+            var context = new FudgeContext();
+            var msg1 = context.NewMessage();
+            msg1.Add("Test", "Bob");
+            var msg2 = context.NewMessage();
+            msg2.Add("Test2", "Shirley");
+            var msgs = new FudgeMsg[] {msg1, msg2};
+            var stream = new MemoryStream();
+            var writer = new FudgeEncodedStreamWriter(context, stream);
+            new FudgeStreamPipe(new FudgeMsgStreamReader(context, msgs), writer).Process();
+
+            stream.Position = 0;
+            var reader = new FudgeEncodedStreamReader(context, stream);
+
+            Assert.Equal(FudgeStreamElement.MessageStart, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.SimpleField, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.MessageEnd, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.MessageStart, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.SimpleField, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.MessageEnd, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.NoElement, reader.MoveNext());
+            Assert.Equal(FudgeStreamElement.NoElement, reader.MoveNext());
         }
     }
 }
