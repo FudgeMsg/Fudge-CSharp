@@ -87,7 +87,9 @@
     <Compile Include="Unit\Linq\ExpressionTreeStructureHasherTest.cs" />
     <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\DateFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
+    <Compile Include="Unit\Types\FudgeDateTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fudge\Fudge.csproj">

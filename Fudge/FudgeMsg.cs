@@ -96,19 +96,6 @@ namespace Fudge
         }
 
         /// <summary>
-        /// Constructs a new <see cref="FudgeMsg"/> from raw binary data, using a given context.
-        /// </summary>
-        /// <param name="byteArray">Binary data to use.</param>
-        /// <param name="context"><see cref="FudgeContext"/> for the message.</param>
-        public FudgeMsg(byte[] byteArray, FudgeContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException("context", "Context must be provided");
-            }
-        }
-
-        /// <summary>
         /// Populates the message fields from the encoded data. If the array is larger than the Fudge envelope, any additional data is ignored.
         /// </summary>
         /// <param name="byteArray">the encoded data to populate this message with</param>
