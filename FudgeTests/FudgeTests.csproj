@@ -90,6 +90,8 @@
     <Compile Include="Unit\Types\DateFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
     <Compile Include="Unit\Types\FudgeDateTest.cs" />
+    <Compile Include="Unit\Types\FudgeTimeTest.cs" />
+    <Compile Include="Unit\Types\TimeFieldTypeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fudge\Fudge.csproj">

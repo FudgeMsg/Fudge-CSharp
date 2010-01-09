@@ -93,6 +93,8 @@
     <Compile Include="Types\FudgeArrayFieldTypeBase.cs" />
     <Compile Include="Types\FudgeDate.cs" />
     <Compile Include="Types\DateFieldType.cs" />
+    <Compile Include="Types\FudgeDateTime.cs" />
+    <Compile Include="Types\FudgeTime.cs" />
     <Compile Include="Types\SecondaryFieldType.cs" />
     <Compile Include="Taxon\IFudgeTaxonomy.cs" />
     <Compile Include="Taxon\IFudgeTaxonomyResolver.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="Types\IndicatorType.cs" />
     <Compile Include="Types\PrimitiveFieldTypes.cs" />
     <Compile Include="Types\StringFieldType.cs" />
+    <Compile Include="Types\TimeFieldType.cs" />
     <Compile Include="Types\UnknownFudgeFieldType.cs" />
     <Compile Include="UnknownFudgeFieldValue.cs" />
     <Compile Include="Util\BinaryNBOReader.cs" />

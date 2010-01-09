@@ -16,7 +16,9 @@
  * -->
  */
 using System;
+using System.Linq;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Fudge.Tests.Unit
 {
@@ -64,6 +66,11 @@ namespace Fudge.Tests.Unit
                 }
             }
             Assert.False(actualIter.MoveNext());
+        }
+
+        public static string ToNiceString(this byte[] bytes)
+        {
+            return string.Join("-", bytes.Select(b => b.ToString("x2")).ToArray());
         }
     }
 }

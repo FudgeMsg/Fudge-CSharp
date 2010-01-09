@@ -67,6 +67,7 @@ namespace Fudge
             AddType(StringFieldType.Instance);
             AddType(FudgeMsgFieldType.Instance);
             AddType(DateFieldType.Instance);
+            AddType(TimeFieldType.Instance);
         }
 
         /// <summary>

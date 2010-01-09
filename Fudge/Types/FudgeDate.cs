@@ -33,8 +33,8 @@ namespace Fudge.Types
     {
         private readonly int rawValue;
         private static readonly int[] monthLengths = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-        public const int MinYear = -9999;
-        public const int MaxYear = 9999;
+        private const int MinYear = -9999;
+        private const int MaxYear = 9999;
 
         /// <summary>
         /// Constructs a new <c>FudgeDate</c> based on a raw value in the form YYYYMMDD.
@@ -54,8 +54,8 @@ namespace Fudge.Types
         /// <param name="day">Day</param>
         public FudgeDate(int year, int month, int day)
         {
-            if (year < -10000 || year > 10000)
-                throw new ArgumentOutOfRangeException("year");
+            if (year < MinYear || year > MaxYear)
+                throw new ArgumentOutOfRangeException("year", "FudgeDate years must be in the range " + MinYear + " to " + MaxYear);
             if (month < 1 || month > 12)
                 throw new ArgumentOutOfRangeException("month");
             if (day < 1 || day > 31)

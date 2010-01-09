@@ -20,37 +20,42 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Fudge.Types;
-using Fudge.Encodings;
 using System.IO;
 using Fudge.Util;
 
 namespace Fudge.Tests.Unit.Types
 {
-    public class DateFieldTypeTest
+    public class TimeFieldTypeTest
     {
-        private FudgeContext context = new FudgeContext();
+        private readonly FudgeContext context = new FudgeContext();
 
         [Fact]
-        public void RoundTrip()
+        public void TestVariousOption()
         {
-            var d = new FudgeDate(1999, 12, 10);
-
-            var msg1 = new FudgeMsg(context, new Field("d", d));
-            var bytes = msg1.ToByteArray();
-            var msg2 = context.Deserialize(bytes).Message;
-
-            Assert.Equal("1999-12-10", msg2.GetValue<FudgeDate>("d").ToString());
+            Cycle(new FudgeTime(1, 2, 3, 123456789, 45, FudgeDateTime.Precision.Nanosecond));
+            Cycle(new FudgeTime(1, 2, 3, 123456789, 45, FudgeDateTime.Precision.Millisecond));
+            Cycle(new FudgeTime(1, 2, 3, 123456789, -45, FudgeDateTime.Precision.Millisecond));
+            Cycle(new FudgeTime(1, 2, 3));
         }
 
         [Fact]
         public void CheckActualBytes()
         {
-            var d = new FudgeDate(2003, 01, 13);
+            var t = new FudgeTime(1, 2, 3, 123456789, 60, FudgeDateTime.Precision.Microsecond);
             var stream = new MemoryStream();
             var writer = new FudgeBinaryWriter(stream);
-            DateFieldType.Instance.WriteValue(writer, d);
+            TimeFieldType.Instance.WriteValue(writer, t);
 
-            Assert.Equal("01-31-a2-a1", stream.ToArray().ToNiceString());       // That's 20030113 in hex
+            Assert.Equal("04-10-0e-8b-07-5b-cd-15", stream.ToArray().ToNiceString());
+        }
+
+        private void Cycle(FudgeTime t)
+        {
+            var msg1 = new FudgeMsg(context, new Field("t", t));
+            var bytes = msg1.ToByteArray();
+            var msg2 = context.Deserialize(bytes).Message;
+
+            Assert.Equal(t, msg2.GetValue<FudgeTime>("t"));
         }
     }
 }
