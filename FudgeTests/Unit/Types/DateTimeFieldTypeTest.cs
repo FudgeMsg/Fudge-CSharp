@@ -64,5 +64,28 @@ namespace Fudge.Tests.Unit.Types
             Assert.Equal(dt, msg.GetValue<DateTime>("dt"));
             Assert.Equal(dto, msg.GetValue<DateTime>("dto"));
         }
+
+        [Fact]
+        public void Minimsation()
+        {
+            var msg = new FudgeMsg(context);
+            var dt = new DateTime(1990, 2, 1);
+            var fdt = new FudgeDateTime(1990, 2, 1, 0, 0, 0, 0, FudgeDateTimePrecision.Day);
+
+            msg.Add("dt", dt);
+            msg.Add("fdt", fdt);
+            Assert.Same(DateFieldType.Instance, msg.GetByName("dt").Type);
+            Assert.IsType<FudgeDate>(msg.GetByName("dt").Value);
+            Assert.Same(DateFieldType.Instance, msg.GetByName("fdt").Type);
+            Assert.IsType<FudgeDate>(msg.GetByName("fdt").Value);
+
+            Assert.Equal(dt, msg.GetValue<DateTime>("dt"));
+            Assert.Equal(fdt, msg.GetValue<FudgeDateTime>("fdt"));
+
+            // Error cases
+            FudgeFieldType type = null;
+            Assert.Equal(null, DateTimeFieldType.Instance.Minimize(null, ref type));
+            Assert.Throws<ArgumentException>(() => DateTimeFieldType.Instance.Minimize("fred", ref type));
+        }
     }
 }

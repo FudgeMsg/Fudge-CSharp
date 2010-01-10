@@ -1,5 +1,5 @@
 /* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,8 @@ namespace Fudge
         public override object Minimize(object value, ref FudgeFieldType type)
         {
             type = wireType;
-            return outputConverter((T)value);       // TODO 2009-09-12 t0rx -- This could maybe be wireType.Minimize(outputConverter etc), but there may be implications on decoding
+            object newValue = outputConverter((T)value);
+            return wireType.Minimize(newValue, ref type);       // Allow the wire type to minimise further if it wants
         }
 
         /// <inheritdoc/>

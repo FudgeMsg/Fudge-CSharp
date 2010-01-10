@@ -344,5 +344,17 @@ namespace Fudge.Types
                 result += " " + time.ToString();
             return result;
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            FudgeDateTime other = obj as FudgeDateTime;
+            if (other == null)
+                return false;
+
+            return this.date.Equals(other.date)
+                && this.time.Equals(other.time)
+                && this.precision == other.precision;
+        }
     }
 }

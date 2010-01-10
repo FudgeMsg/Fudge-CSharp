@@ -158,5 +158,32 @@ namespace Fudge.Tests.Unit.Types
             Assert.Equal("-1234-10-01", new FudgeDate(-12341001).ToString());
             Assert.Equal("-0001-10-01", new FudgeDate(-00011001).ToString());
         }
+
+        [Fact]
+        public void IConvertible()
+        {
+            var date = new FudgeDate(19870304);
+            Assert.Equal(TypeCode.Object, date.GetTypeCode());
+            Assert.Throws<InvalidCastException>(() => date.ToBoolean(null));
+            Assert.Throws<InvalidCastException>(() => date.ToByte(null));
+            Assert.Throws<InvalidCastException>(() => date.ToChar(null));
+            Assert.Equal(new DateTime (1987, 3, 4), date.ToDateTime(null));
+            Assert.Throws<InvalidCastException>(() => date.ToDecimal(null));
+            Assert.Throws<InvalidCastException>(() => date.ToDouble(null));
+            Assert.Throws<InvalidCastException>(() => date.ToInt16(null));
+            Assert.Throws<InvalidCastException>(() => date.ToInt32(null));
+            Assert.Throws<InvalidCastException>(() => date.ToInt64(null));
+            Assert.Throws<InvalidCastException>(() => date.ToSByte(null));
+            Assert.Throws<InvalidCastException>(() => date.ToSingle(null));
+            Assert.Equal("1987-03-04", date.ToString(null));
+            Assert.Throws<InvalidCastException>(() => date.ToUInt16(null));
+            Assert.Throws<InvalidCastException>(() => date.ToUInt32(null));
+            Assert.Throws<InvalidCastException>(() => date.ToUInt64(null));
+            Assert.Equal(new DateTime(1987, 3, 4), date.ToType(typeof(DateTime), null));
+            Assert.Equal(new DateTimeOffset(1987, 3, 4, 0, 0, 0, TimeSpan.Zero), date.ToType(typeof(DateTimeOffset), null));
+            Assert.Equal(new FudgeDateTime(1987, 3, 4, 0, 0, 0, 0, FudgeDateTimePrecision.Day), date.ToType(typeof(FudgeDateTime), null));
+            Assert.Equal("1987-03-04", date.ToType(typeof(string), null));
+            Assert.Throws<InvalidCastException>(() => date.ToType(typeof(int), null));
+        }
     }
 }

@@ -92,10 +92,18 @@ namespace Fudge.Tests.Unit.Types
         }
 
         [Fact]
-        public void BasicToString()
+        public void ObjectOverrides()
         {
+            // ToString
             var dt = new FudgeDateTime(2003, 11, 13, 12, 14, 34, 987654321, 0, FudgeDateTimePrecision.Nanosecond);
             Assert.Equal("2003-11-13 12:14:34.987654321 +00:00", dt.ToString());
+
+            // Equals
+            var dt2 = new FudgeDateTime(2003, 11, 13, 12, 14, 34, 987654321, 0, FudgeDateTimePrecision.Nanosecond);
+            var dt3 = new FudgeDateTime(2003, 11, 13, 12, 14, 34, 987654321, 0, FudgeDateTimePrecision.Nanosecond);
+            Assert.Equal(dt2, dt3);
+            Assert.False(dt2.Equals(null));
+            Assert.False(dt2.Equals("Fred"));
         }
     }
 }

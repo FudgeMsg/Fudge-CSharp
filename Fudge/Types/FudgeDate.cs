@@ -29,7 +29,7 @@ namespace Fudge.Types
     /// (e.g. 30th February), however converting to a <see cref="DateTime"/> will always
     /// return a valid date (rolling to the next valid day if appropriate).
     /// </remarks>
-    public class FudgeDate : IComparable<FudgeDate>
+    public class FudgeDate : IComparable<FudgeDate>, IConvertible
     {
         private readonly int rawValue;
         private static readonly int[] monthLengths = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -78,7 +78,8 @@ namespace Fudge.Types
         /// </summary>
         /// <param name="dateTime">DateTime to base this <c>FudgeDate</c> on</param>.
         /// <remarks>Note that timezone information is ignored, and only the date part used.</remarks>
-        public FudgeDate(DateTime dateTime) : this(dateTime.Year, dateTime.Month, dateTime.Day)
+        public FudgeDate(DateTime dateTime)
+            : this(dateTime.Year, dateTime.Month, dateTime.Day)
         {
             // DateTime years run from 1 to 9999, so we don't have to worry about negatives
         }
@@ -257,6 +258,121 @@ namespace Fudge.Types
 
             int subYearDiff = (Math.Abs(this.rawValue) % 10000) - (Math.Abs(other.rawValue) % 10000);
             return Math.Sign(subYearDiff); ;
+        }
+
+        #endregion
+
+        #region IConvertible Members
+
+        /// <inheritdoc/>
+        public TypeCode GetTypeCode()
+        {
+            return TypeCode.Object;
+        }
+
+        /// <inheritdoc/>
+        public bool ToBoolean(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public byte ToByte(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public char ToChar(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public DateTime ToDateTime(IFormatProvider provider)
+        {
+            return this.ToDateTime();
+        }
+
+        /// <inheritdoc/>
+        public decimal ToDecimal(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public double ToDouble(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public short ToInt16(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public int ToInt32(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public long ToInt64(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public sbyte ToSByte(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public float ToSingle(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public string ToString(IFormatProvider provider)
+        {
+            return ToString();
+        }
+
+        /// <inheritdoc/>
+        public object ToType(Type conversionType, IFormatProvider provider)
+        {
+            if (conversionType == typeof(DateTime))
+                return this.ToDateTime();
+            if (conversionType == typeof(FudgeDateTime))
+                return new FudgeDateTime(this, null);
+            if (conversionType == typeof(DateTimeOffset))
+                return new DateTimeOffset(this.ToDateTime(), TimeSpan.Zero);
+            if (conversionType == typeof(string))
+                return ToString();
+
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public ushort ToUInt16(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public uint ToUInt32(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public ulong ToUInt64(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
         }
 
         #endregion

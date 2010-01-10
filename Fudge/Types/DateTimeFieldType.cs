@@ -41,6 +41,28 @@ namespace Fudge.Types
         }
 
         /// <inheritdoc/>
+        public override object Minimize(object value, ref FudgeFieldType type)
+        {
+            // If it's a pure date we can just use a date field instead
+
+            if (value == null)
+                return null;
+
+            FudgeDateTime fdt = value as FudgeDateTime;
+            if (fdt == null)
+                throw new ArgumentException("value must be FudgeDateTime");
+
+            if (fdt.Precision == FudgeDateTimePrecision.Day || fdt.Time.Equals(FudgeTime.Midnight))
+            {
+                // We can just use a date
+                type = DateFieldType.Instance;
+                return fdt.Date;
+            }
+
+            return fdt;
+        }
+
+        /// <inheritdoc/>
         public override FudgeDateTime ReadTypedValue(BinaryReader input, int dataSize)
         {
             FudgeDate date = DateFieldType.Instance.ReadTypedValue(input, 0);
