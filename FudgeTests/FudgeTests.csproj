@@ -88,8 +88,10 @@
     <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
     <Compile Include="Unit\Types\DateFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\DateTimeFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
     <Compile Include="Unit\Types\FudgeDateTest.cs" />
+    <Compile Include="Unit\Types\FudgeDateTimeTest.cs" />
     <Compile Include="Unit\Types\FudgeTimeTest.cs" />
     <Compile Include="Unit\Types\TimeFieldTypeTest.cs" />
   </ItemGroup>

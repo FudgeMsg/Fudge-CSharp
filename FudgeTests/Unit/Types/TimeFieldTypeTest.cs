@@ -32,16 +32,16 @@ namespace Fudge.Tests.Unit.Types
         [Fact]
         public void TestVariousOption()
         {
-            Cycle(new FudgeTime(1, 2, 3, 123456789, 45, FudgeDateTime.Precision.Nanosecond));
-            Cycle(new FudgeTime(1, 2, 3, 123456789, 45, FudgeDateTime.Precision.Millisecond));
-            Cycle(new FudgeTime(1, 2, 3, 123456789, -45, FudgeDateTime.Precision.Millisecond));
+            Cycle(new FudgeTime(1, 2, 3, 123456789, 45, FudgeDateTimePrecision.Nanosecond));
+            Cycle(new FudgeTime(1, 2, 3, 123456789, 45, FudgeDateTimePrecision.Millisecond));
+            Cycle(new FudgeTime(1, 2, 3, 123456789, -45, FudgeDateTimePrecision.Millisecond));
             Cycle(new FudgeTime(1, 2, 3));
         }
 
         [Fact]
         public void CheckActualBytes()
         {
-            var t = new FudgeTime(1, 2, 3, 123456789, 60, FudgeDateTime.Precision.Microsecond);
+            var t = new FudgeTime(1, 2, 3, 123456789, 60, FudgeDateTimePrecision.Microsecond);
             var stream = new MemoryStream();
             var writer = new FudgeBinaryWriter(stream);
             TimeFieldType.Instance.WriteValue(writer, t);

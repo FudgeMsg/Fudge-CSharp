@@ -108,6 +108,19 @@ namespace Fudge.Tests.Unit.Types
         }
 
         [Fact]
+        public void VariousToString()
+        {
+            Assert.Equal("1000-01-01", new FudgeDate(10000101).ToString());
+            Assert.Equal("0010-01-01", new FudgeDate(00100101).ToString());
+            Assert.Equal("-1000-01-01", new FudgeDate(-10000101).ToString());
+
+            Assert.Equal("1001-01-01", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Day));
+            Assert.Equal("1001-01", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Month));
+            Assert.Equal("1001", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Year));
+            Assert.Equal("1000", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Century));    // REVIEW 20100110 t0rx -- Is this the right behaviour for centuries?
+        }
+
+        [Fact]
         public void Comparison()
         {
             Assert.Equal(-1, new FudgeDate(19990102).CompareTo(new FudgeDate(20000102)));

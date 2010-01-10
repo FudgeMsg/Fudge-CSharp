@@ -43,14 +43,14 @@ namespace Fudge.Types
         /// <inheritdoc/>
         public override FudgeTime ReadTypedValue(BinaryReader input, int dataSize)
         {
-            int firstFourBytes = input.ReadInt32();
-            int nanos = input.ReadInt32();
+            int? timeZone;
+            int seconds;
+            int nanos;
+            FudgeDateTimePrecision precision;
 
-            int timezone = firstFourBytes >> 24;
-            var precision = (FudgeDateTime.Precision)((firstFourBytes >> 20) & 0x0f);
-            var seconds = firstFourBytes & 0x000fffff;
+            ReadEncodedTime(input, out precision, out timeZone, out seconds, out nanos);
 
-            if (timezone == -128)
+            if (timeZone == null)
             {
                 // No timezone
                 return new FudgeTime(precision, seconds, nanos);
@@ -58,18 +58,44 @@ namespace Fudge.Types
             else
             {
                 // Timezone
-                return new FudgeTime(precision, seconds, nanos, timezone * 15);
+                return new FudgeTime(precision, seconds, nanos, timeZone.Value);
             }
         }
 
         /// <inheritdoc/>
         public override void WriteValue(BinaryWriter output, FudgeTime value)
         {
-            int firstFourBytes = (value.HasTimeZone ? value.TimeZoneOffset / 15 : -128) << 24;
-            firstFourBytes |= ((int)value.Precision) << 20;
-            firstFourBytes |= value.TotalSeconds;
+            WriteEncodedTime(output, value.Precision, value.TimeZoneOffset, value.TotalSeconds, value.Nanoseconds);      
+        }
+
+        internal static void ReadEncodedTime(BinaryReader input, out FudgeDateTimePrecision precision, out int? timeZone, out int seconds, out int nanos)
+        {
+            int firstFourBytes = input.ReadInt32();
+            nanos = input.ReadInt32();
+
+            timeZone = firstFourBytes >> 24;
+            precision = (FudgeDateTimePrecision)((firstFourBytes >> 20) & 0x0f);
+            seconds = firstFourBytes & 0x000fffff;
+
+            if (timeZone == -128)
+            {
+                // No timezone
+                timeZone = null;
+            }
+            else
+            {
+                // Timezone
+                timeZone = timeZone.Value * 15;
+            }
+        }
+
+        internal static void WriteEncodedTime(BinaryWriter output, FudgeDateTimePrecision precision, int? timezone, int seconds, int nanos)
+        {
+            int firstFourBytes = (timezone.HasValue ? timezone.Value / 15 : -128) << 24;
+            firstFourBytes |= ((int)precision) << 20;
+            firstFourBytes |= seconds;
             output.Write(firstFourBytes);
-            output.Write(value.Nanoseconds);        
+            output.Write(nanos);
         }
     }
 }

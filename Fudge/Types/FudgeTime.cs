@@ -27,18 +27,24 @@ namespace Fudge.Types
     /// </summary>
     public class FudgeTime
     {
-        private const int BogusTimeZone = int.MinValue;
         private readonly int seconds;
         private readonly int nanos;
-        private readonly int timeZoneOffset;
-        private readonly FudgeDateTime.Precision precision;
+        private readonly int? timeZoneOffset;
+        private readonly FudgeDateTimePrecision precision;
+        private const int ticksPerSecond = 10000000;                    // A .net tick is 100 nanoseconds
+        private const int nanosPerTick = 1000000000 / ticksPerSecond;
+
+        /// <summary>The default precision assumed for .net <see cref="DateTime"/> objects.</summary>
+        public const FudgeDateTimePrecision DefaultDateTimePrecision = FudgeDateTimePrecision.Nanosecond;
+        /// <summary>Represents midnight with no timezone</summary>
+        public static readonly FudgeTime Midnight = new FudgeTime(FudgeDateTimePrecision.Nanosecond, 0, 0);
 
         /// <summary>
         /// Constructs a new <c>FudgeTime</c> which is just hours, without a timezone.
         /// </summary>
         /// <param name="hour"></param>
         public FudgeTime(int hour)
-            : this(hour, 0, 0, 0, FudgeDateTime.Precision.Hour)
+            : this(hour, 0, 0, 0, FudgeDateTimePrecision.Hour)
         {
         }
 
@@ -48,7 +54,7 @@ namespace Fudge.Types
         /// <param name="hour"></param>
         /// <param name="minute"></param>
         public FudgeTime(int hour, int minute)
-            : this(hour, minute, 0, 0, FudgeDateTime.Precision.Minute)
+            : this(hour, minute, 0, 0, FudgeDateTimePrecision.Minute)
         {
         }
 
@@ -59,7 +65,7 @@ namespace Fudge.Types
         /// <param name="minute"></param>
         /// <param name="second"></param>
         public FudgeTime(int hour, int minute, int second)
-            : this(hour, minute, second, 0, FudgeDateTime.Precision.Second)
+            : this(hour, minute, second, 0, FudgeDateTimePrecision.Second)
         {
         }
 
@@ -71,7 +77,7 @@ namespace Fudge.Types
         /// <param name="second"></param>
         /// <param name="timeZoneOffset">Timezone offset from UTC, in minutes, must be multiple of 15</param>
         public FudgeTime(int hour, int minute, int second, int timeZoneOffset)
-            : this(hour, minute, second, 0, timeZoneOffset, FudgeDateTime.Precision.Second)
+            : this(hour, minute, second, 0, timeZoneOffset, FudgeDateTimePrecision.Second)
         {
         }
 
@@ -83,8 +89,8 @@ namespace Fudge.Types
         /// <param name="second"></param>
         /// <param name="nanoseconds"></param>
         /// <param name="precision"></param>
-        public FudgeTime(int hour, int minute, int second, int nanoseconds, FudgeDateTime.Precision precision)
-            : this(hour, minute, second, nanoseconds, BogusTimeZone, precision)
+        public FudgeTime(int hour, int minute, int second, int nanoseconds, FudgeDateTimePrecision precision)
+            : this(hour, minute, second, nanoseconds, null, precision)
         {
         }
 
@@ -97,7 +103,7 @@ namespace Fudge.Types
         /// <param name="nanoseconds"></param>
         /// <param name="timeZoneOffset">Timezone offset from UTC, in minutes, must be multiple of 15</param>
         /// <param name="precision"></param>
-        public FudgeTime(int hour, int minute, int second, int nanoseconds, int timeZoneOffset, FudgeDateTime.Precision precision)
+        public FudgeTime(int hour, int minute, int second, int nanoseconds, int? timeZoneOffset, FudgeDateTimePrecision precision)
         {
             if (hour < 0 || hour > 23)
                 throw new ArgumentOutOfRangeException("hour");
@@ -107,14 +113,14 @@ namespace Fudge.Types
                 throw new ArgumentOutOfRangeException("second");
             if (nanoseconds < 0 || nanoseconds > 999999999)
                 throw new ArgumentOutOfRangeException("nanoseconds");
-            if (timeZoneOffset != BogusTimeZone)
+            if (timeZoneOffset.HasValue)
             {
                 if (timeZoneOffset % 15 != 0)
                     throw new ArgumentOutOfRangeException("timeZoneOffset", "offset must be a multiple of 15 (minutes)");
                 if (timeZoneOffset < -127 * 15 || timeZoneOffset > 127 * 15)
                     throw new ArgumentOutOfRangeException("timeZoneOffset");
             }
-            if (precision > FudgeDateTime.Precision.Hour)
+            if (precision > FudgeDateTimePrecision.Hour)
                 throw new ArgumentOutOfRangeException("precision");
             this.seconds = hour * 3600 + minute * 60 + second;
             this.nanos = nanoseconds;
@@ -128,7 +134,8 @@ namespace Fudge.Types
         /// <param name="precision"></param>
         /// <param name="totalSeconds"></param>
         /// <param name="nanoseconds"></param>
-        public FudgeTime(FudgeDateTime.Precision precision, int totalSeconds, int nanoseconds) : this(precision, totalSeconds, nanoseconds, BogusTimeZone)
+        public FudgeTime(FudgeDateTimePrecision precision, int totalSeconds, int nanoseconds)
+            : this(precision, totalSeconds, nanoseconds, null)
         {
         }
 
@@ -139,26 +146,62 @@ namespace Fudge.Types
         /// <param name="totalSeconds"></param>
         /// <param name="nanoseconds"></param>
         /// <param name="timeZoneOffset">Timezone offset from UTC, in minutes, must be multiple of 15</param>
-        public FudgeTime(FudgeDateTime.Precision precision, int totalSeconds, int nanoseconds, int timeZoneOffset)
+        public FudgeTime(FudgeDateTimePrecision precision, int totalSeconds, int nanoseconds, int? timeZoneOffset)
         {
             if (totalSeconds < 0 || totalSeconds >= 24 * 60 * 60)
                 throw new ArgumentOutOfRangeException("totalseconds");
             if (nanoseconds < 0 || nanoseconds > 999999999)
                 throw new ArgumentOutOfRangeException("nanoseconds");
-            if (timeZoneOffset != BogusTimeZone)
+            if (timeZoneOffset.HasValue)
             {
                 if (timeZoneOffset % 15 != 0)
                     throw new ArgumentOutOfRangeException("timeZoneOffset", "offset must be a multiple of 15 (minutes)");
                 if (timeZoneOffset < -127 * 15 || timeZoneOffset > 127 * 15)
                     throw new ArgumentOutOfRangeException("timeZoneOffset");
             }
-            if (precision > FudgeDateTime.Precision.Hour)
+            if (precision > FudgeDateTimePrecision.Hour)
                 throw new ArgumentOutOfRangeException("precision");
-
             this.precision = precision;
             this.seconds = totalSeconds;
             this.nanos = nanoseconds;
             this.timeZoneOffset = timeZoneOffset;
+        }
+
+        /// <summary>
+        /// Constructs a <c>FudgeTime</c> from the time components of a .net <see cref="DateTime"/>.
+        /// </summary>
+        /// <param name="dateTime"><see cref="DateTime"/> to use.</param>
+        public FudgeTime(DateTime dateTime)
+            : this(dateTime, DefaultDateTimePrecision)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a <c>FudgeTime</c> from the time components of a .net <see cref="DateTime"/>, specifying the precision.
+        /// </summary>
+        /// <param name="dateTime"><see cref="DateTime"/> to use.</param>
+        /// <param name="precision"><see cref="FudgeDateTimePrecision"/> for this <c>FudgeTime</c>.</param>
+        public FudgeTime(DateTime dateTime, FudgeDateTimePrecision precision)
+        {
+            if (precision > FudgeDateTimePrecision.Hour)
+                throw new ArgumentOutOfRangeException("precision");
+            TimeSpan time = dateTime.TimeOfDay;
+            this.precision = precision;
+            this.seconds = (int)(time.Ticks / ticksPerSecond);
+            this.nanos = (int)(time.Ticks % ticksPerSecond) * nanosPerTick;
+            switch (dateTime.Kind)
+            {
+                case DateTimeKind.Utc:
+                    this.timeZoneOffset = 0;
+                    break;
+                case DateTimeKind.Unspecified:
+                    this.timeZoneOffset = null;
+                    break;
+                case DateTimeKind.Local:
+                    var tzOffset = TimeZoneInfo.Local.GetUtcOffset(dateTime);
+                    this.timeZoneOffset = tzOffset.Hours * 60 + tzOffset.Minutes;
+                    break;
+            }
         }
 
         /// <summary>Gets the hour component of this time.</summary>
@@ -197,20 +240,14 @@ namespace Fudge.Types
             get { return seconds * 1000000000L + nanos; }
         }
 
-        /// <summary>Indicates whether this <c>FudgeTime</c> carries timezone information.</summary>
-        public bool HasTimeZone
+        /// <summary>Gets the offset from UTC in minutes, or returns <c>null</c> if there is no timezone.</summary>
+        public int? TimeZoneOffset
         {
-            get { return (timeZoneOffset != BogusTimeZone); }
+            get { return timeZoneOffset; }
         }
 
-        /// <summary>Gets the offset from UTC in minutes.</summary>
-        public int TimeZoneOffset
-        {
-            get { return HasTimeZone ? timeZoneOffset : 0; }
-        }
-
-        /// <summary>Gets the precision of this time, as a <see cref="FudgeDateTime.Precision"/>.</summary>
-        public FudgeDateTime.Precision Precision
+        /// <summary>Gets the precision of this time, as a <see cref="FudgeDateTimePrecision"/>.</summary>
+        public FudgeDateTimePrecision Precision
         {
             get { return precision; }
         }
@@ -225,18 +262,22 @@ namespace Fudge.Types
                 "{0:d2}:{1:d2}:{2:d2}",
                 "{0:d2}:{1:d2}",
                 "{0:d2}",
+                "",
+                "",
+                "",
+                ""
             };
-        private static readonly int[] nanoDividers = { 1, 1000, 1000000, 1, 1, 1 };
+        private static readonly int[] nanoDividers = { 1, 1000, 1000000, 1, 1, 1, 1, 1, 1, 1 };
 
         /// <inheritdoc/>
         public override string ToString()
         {
             int subSecond = nanos / nanoDividers[(int)precision];
             string result = string.Format(precisionFormatters[(int)precision], Hour, Minute, Second, subSecond);
-            if (HasTimeZone)
+            if (timeZoneOffset.HasValue)
             {
-                int mins = Math.Abs(timeZoneOffset) % 60;
-                int hours = Math.Abs(timeZoneOffset) / 60;
+                int mins = Math.Abs(timeZoneOffset.Value) % 60;
+                int hours = Math.Abs(timeZoneOffset.Value) / 60;
                 char prefix = (timeZoneOffset < 0) ? '-' : '+';
                 result += string.Format(" {0}{1:d2}:{2:d2}", prefix, hours, mins);
             }
@@ -258,7 +299,7 @@ namespace Fudge.Types
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return seconds ^ nanos ^ timeZoneOffset ^ (int)precision;
+            return seconds ^ nanos ^ (timeZoneOffset ?? int.MinValue) ^ (int)precision;
         }
 
         #endregion

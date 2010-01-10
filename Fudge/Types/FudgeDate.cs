@@ -225,6 +225,26 @@ namespace Fudge.Types
             return string.Format("{0:d4}-{1:d2}-{2:d2}", Year, Month, Day);
         }
 
+        /// <summary>
+        /// Converts the date to a string based on a given <see cref="FudgeDateTimePrecision"/>.
+        /// </summary>
+        /// <param name="precision">Precision to use.</param>
+        /// <returns>Date as a string.</returns>
+        public string ToString(FudgeDateTimePrecision precision)
+        {
+            switch (precision)
+            {
+                case FudgeDateTimePrecision.Century:
+                    return string.Format("{0:d2}00", Year / 100);
+                case FudgeDateTimePrecision.Year:
+                    return string.Format("{0:d4}", Year);
+                case FudgeDateTimePrecision.Month:
+                    return string.Format("{0:d4}-{1:d2}", Year, Month);
+                default:
+                    return ToString();
+            }
+        }
+
         #region IComparable<FudgeDate> Members
 
         /// <inheritdoc/>
