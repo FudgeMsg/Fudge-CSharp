@@ -45,5 +45,24 @@ namespace Fudge.Tests.Unit.Types
             // Just in case these ever change in the future
             Assert.Equal(DateTimeFieldType.Instance.FixedSize, TimeFieldType.Instance.FixedSize + DateFieldType.Instance.FixedSize);
         }
+
+        [Fact]
+        public void CheckSecondaryTypes()
+        {
+            var msg = new FudgeMsg(context);
+            var dt = new DateTime(1987, 1, 13, 8, 6, 5);
+            var dto = new DateTimeOffset(1822, 7, 20, 13, 2, 15, new TimeSpan(-2, 0, 0));
+
+            msg.Add("dt", dt);
+            msg.Add("dto", dto);
+
+            Assert.Same(DateTimeFieldType.Instance, msg.GetByName("dt").Type);
+            Assert.IsType<FudgeDateTime>(msg.GetByName("dt").Value);
+            Assert.Same(DateTimeFieldType.Instance, msg.GetByName("dto").Type);
+            Assert.IsType<FudgeDateTime>(msg.GetByName("dto").Value);
+
+            Assert.Equal(dt, msg.GetValue<DateTime>("dt"));
+            Assert.Equal(dto, msg.GetValue<DateTime>("dto"));
+        }
     }
 }

@@ -69,6 +69,14 @@ namespace Fudge
             AddType(DateFieldType.Instance);
             AddType(TimeFieldType.Instance);
             AddType(DateTimeFieldType.Instance);
+            AddStandardSecondaryTypes();
+        }
+
+        private void AddStandardSecondaryTypes()
+        {
+            AddType(new SecondaryFieldType<DateTime, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTime(), dt => new FudgeDateTime(dt)));
+            AddType(new SecondaryFieldType<DateTimeOffset, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTimeOffset(), dto => new FudgeDateTime(dto)));
+            AddType(new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray()));
         }
 
         /// <summary>

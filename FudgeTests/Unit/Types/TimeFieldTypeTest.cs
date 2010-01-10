@@ -46,7 +46,7 @@ namespace Fudge.Tests.Unit.Types
             var writer = new FudgeBinaryWriter(stream);
             TimeFieldType.Instance.WriteValue(writer, t);
 
-            Assert.Equal("04-10-0e-8b-07-5b-cd-15", stream.ToArray().ToNiceString());
+            Assert.Equal("04-80-0e-8b-07-5b-cd-15", stream.ToArray().ToNiceString());
         }
 
         private void Cycle(FudgeTime t)

@@ -52,8 +52,8 @@ namespace Fudge.Types
 
             TimeFieldType.ReadEncodedTime(input, out precision, out timeZone, out seconds, out nanos);
 
-            // Time can't have a precision of larger than hours
-            var timePrecision = (precision < FudgeDateTimePrecision.Day) ? precision : FudgeDateTimePrecision.Hour;
+            // Time can't have a precision of worse than hours
+            var timePrecision = (precision > FudgeDateTimePrecision.Day) ? precision : FudgeDateTimePrecision.Hour;
             var time = new FudgeTime(timePrecision, seconds, nanos, timeZone);
 
             return new FudgeDateTime(date, time, precision);
