@@ -112,34 +112,17 @@ namespace Fudge.Tests.Perf
             Console.Out.WriteLine("GCing...");
             System.GC.Collect();
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append("For ").Append(nCycles).Append(" cycles");
-            Console.Out.WriteLine(sb.ToString());
+            Console.WriteLine("For " + nCycles + " cycles");
 
-            sb = new StringBuilder();
-            sb.Append("Fudge Names Only ").Append(fudgeDeltaNamesOnly);
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("Fudge Ordinals Only ").Append(fudgeDeltaOrdinalsOnly);
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("Fudge Names And Ordinals ").Append(fudgeDeltaBoth);
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("ms, Serialization ").Append(serializationDelta).Append("ms");
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("Fudge Names Only: ").Append(fudgeSplitNamesOnly).Append("cycles/sec");
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("Fudge Ordinals Only: ").Append(fudgeSplitOrdinalsOnly).Append("cycles/sec");
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("Fudge Names And Ordinals: ").Append(fudgeSplitBoth).Append("cycles/sec");
-            Console.Out.WriteLine(sb.ToString());
-            sb = new StringBuilder();
-            sb.Append("Serialization: ").Append(serializationSplit).Append("cycles/sec");
-            Console.Out.WriteLine(sb.ToString());
+
+            Console.WriteLine("Fudge Names Only " + fudgeDeltaNamesOnly + "ms");
+            Console.WriteLine("Fudge Ordinals Only " + fudgeDeltaOrdinalsOnly + "ms");
+            Console.WriteLine("Fudge Names And Ordinals " + fudgeDeltaBoth + "ms");
+            Console.WriteLine("Serialization " + serializationDelta + "ms");
+            Console.WriteLine("Fudge Names Only: " + fudgeSplitNamesOnly + "cycles/sec");
+            Console.WriteLine("Fudge Ordinals Only: " + fudgeSplitOrdinalsOnly + "cycles/sec");
+            Console.WriteLine("Fudge Names And Ordinals: " + fudgeSplitBoth + "cycles/sec");
+            Console.WriteLine("Serialization: " + serializationSplit + "cycles/sec");
             Assert.True(serializationDelta > fudgeDeltaNamesOnly, "Serialization faster by " + (fudgeDeltaNamesOnly - serializationDelta) + "ms.");
         }
 
@@ -157,7 +140,7 @@ namespace Fudge.Tests.Perf
             MemoryStream outputStream = new MemoryStream();
             var bw = new FudgeBinaryWriter(outputStream);
             SmallFinancialTick tick = new SmallFinancialTick();
-            FudgeMsg msg = new FudgeMsg();
+            FudgeMsg msg = new FudgeMsg(fudgeContext);
             if (useNames && useOrdinals)
             {
                 msg.Add("ask", (short)1, tick.Ask);
@@ -182,13 +165,13 @@ namespace Fudge.Tests.Perf
                 msg.Add(4, tick.BidVolume);
                 msg.Add(5, tick.Timestamp);
             }
-            //FudgeStreamEncoder.WriteMsg(bw, msg);     // TODO t0rx 2009-11-12 -- Put back in performance test
+            fudgeContext.Serialize(msg, bw);
 
             byte[] data = outputStream.ToArray();
 
             MemoryStream inputstream = new MemoryStream(data);
             var br = new FudgeBinaryReader(inputstream);
-            //msg = FudgeStreamDecoder.ReadMsg(br).Message;     // TODO t0rx 2009-11-12 -- Put back in performance test
+            msg = fudgeContext.Deserialize(inputstream).Message;
 
             tick = new SmallFinancialTick();
             if (useOrdinals)
