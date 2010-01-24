@@ -51,6 +51,7 @@ namespace Fudge
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private readonly FudgeTypeHandler typeHandler;
         private ITaxonomyResolver taxonomyResolver;
+        private object[] properties;     // REVIEW t0rx 2009-11-28 -- Should we only create this on demand?
         private FudgeStreamParser parser;
 
         /// <summary>
@@ -58,6 +59,7 @@ namespace Fudge
         /// </summary>
         public FudgeContext()
         {
+            properties = new object[0];              // This will expand on use
             parser = new FudgeStreamParser(this);
             typeHandler = new FudgeTypeHandler(typeDictionary);
         }
@@ -223,6 +225,72 @@ namespace Fudge
         // TODO 2009-12-11 Andrew -- should we have a version that takes an offset so that arrays with more than one envelope can be processed?
         //      2009-12-23 t0rx -- or is that actually about the FudgeEncodedStreamReader?
 
+        #region Property support
+
+        /// <summary>
+        /// Gets the value of a specific property from this context, or null if not set.
+        /// </summary>
+        /// <param name="prop">Property to retrieve.</param>
+        /// <returns>Property value or null if not set.</returns>
+        public object GetProperty(FudgeContextProperty prop)
+        {
+            if (prop == null)
+                throw new ArgumentNullException("prop");
+
+            int index = prop.Index;
+            if (index >= properties.Length)
+                return null;
+
+            return properties[index];
+        }
+
+        /// <summary>
+        /// Gets the value of a specific property from this context, or returns <c>defaultValue</c> if not set.
+        /// </summary>
+        /// <param name="prop">Property to retrieve.</param>
+        /// <param name="defaultValue">Value to return if property not set.</param>
+        /// <returns>Property value or <c>defaultValue</c> if not set.</returns>
+        public object GetProperty(FudgeContextProperty prop, object defaultValue)
+        {
+            return GetProperty(prop) ?? defaultValue;
+        }
+
+        /// <summary>
+        /// Sets the value of a specific property in the context.
+        /// </summary>
+        /// <param name="prop">Property to set.</param>
+        /// <param name="value">Value for the property.</param>
+        /// <remarks>
+        /// Context properties are used to control the behaviour of encoding and decoding.
+        /// </remarks>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is rejected by the <see cref="FudgeContextProperty"/> as invalid.</exception>
+        public void SetProperty(FudgeContextProperty prop, object value)
+        {
+            if (prop == null)
+                throw new ArgumentNullException("prop");
+            if (!prop.IsValidValue(value))
+                throw new ArgumentOutOfRangeException("Value is not valid for context property " + prop.Name);
+
+            int index = prop.Index;
+            if (index >= properties.Length)
+            {
+                lock (this)
+                {
+                    if (index >= properties.Length)
+                    {
+                        int newSize = Math.Max(properties.Length, FudgeContextProperty.MaxIndex + 1);
+                        var newArray = new object[newSize];
+                        properties.CopyTo(newArray, 0);
+                        properties = newArray;
+                    }
+                }
+            }
+
+            properties[index] = value;
+        }
+
+        #endregion
+
         /// <summary>
         /// <c>FudgeTypeHandler</c> provides methods to handle type-related functions.
         /// </summary>
@@ -295,6 +363,5 @@ namespace Fudge
                 return type;
             }
         }
-
     }
 }

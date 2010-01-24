@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,14 @@ using System.Text;
 
 namespace Fudge.Serialization
 {
-    public interface IFudgeSerializationContext
+    public interface IFudgeSerializer
     {
-        FudgeMsg AsSubMsg(object obj);
+        // TODO 20100123 t0rx -- Do we need fast versions for primitive types?
 
-        int AsRef(object obj);
+        void Write(string fieldName, int? ordinal, object value);
+
+        void WriteSubMsg(string fieldName, int? ordinal, object obj);
+
+        void WriteRef(string fieldName, int? ordinal, object obj);
     }
 }

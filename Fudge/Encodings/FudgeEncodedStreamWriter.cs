@@ -315,6 +315,9 @@ namespace Fudge.Encodings
             // First, normalize the name/ordinal bit
             NormalizeNameAndOrdinal(ref name, ref ordinal, taxonomy);
 
+            // Reduce the value to minimal form
+            value = type.Minimize(value, ref type);
+
             // Now do the field header
             int valueSize = type.IsVariableSize ? type.GetVariableSize(value, taxonomy) : type.FixedSize;
             int nWritten = WriteFieldHeader(bw, valueSize, type.IsVariableSize, type.TypeId, ordinal, name);

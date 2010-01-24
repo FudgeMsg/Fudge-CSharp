@@ -1,5 +1,5 @@
 ﻿/*<!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,27 +23,53 @@ namespace Fudge.Serialization
 {
     public static class FudgeSerializationExtensions
     {
-        public static IEnumerable<FudgeMsg> AllAsSubMsgs<T>(this IFudgeSerializationContext context, IEnumerable<T> objects)
+        public static void Write(this IFudgeSerializer serializer, string name, object value)
         {
-            var result = new List<FudgeMsg>();
-            foreach (T obj in objects)
-            {
-                result.Add(context.AsSubMsg(obj));
-            }
-            return result;
+            serializer.Write(name, null, value);
         }
 
-        public static IEnumerable<int> AllAsRefs<T>(this IFudgeSerializationContext context, IEnumerable<T> objects)
+        public static void WriteSubMsg(this IFudgeSerializer serializer, string name, object value)
+        {
+            serializer.WriteSubMsg(name, null, value);
+        }
+
+        public static void WriteRef(this IFudgeSerializer serializer, string name, object value)
+        {
+            serializer.WriteRef(name, null, value);
+        }
+
+        public static void WriteIfNotNull<T>(this IFudgeSerializer serializer, string name, T value) where T : class
+        {
+            if (value != null)
+                serializer.Write(name, value);
+        }
+
+        public static void WriteAll<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> values)
+        {
+            foreach (T value in values)
+            {
+                serializer.Write(name, value);
+            }
+        }
+
+        public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
+        {
+            foreach (T obj in objects)
+            {
+                serializer.WriteSubMsg(name, obj);
+            }
+        }
+
+        public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
             var result = new List<int>();
             foreach (T obj in objects)
             {
-                result.Add(context.AsRef(obj));
+                serializer.WriteRef(name, obj);
             }
-            return result;
         }
-
-        public static IEnumerable<T> AllFromFields<T>(this IFudgeDeserializationContext context, IEnumerable<IFudgeField> fields) where T : class
+        /*
+        public static IEnumerable<T> AllFromFields<T>(this IFudgeDeserializer context, IEnumerable<IFudgeField> fields) where T : class
         {
             var result = new List<T>();
             foreach (var field in fields)
@@ -52,5 +78,6 @@ namespace Fudge.Serialization
             }
             return result;
         }
+        */
     }
 }

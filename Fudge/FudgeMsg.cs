@@ -43,7 +43,7 @@ namespace Fudge
     /// </remarks>
     public class FudgeMsg : FudgeEncodingObject, IMutableFudgeFieldContainer
     {
-        private readonly FudgeContext fudgeContext;
+        private readonly FudgeContext context;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace Fudge
             {
                 throw new ArgumentNullException("context", "Context must be provided");
             }
-            this.fudgeContext = context;
+            this.context = context;
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Fudge
             {
                 throw new ArgumentNullException("Cannot initialize from a null other FudgeMsg");
             }
-            this.fudgeContext = other.fudgeContext;
+            this.context = other.context;
             InitializeFromByteArray(other.ToByteArray());
         }
 
@@ -96,34 +96,21 @@ namespace Fudge
         }
 
         /// <summary>
-        /// Constructs a new <see cref="FudgeMsg"/> from raw binary data, using a given context.
-        /// </summary>
-        /// <param name="byteArray">Binary data to use.</param>
-        /// <param name="context"><see cref="FudgeContext"/> for the message.</param>
-        public FudgeMsg(byte[] byteArray, FudgeContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException("context", "Context must be provided");
-            }
-        }
-
-        /// <summary>
         /// Populates the message fields from the encoded data. If the array is larger than the Fudge envelope, any additional data is ignored.
         /// </summary>
         /// <param name="byteArray">the encoded data to populate this message with</param>
         protected void InitializeFromByteArray(byte[] byteArray)
         {
-            FudgeMsgEnvelope other = fudgeContext.Deserialize(byteArray);
+            FudgeMsgEnvelope other = context.Deserialize(byteArray);
             fields.AddRange(other.Message.fields);
         }
 
         /// <summary>
         /// Gets the <see cref="FudgeContext"/> for this message.
         /// </summary>
-        public FudgeContext FudgeContext
+        public FudgeContext Context
         {
-            get { return fudgeContext; }
+            get { return context; }
         }
 
         #region IMutableFudgeFieldContainer implementation
@@ -170,7 +157,7 @@ namespace Fudge
             if (type == null)
             {
                 // See if we can derive it
-                type = fudgeContext.TypeHandler.DetermineTypeFromValue(value);
+                type = context.TypeHandler.DetermineTypeFromValue(value);
                 if (type == null)
                 {
                     throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
@@ -349,7 +336,7 @@ namespace Fudge
             T[] result = new T[nFields];
             for (int i = 0; i < nFields; i++)
             {
-                result[i] = (T)fudgeContext.TypeHandler.ConvertType(fields[i].Value, typeof(T));
+                result[i] = (T)context.TypeHandler.ConvertType(fields[i].Value, typeof(T));
             }
             return result;
         }
@@ -361,7 +348,7 @@ namespace Fudge
             T[] result = new T[nFields];
             for (int i = 0; i < nFields; i++)
             {
-                result[i] = (T)fudgeContext.TypeHandler.ConvertType(fields[i].Value, typeof(T));
+                result[i] = (T)context.TypeHandler.ConvertType(fields[i].Value, typeof(T));
             }
             return result;
         }
@@ -376,7 +363,7 @@ namespace Fudge
         public object GetValue(string name, Type type)
         {
             object value = GetValue(name);
-            return fudgeContext.TypeHandler.ConvertType(value, type);
+            return context.TypeHandler.ConvertType(value, type);
         }
 
         /// <inheritdoc />
@@ -402,7 +389,7 @@ namespace Fudge
         public object GetValue(int ordinal, Type type)
         {
             object value = GetValue(ordinal);
-            return fudgeContext.TypeHandler.ConvertType(value, type);
+            return context.TypeHandler.ConvertType(value, type);
         }
 
         /// <inheritdoc />
@@ -442,7 +429,7 @@ namespace Fudge
         public object GetValue(string name, int? ordinal, Type type)
         {
             object value = GetValue(name, ordinal);
-            return fudgeContext.TypeHandler.ConvertType(value, type);
+            return context.TypeHandler.ConvertType(value, type);
         }
 
         // Primitive Queries:
@@ -679,7 +666,7 @@ namespace Fudge
 
         private FudgeMsg CopyContainer(IFudgeFieldContainer container)
         {
-            var msg = fudgeContext.NewMessage();
+            var msg = context.NewMessage();
             msg.Add(container);
             return msg;
         }
@@ -690,7 +677,7 @@ namespace Fudge
         /// <returns>an array containing the encoded message</returns>
         public byte[] ToByteArray()
         {
-            return fudgeContext.ToByteArray(this);
+            return context.ToByteArray(this);
         }
 
         // TODO 2009-12-14 Andrew -- should we have a ToByteArray that accepts a taxonomy ?

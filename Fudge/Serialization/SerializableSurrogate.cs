@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,18 +44,35 @@ namespace Fudge.Serialization
 
         #region IFudgeSerializationSurrogate Members
 
-        public void Serialize(object obj, FudgeMsg msg, IFudgeSerializationContext context)
+        /// <inheritdoc/>
+        public void Serialize(object obj, IFudgeSerializer serializer)
         {
             IFudgeSerializable ser = (IFudgeSerializable)obj;
-            ser.Serialize(msg, context);
+            ser.Serialize(serializer);
         }
 
-        public object Deserialize(FudgeMsg msg, int dataVersion, IFudgeDeserializationContext context)
+        /// <inheritdoc/>
+        public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
         {
             IFudgeSerializable result = (IFudgeSerializable)constructor.Invoke(null);
-            context.Register(result);
-            result.Deserialize(msg, dataVersion, context);
+            deserializer.Register(result);
+            result.BeginDeserialize(deserializer, dataVersion);
             return result;
+        }
+
+        /// <inheritdoc/>
+        public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
+        {
+            IFudgeSerializable obj = (IFudgeSerializable)state;
+            return obj.DeserializeField(deserializer, field, dataVersion);
+        }
+
+        /// <inheritdoc/>
+        public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
+        {
+            IFudgeSerializable obj = (IFudgeSerializable)state;
+            obj.EndDeserialize(deserializer, dataVersion);
+            return obj;
         }
 
         #endregion

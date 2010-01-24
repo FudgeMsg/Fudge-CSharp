@@ -1,5 +1,6 @@
 ﻿/**
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -38,7 +40,7 @@ namespace Fudge.Tests.Unit
 
             Assert.NotNull(outputMsg);
 
-            FudgeMsgCodecTest.AssertAllFieldsMatch(inputMsg, outputMsg);
+            FudgeUtils.AssertAllFieldsMatch(inputMsg, outputMsg);
         }
 
         [Fact]
@@ -117,6 +119,51 @@ namespace Fudge.Tests.Unit
             // Get some data
             int age = msg2.GetInt("age") ?? 0;
         }
+
+        #region Property tests
+
+        [Fact]
+        public void BasicPropertyTest()
+        {
+            var myProp = new FudgeContextProperty("SomeProp");
+            var context = new FudgeContext();
+
+            Assert.Null(context.GetProperty(myProp));
+            Assert.Equal(12, context.GetProperty(myProp, 12));
+
+            context.SetProperty(myProp, 17);
+
+            Assert.Equal(17, context.GetProperty(myProp));
+            Assert.Equal(17, context.GetProperty(myProp, 12));
+        }
+
+        [Fact]
+        public void PropertyValidationTest()
+        {
+            var myProp = new FudgeContextProperty("EvenProp", x => (int)x % 2 == 0);        // Only accept even integers
+
+            var context = new FudgeContext();
+            context.SetProperty(myProp, 12);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                context.SetProperty(myProp, 17);
+            });
+        }
+
+        [Fact]
+        public void PropertiesCreatedAfterContext()
+        {
+            var context = new FudgeContext();
+
+            var newProp = new FudgeContextProperty("NewProp");
+
+            Assert.Null(context.GetProperty(newProp));
+            context.SetProperty(newProp, "test");
+            Assert.Equal("test", context.GetProperty(newProp));
+        }
+
+        #endregion
 
         private FudgeMsg CycleMessage(FudgeMsg msg, FudgeContext context, short? taxonomy)
         {

@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -30,13 +32,25 @@ namespace Fudge.Encodings
         /// </summary>
         /// <param name="reader">Reader providing the data for the message.</param>
         /// <returns>New message containing data from the reader.</returns>
-        public static FudgeMsg ReadToMsg(this IFudgeStreamReader reader)
+        public static FudgeMsg ReadMsg(this IFudgeStreamReader reader)
         {
             var writer = new FudgeMsgStreamWriter();
             var pipe = new FudgeStreamPipe(reader, writer);
             pipe.ProcessOne();
 
-            return writer.Messages[0];
+            return writer.DequeueMessage();
+        }
+
+        /// <summary>
+        /// Convenience method for writing a <see cref="FudgeMsg"/> to a <see cref="IFudgeStreamWriter"/>.
+        /// </summary>
+        /// <param name="writer">Writer to write the data.</param>
+        /// <param name="msg">Message to write.</param>
+        public static void WriteMsg(this IFudgeStreamWriter writer, FudgeMsg msg)
+        {
+            var reader = new FudgeMsgStreamReader(msg.Context, msg);
+            var pipe = new FudgeStreamPipe(reader, writer);
+            pipe.ProcessOne();
         }
     }
 }

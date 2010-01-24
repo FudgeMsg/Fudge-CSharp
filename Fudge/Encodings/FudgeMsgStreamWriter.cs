@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -29,7 +31,7 @@ namespace Fudge.Encodings
         private readonly FudgeContext context;
         private FudgeMsg top;
         private FudgeMsg current;
-        private readonly List<FudgeMsg> messages = new List<FudgeMsg>();
+        private readonly Queue<FudgeMsg> messages = new Queue<FudgeMsg>();
 
         /// <summary>
         /// Constructs a new <see cref="FudgeMsgStreamWriter"/> which will use a default <see cref="FudgeContext"/>.
@@ -48,11 +50,34 @@ namespace Fudge.Encodings
         }
 
         /// <summary>
-        /// Gets the list of <see cref="FudgeMsg"/>s that have been written.
+        /// Gets the list of all <see cref="FudgeMsg"/>s that have been written and removes them from the queue.
         /// </summary>
-        public IList<FudgeMsg> Messages
+        public IList<FudgeMsg> GetAllMessages()
         {
-            get { return messages; }
+            var result = new List<FudgeMsg>(messages);
+            messages.Clear();
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the list of all <see cref="FudgeMsg"/>s that have been written without removing them from the queue.
+        /// </summary>
+        public IList<FudgeMsg> PeekAllMessages()
+        {
+            var result = new List<FudgeMsg>(messages);
+            return result;
+        }
+
+        /// <summary>
+        /// Dequeues the first message that has been written.
+        /// </summary>
+        /// <returns>First message in queue, or null if none available</returns>
+        public FudgeMsg DequeueMessage()
+        {
+            if (messages.Count == 0)
+                return null;
+
+            return messages.Dequeue();
         }
 
         #region IFudgeStreamWriter Members
@@ -105,7 +130,7 @@ namespace Fudge.Encodings
             {
                 throw new InvalidOperationException("Ending message prematurely");
             }
-            messages.Add(top);
+            messages.Enqueue(top);
             top = null;
             current = null;
         }

@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,25 +36,37 @@ namespace Fudge.Serialization
             RegisterType(type, name, 0);
         }
 
-        public void RegisterType(Type type, string name, IFudgeSerializationSurrogate surrogate)
+        public void RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory)
         {
-            RegisterType(type, name, surrogate, 0);
+            RegisterType(type, name, surrogateFactory, 0);
+        }
+
+        /// <summary>
+        /// Registers a type with a serialization surrogate that needs no internal state.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="name"></param>
+        /// <param name="globalSurrogate"></param>
+        public void RegisterType(Type type, string name, IFudgeSerializationSurrogate statelessSurrogate)
+        {
+            RegisterType(type, name, c => statelessSurrogate, 0);
         }
 
         public void RegisterType(Type type, string name, int typeVersion)
         {
             if (typeof(IFudgeSerializable).IsAssignableFrom(type))
             {
-                // Class implements IFudgeSerializable directly, so manufacture a surrogate
-                RegisterType(type, name, new SerializableSurrogate(type), typeVersion);
+                // Class implements IFudgeSerializable directly, so manufacture a surrogate (we only need one as it maintains no state)
+                var surrogate = new SerializableSurrogate(type);
+                RegisterType(type, name, context => surrogate, typeVersion);
             }
         }
 
-        private void RegisterType(Type type, string name, IFudgeSerializationSurrogate surrogate, int typeVersion)
+        private void RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory, int typeVersion)
         {
             // TODO t0rx 2009-10-18 -- Handle IFudgeSerializable
             int id = typeDataList.Count;
-            var entry = new TypeData { Name = name, Surrogate = surrogate, TypeVersion = typeVersion, Type = type };
+            var entry = new TypeData { Name = name, SurrogateFactory = surrogateFactory, TypeVersion = typeVersion, Type = type };
             typeDataList.Add(entry);
             nameMap.Add(name, id);
             typeMap.Add(type, id);
@@ -80,27 +92,32 @@ namespace Fudge.Serialization
             return typeDataList.ConvertAll(entry => entry.TypeVersion);
         }
 
-        public IFudgeSerializationSurrogate GetSurrogate(Type type)
+        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type)
         {
             int index;
             if (typeMap.TryGetValue(type, out index))
             {
-                return typeDataList[index].Surrogate;
+                return typeDataList[index].SurrogateFactory;
             }
             return null;
         }
 
-        public IFudgeSerializationSurrogate GetSurrogate(int typeId)
+        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(int typeId)
         {
             if (typeId < 0 || typeId >= typeDataList.Count)
                 return null;
 
-            return typeDataList[typeId].Surrogate;
+            return typeDataList[typeId].SurrogateFactory;
         }
 
         public int GetTypeVersion(int typeId)
         {
             return typeDataList[typeId].TypeVersion;
+        }
+
+        public string GetTypeName(int typeId)
+        {
+            return typeDataList[typeId].Name;
         }
 
         /// <summary>
@@ -128,15 +145,15 @@ namespace Fudge.Serialization
                 {
                     var data = typeDataList[index];
                     if (typeVersions == null)
-                        result.RegisterType(data.Type, name, data.Surrogate, typeVersions[i]);
+                        result.RegisterType(data.Type, name, data.SurrogateFactory, typeVersions[i]);
                     else
-                        result.RegisterType(data.Type, name, data.Surrogate);
+                        result.RegisterType(data.Type, name, data.SurrogateFactory);
                 }
                 else
                 {
                     // Unknown
                     // TODO t0rx 2009-10-18 -- Handling for unknown types
-                    result.RegisterType(null, name, null);
+                    result.RegisterType(null, name, c => null);
                 }
             }
             return result;
@@ -146,7 +163,7 @@ namespace Fudge.Serialization
         {
             public Type Type { get; set; }
             public string Name { get; set; }
-            public IFudgeSerializationSurrogate Surrogate { get; set; }
+            public Func<FudgeContext, IFudgeSerializationSurrogate> SurrogateFactory { get; set; }
             public int TypeVersion { get; set; }
         }
     }

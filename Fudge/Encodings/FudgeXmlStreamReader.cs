@@ -1,5 +1,6 @@
 ﻿/*
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -35,6 +37,7 @@ namespace Fudge.Encodings
     /// </remarks>
     public class FudgeXmlStreamReader : FudgeStreamReaderBase
     {
+        private readonly FudgeContext context;
         private readonly XmlReader reader;
         private int depth = 0;
         private bool atEnd;
@@ -44,20 +47,36 @@ namespace Fudge.Encodings
         /// <summary>
         /// Constructs a new <c>FudgeXmlStreamReader</c> using a given <see cref="XmlReader"/> as the source of the XML data.
         /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
         /// <param name="reader"><see cref="XmlReader"/> providing the XML data</param>
-        public FudgeXmlStreamReader(XmlReader reader)
+        public FudgeXmlStreamReader(FudgeContext context, XmlReader reader)
         {
+            if (context == null)
+                throw new ArgumentNullException("context");
             if (reader == null)
                 throw new ArgumentNullException("reader");
+
+            this.context = context;
             this.reader = reader;
+        }
+
+        /// <summary>
+        /// Constructs a new <c>FudgeXmlStreamReader</c> with the XML data coming from a <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
+        /// <param name="stream"></param>
+        public FudgeXmlStreamReader(FudgeContext context, Stream stream)
+            : this(context, XmlReader.Create(stream, new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment }))
+        {
         }
 
         /// <summary>
         /// Constructs a new <c>FudgeXmlStreamReader</c> with the XML data coming from a string.
         /// </summary>
+        /// <param name="context">Context to control behaviours.</param>
         /// <param name="xml"></param>
-        public FudgeXmlStreamReader(string xml)
-            : this(XmlReader.Create(new StringReader(xml), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment }))
+        public FudgeXmlStreamReader(FudgeContext context, string xml)
+            : this(context, XmlReader.Create(new StringReader(xml), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment }))
         {
         }
 

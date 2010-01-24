@@ -1,5 +1,6 @@
-﻿/**
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+﻿/*
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
 using System.Collections.Generic;
@@ -30,13 +32,13 @@ namespace Fudge.Tests.Unit.Encodings
             var context = new FudgeContext();
 
             var msg = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
-            var reader = new FudgeMsgStreamReader(msg);
+            var reader = new FudgeMsgStreamReader(context, msg);
             var writer = new FudgeMsgStreamWriter();
 
             var pipe = new FudgeStreamPipe(reader, writer);
             pipe.Process();
 
-            var newMsg = writer.Messages[0];
+            var newMsg = writer.DequeueMessage();
 
             FudgeUtils.AssertAllFieldsMatch(msg, newMsg);
         }
@@ -48,14 +50,15 @@ namespace Fudge.Tests.Unit.Encodings
 
             var msg1 = StandardFudgeMessages.CreateMessageWithSubMsgs(context);
             var msg2 = StandardFudgeMessages.CreateMessageAllNames(context);
-            var reader = new FudgeMsgStreamReader(new FudgeMsg[] {msg1, msg2});
+            var reader = new FudgeMsgStreamReader(context, new FudgeMsg[] {msg1, msg2});
             var writer = new FudgeMsgStreamWriter();
 
             var pipe = new FudgeStreamPipe(reader, writer);
             pipe.Process();
 
-            FudgeUtils.AssertAllFieldsMatch(msg1, writer.Messages[0]);
-            FudgeUtils.AssertAllFieldsMatch(msg2, writer.Messages[1]);
+            Assert.Equal(2, writer.PeekAllMessages().Count);
+            FudgeUtils.AssertAllFieldsMatch(msg1, writer.DequeueMessage());
+            FudgeUtils.AssertAllFieldsMatch(msg2, writer.DequeueMessage());
         }
     }
 }

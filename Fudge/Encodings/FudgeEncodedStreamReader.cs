@@ -43,6 +43,7 @@ namespace Fudge.Encodings
         private short taxonomyId;
         private int envelopeSize;
         private bool eof;
+        private byte? bufferedByte;
 
         /// <summary>
         /// Constructs a new <see cref="FudgeEncodedStreamReader"/> with a given <see cref="FudgeContext"/>.
@@ -151,14 +152,7 @@ namespace Fudge.Encodings
                 if (eof)
                 {
                     // Already at the end
-                    Debug.Assert(CurrentElement == FudgeStreamElement.NoElement);
-                    return CurrentElement;
-                }
-                else if (CurrentElement == FudgeStreamElement.MessageEnd)
-                {
-                    // We currently don't support multiple messages in a stream and we've already published MessageEnd, so stop
                     CurrentElement = FudgeStreamElement.NoElement;
-                    eof = true;
                     return CurrentElement;
                 }
                 else if (processingStack.Count == 0)
@@ -176,13 +170,13 @@ namespace Fudge.Encodings
                 else
                 {
                     ConsumeFieldData();
+                    Debug.Assert(CurrentElement != FudgeStreamElement.NoElement);
                 }
             }
             catch (IOException ioe)
             {
                 throw new FudgeRuntimeException("Unable to consume data", ioe);
             }
-            Debug.Assert(CurrentElement != FudgeStreamElement.NoElement);
             return CurrentElement;
         }
 
@@ -326,13 +320,50 @@ namespace Fudge.Encodings
             return type.ReadValue(br, varSize);
         }
 
+        private byte? SafelyReadOneByte()
+        {
+            try
+            {
+                byte result = Reader.ReadByte();
+                return result;
+            }
+            catch (EndOfStreamException)
+            {
+                return null;
+            }
+            catch (ObjectDisposedException)
+            {
+                // Stream closed
+                return null;
+            }
+        }
+
         /**
          * 
          */
         protected void ConsumeMessageEnvelope() //throws IOException
         {
+            Debug.Assert(!eof);
+
             CurrentElement = FudgeStreamElement.MessageStart;
-            processingDirectives = Reader.ReadByte();
+            if (bufferedByte.HasValue)
+            {
+                processingDirectives = bufferedByte.Value;
+                bufferedByte = null;
+            }
+            else
+            {
+                byte? nextByte = SafelyReadOneByte();
+                if (nextByte.HasValue)
+                    processingDirectives = nextByte.Value;
+                else
+                {
+                    // Hit the end of the stream
+                    CurrentElement = FudgeStreamElement.NoElement;
+                    eof = true;
+                    return;
+                }
+            }
             schemaVersion = Reader.ReadByte();
             taxonomyId = Reader.ReadInt16();
             envelopeSize = Reader.ReadInt32();
@@ -352,10 +383,17 @@ namespace Fudge.Encodings
         {
             get
             {
-                // TODO 2010-01-01 t0rx -- Support multiple binary messages in a stream
-                // We currently stop after a single message, but calling reader.PeekChar() to see
-                // if there's more data will fail on any stream that can't seek (e.g. a socket)
-                return (processingStack.Count > 0 || (CurrentElement != FudgeStreamElement.MessageEnd && !eof));
+                if (eof)
+                    return false;
+                if (processingStack.Count > 0 || bufferedByte.HasValue)
+                    return true;
+
+                // We can't be in a message, so read a byte ahead to see if we have another envelope
+                bufferedByte = SafelyReadOneByte();
+                if (bufferedByte == null)
+                    eof = true;
+
+                return (bufferedByte.HasValue);
             }
         }
 

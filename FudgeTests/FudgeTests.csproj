@@ -69,8 +69,8 @@
     </Compile>
     <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
     <Compile Include="Unit\Serialization\SerializableSurrogateTest.cs" />
-    <Compile Include="Unit\Serialization\SerializationMessageTest.cs" />
-    <Compile Include="Unit\Serialization\TrackingFudgeMsgTest.cs" />
+    <Compile Include="Unit\Serialization\SerializationExampleClasses.cs" />
+    <Compile Include="Unit\FudgeContextPropertyTest.cs" />
     <Compile Include="Unit\Encodings\DebuggingWriter.cs" />
     <Compile Include="Unit\Encodings\FudgeEncodedStreamReaderTest.cs" />
     <Compile Include="Unit\Encodings\FudgeJSONStreamReaderTest.cs" />
@@ -83,14 +83,20 @@
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
     <Compile Include="Unit\FudgeStreamParserTest.cs" />
+    <Compile Include="Unit\FudgeStreamPipeTest.cs" />
     <Compile Include="Unit\FudgeUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />
     <Compile Include="Unit\Linq\ExpressionTreeStructureHasherTest.cs" />
     <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\DateFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\DateTimeFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
-    <Compile Include="Unit\Types\StringArrayFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\FudgeDateTest.cs" />
+    <Compile Include="Unit\Types\FudgeDateTimeTest.cs" />
+    <Compile Include="Unit\Types\FudgeTimeTest.cs" />
+    <Compile Include="Unit\Types\TimeFieldTypeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fudge\Fudge.csproj">

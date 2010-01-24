@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,18 @@ using System.Text;
 
 namespace Fudge.Serialization
 {
-    public interface IFudgeDeserializationContext
+    public interface IFudgeDeserializer
     {
-        T FromMsg<T>(FudgeMsg msg) where T : class;
-
-        T FromRef<T>(int? refId) where T : class;
+        /// <summary>
+        /// Gets any fields that have not been read by <see cref="IFudgeSerializable.DeserializeField"/> or <see cref="IFudgeSerializationSurrogate.DeserializeField"/>
+        /// as an <see cref="IFudgeFieldContainer"/>.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// This can be called in <c>BeginDeserialize</c> in which case all fields are returned, or <c>EndDeserialize</c> in which case all fields that were not
+        /// handled in <c>DeserializeField</c> are returned.
+        /// </remarks>
+        IFudgeFieldContainer GetUnreadFields();
 
         /// <summary>
         /// Deserialises an object from a Fudge field.

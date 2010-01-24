@@ -66,7 +66,17 @@ namespace Fudge
             AddType(ByteArrayFieldType.VariableSizedInstance);
             AddType(StringFieldType.Instance);
             AddType(FudgeMsgFieldType.Instance);
-            AddType(StringArrayFieldType.Instance);
+            AddType(DateFieldType.Instance);
+            AddType(TimeFieldType.Instance);
+            AddType(DateTimeFieldType.Instance);
+            AddStandardSecondaryTypes();
+        }
+
+        private void AddStandardSecondaryTypes()
+        {
+            AddType(new SecondaryFieldType<DateTime, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTime(), dt => new FudgeDateTime(dt)));
+            AddType(new SecondaryFieldType<DateTimeOffset, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTimeOffset(), dto => new FudgeDateTime(dto)));
+            AddType(new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray()));
         }
 
         /// <summary>
@@ -229,6 +239,11 @@ namespace Fudge
         public const byte BYTE_ARR_256_TYPE_ID = 24;
         /// <summary>Predefined constant for a 512-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_512_TYPE_ID = 25;
-        public const byte STRING_ARRAY_TYPE_ID = 26;
+        /// <summary>Predefined constant for a pure date - refer to the Fudge encoding specification.</summary>
+        public const byte DATE_TYPE_ID = 26;
+        /// <summary>Predefined constant for a pure time - refer to the Fudge encoding specification.</summary>
+        public const byte TIME_TYPE_ID = 27;
+        /// <summary>Predefined constant for date and time- refer to the Fudge encoding specification.</summary>
+        public const byte DATETIME_TYPE_ID = 28;
     }
 }

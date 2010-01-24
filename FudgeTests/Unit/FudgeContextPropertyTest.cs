@@ -18,35 +18,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
-using System.IO;
-using Fudge.Util;
-using Fudge.Types;
 
-namespace Fudge.Tests.Unit.Types
+namespace Fudge.Tests.Unit
 {
-    public class StringArrayFieldTypeTest
+    public class FudgeContextPropertyTest
     {
         [Fact]
-        public void SimpleExample()
+        public void TypeValidation()
         {
-            string[] array = { "Fred", "Bob" };
-            var fieldType = new StringArrayFieldType();
+            var prop = new FudgeContextProperty("test", typeof(string));
+            Assert.True(prop.IsValidValue("fred"));
+            Assert.False(prop.IsValidValue(17));
+        }
 
-            var stream = new MemoryStream();
-            var writer = new FudgeBinaryWriter(stream);
-
-            int len = fieldType.GetVariableSize(array, null);
-            fieldType.WriteValue(writer, array);
-
-            byte[] bytes = stream.ToArray();
-
-            Assert.Equal(len, bytes.Length);
-
-            stream = new MemoryStream(bytes);
-            var reader = new FudgeBinaryReader(stream);
-
-            var array2 = fieldType.ReadTypedValue(reader, len);
-            Assert.Equal(array, array2);
+        [Fact]
+        public void InheritedTypes()
+        {
+            var prop = new FudgeContextProperty("test", typeof(object));
+            Assert.True(prop.IsValidValue(new object()));
+            Assert.True(prop.IsValidValue(new FudgeContextPropertyTest()));
         }
     }
 }

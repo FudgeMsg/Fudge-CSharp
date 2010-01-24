@@ -1,5 +1,6 @@
-﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+﻿/*
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +29,15 @@ namespace Fudge.Tests.Unit.Encodings
 {
     public class FudgeXmlStreamReaderTest
     {
+        private FudgeContext context = new FudgeContext();
+
         [Fact]
         public void Attributes()
         {
             string xml = "<msg><name type=\"surname\" value=\"Smith\"/></msg>";
 
-            var reader = new FudgeXmlStreamReader(xml);
-            var msg = reader.ReadToMsg();
+            var reader = new FudgeXmlStreamReader(context, xml);
+            var msg = reader.ReadMsg();
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("name").Type);
             var name = msg.GetMessage("name");
@@ -49,8 +52,8 @@ namespace Fudge.Tests.Unit.Encodings
             // TODO 2009-12-17 t0rx -- Is this a good thing to do, or should it go in a field called "value", or just be ignored?
             string xml = "<msg><name type=\"surname\">Smith</name></msg>";
 
-            var reader = new FudgeXmlStreamReader(xml);
-            var msg = reader.ReadToMsg();
+            var reader = new FudgeXmlStreamReader(context, xml);
+            var msg = reader.ReadMsg();
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("name").Type);
             var name = msg.GetMessage("name");
@@ -65,8 +68,8 @@ namespace Fudge.Tests.Unit.Encodings
             // TODO 2009-12-17 t0rx -- Is this a good thing to do, or should it go in a field called "value", or just be ignored?
             string xml = "<msg><name type=\"surname\"><value>Smith</value></name></msg>";
 
-            var reader = new FudgeXmlStreamReader(xml);
-            var msg = reader.ReadToMsg();
+            var reader = new FudgeXmlStreamReader(context, xml);
+            var msg = reader.ReadMsg();
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("name").Type);
             var name = msg.GetMessage("name");
@@ -79,19 +82,19 @@ namespace Fudge.Tests.Unit.Encodings
         {
             string xml = "<?xml version=\"1.0\" encoding=\"utf-16\"?><msg><name>Fred</name><address><number>17</number><line1>Our House</line1><line2>In the middle of our street</line2><phone>1234</phone><local /></address></msg>";
 
-            var reader = new FudgeXmlStreamReader(xml);
+            var reader = new FudgeXmlStreamReader(context, xml);
             var writer = new FudgeMsgStreamWriter();
             new FudgeStreamPipe(reader, writer).Process();
 
-            var msg = writer.Messages[0];
+            var msg = writer.DequeueMessage();
 
             Assert.Equal("Our House", msg.GetMessage("address").GetString("line1"));
 
             // Convert back to XML and see if it matches
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb);
-            var reader2 = new FudgeMsgStreamReader(msg);
-            var writer2 = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+            var reader2 = new FudgeMsgStreamReader(context, msg);
+            var writer2 = new FudgeXmlStreamWriter(context, xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
             new FudgeStreamPipe(reader2, writer2).Process();
 
             var xml2 = sb.ToString();
@@ -102,11 +105,11 @@ namespace Fudge.Tests.Unit.Encodings
         public void MultipleMessages()
         {
             string inputXml = "<msg><name>Fred</name></msg><msg><name>Bob</name></msg>";
-            var reader = new FudgeXmlStreamReader(inputXml);
+            var reader = new FudgeXmlStreamReader(context, inputXml);
 
             var sb = new StringBuilder();
             var xmlWriter = XmlWriter.Create(sb, new XmlWriterSettings {OmitXmlDeclaration = true, ConformanceLevel = ConformanceLevel.Fragment});
-            var writer = new FudgeXmlStreamWriter(xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
+            var writer = new FudgeXmlStreamWriter(context, xmlWriter, "msg") { AutoFlushOnMessageEnd = true };
             var multiwriter = new FudgeStreamMultiwriter(new DebuggingWriter(), writer);
             new FudgeStreamPipe(reader, multiwriter).Process();
             string outputXml = sb.ToString();

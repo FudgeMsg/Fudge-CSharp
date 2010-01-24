@@ -38,5 +38,18 @@ namespace Fudge
                 msg.Add(ordinal, value);
             }
         }
+
+        #region IFudgeField extensions
+
+        public static string GetString(this IFudgeField field)
+        {
+            IConvertible value = field.Value as IConvertible;
+            if (value == null)
+                return null;
+            else
+                return value.ToString(null);
+        }
+
+        #endregion
     }
 }

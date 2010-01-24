@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,53 +18,68 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Fudge.Encodings;
+using Fudge.Types;
 
 namespace Fudge.Serialization
 {
     public class FudgeSerializer
     {
+        private readonly FudgeContext context;
         private readonly SerializationTypeMap typeMap;
-        public const string TypeIdFieldName = "__typeId";
+        public const int TypeIdFieldOrdinal = 0;
 
-        public FudgeSerializer(SerializationTypeMap typeMap)
+        public FudgeSerializer(FudgeContext context, SerializationTypeMap typeMap)
         {
+            if (context == null)
+                throw new ArgumentNullException("context");
             if (typeMap == null)
                 throw new ArgumentNullException("typeMap");
 
+            this.context = context;
             this.typeMap = typeMap;
         }
 
-        public FudgeMsg Serialize(object graph)
+        public void Serialize(IFudgeStreamWriter writer, object graph)
         {
             if (graph == null)
             {
                 throw new ArgumentNullException("graph");
             }
 
-            var message = new SerializationMessage(typeMap);
-            var context = new FudgeSerializationContext(this, message);
-
-            context.QueueObject(graph);
-
-            object nextObj;
-            while ((nextObj = context.PopQueuedObject()) != null)
-            {
-                context.RegisterObject(nextObj);     // Must register before serialising in case of circular references
-                SerializeObject(nextObj, context, message);
-            }
-
-            return message.ToMessage();
+            // Delegate to FudgeSerializationContext to do the work
+            var serializationContext = new FudgeSerializationContext(context, typeMap, writer);
+            serializationContext.SerializeGraph(writer, graph);
         }
 
-        public object Deserialize(FudgeMsg fudgeMsg)
+        public IList<FudgeMsg> SerializeToMsgs(object graph)
         {
-            var sm = new SerializationMessage(fudgeMsg, typeMap);
-            var context = new FudgeDeserializationContext(this, sm);
+            var writer = new FudgeMsgStreamWriter(context);
+            Serialize(writer, graph);
+            return writer.PeekAllMessages();
+        }
 
-            // Our result is simply the first object in the message
-            var result = context.FromRef<object>(0);
+        public object Deserialize(IFudgeStreamReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
 
-            return result;
+            // Delegate to FudgeDeserializer to do the work
+            var deserializer = new FudgeDeserializationContext(context, typeMap, reader);
+            return deserializer.DeserializeGraph();
+        }
+
+        public object Deserialize(IEnumerable<FudgeMsg> msgs)
+        {
+            var reader = new FudgeMsgStreamReader(context, msgs);
+            return Deserialize(reader);
+        }
+
+        public FudgeContext Context
+        {
+            get { return context; }
         }
 
         public SerializationTypeMap TypeMap
@@ -72,16 +87,6 @@ namespace Fudge.Serialization
             get { return typeMap; }
         }
 
-        private void SerializeObject(object obj, FudgeSerializationContext context, SerializationMessage message)
-        {
-            var msg = new FudgeMsg();
 
-            // Add in the type ID for when we deserialise
-            int typeId = typeMap.GetTypeId(obj.GetType());
-            msg.Add(TypeIdFieldName, typeId);
-
-            context.SerializeIntoMessage(obj, msg);
-            message.AddObject(msg);
-        }
     }
 }
