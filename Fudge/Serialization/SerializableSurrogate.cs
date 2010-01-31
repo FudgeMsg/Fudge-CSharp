@@ -23,11 +23,21 @@ using System.Reflection;
 
 namespace Fudge.Serialization
 {
+    /// <summary>
+    /// <c>SerializableSurrogate</c> acts as a surrogate for objects that implement <see cref="IFudgeSerializable"/>.
+    /// </summary>
+    /// <remarks>
+    /// You should not normally need to use this class directly.
+    /// </remarks>
     public class SerializableSurrogate : IFudgeSerializationSurrogate
     {
         private readonly Type type;
         private readonly ConstructorInfo constructor;
 
+        /// <summary>
+        /// Constructs a new <c>SerializableSurrogate</c> for a given type.
+        /// </summary>
+        /// <param name="type">Type of the object, which must implement <see cref="IFudgeSerializable"/> and have a default constructor.</param>
         public SerializableSurrogate(Type type)
         {
             if (type == null || !typeof(IFudgeSerializable).IsAssignableFrom(type))

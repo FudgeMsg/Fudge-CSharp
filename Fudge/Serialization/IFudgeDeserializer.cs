@@ -21,6 +21,9 @@ using System.Text;
 
 namespace Fudge.Serialization
 {
+    /// <summary>
+    /// <c>IFudgeDeserializer</c> is the interface through which objects being deserialized access the serialization framework.
+    /// </summary>
     public interface IFudgeDeserializer
     {
         /// <summary>
@@ -54,7 +57,7 @@ namespace Fudge.Serialization
         /// If there is the possibility that your object may reference another object which
         /// may in turn directly or indirectly reference back to yours, then calling <c>Register</c>
         /// will allow this reference to be resolved.  This will typically be performed during
-        /// <see cref="IFudgeSerializationSurrogate.Deserialize"/>  immediately after construction
+        /// <see cref="IFudgeSerializationSurrogate.BeginDeserialize"/>  immediately after construction
         /// but before any members are initialised.
         /// </para>
         /// <para>

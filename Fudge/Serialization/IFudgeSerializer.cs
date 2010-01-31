@@ -21,14 +21,36 @@ using System.Text;
 
 namespace Fudge.Serialization
 {
+    /// <summary>
+    /// <c>IFudgeSerializer</c> is the interface through which objects (or their surrogates)
+    /// write data during serialization.
+    /// </summary>
     public interface IFudgeSerializer
     {
         // TODO 20100123 t0rx -- Do we need fast versions for primitive types?
 
+        /// <summary>
+        /// Writes a value as a field with a given name and/or ordinal.
+        /// </summary>
+        /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
+        /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
+        /// <param name="value">Value of field.</param>
         void Write(string fieldName, int? ordinal, object value);
 
+        /// <summary>
+        /// Writes a child object as a serialized sub-message with a given name and/or ordinal.
+        /// </summary>
+        /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
+        /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
+        /// <param name="obj">Child object to write.</param>
         void WriteSubMsg(string fieldName, int? ordinal, object obj);
 
+        /// <summary>
+        /// Writes a child object as a reference to a serialized message with a given name and/or ordinal.
+        /// </summary>
+        /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
+        /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
+        /// <param name="obj">Child object to write.</param>
         void WriteRef(string fieldName, int? ordinal, object obj);
     }
 }
