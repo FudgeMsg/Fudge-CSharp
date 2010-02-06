@@ -49,42 +49,42 @@ namespace Fudge.Serialization.Reflection
 
         public class PropertyData
         {
+            private readonly FudgeContext context;
             private readonly PropertyInfo info;
             private readonly string name;
             private readonly PropertyType type;
             private readonly Type valueType;
             private readonly bool hasPublicSetter;
             private string serializedName;
-            private readonly Action<object, object> adderFunc;
+            private readonly Action<object, IFudgeField, IFudgeDeserializer> adder;
             private readonly Action<object, IFudgeSerializer> serializer;
 
             public PropertyData(FudgeContext context, PropertyInfo info)
             {
+                this.context = context;
                 this.info = info;
                 this.name = info.Name;
                 this.serializedName = info.Name;
-                this.type = CalcType(context, info, out this.valueType, out this.serializer, out this.adderFunc);
+                this.type = CalcType(context, info, out this.valueType, out this.serializer, out this.adder);
                 this.hasPublicSetter = (info.GetSetMethod() != null);   // Can't just use CanWrite as it may be non-public
             }
 
             public PropertyInfo Info { get { return info; } }
             public string Name { get { return name; } }
+            public PropertyType Type { get { return type; } }
+            public Type ValueType { get { return valueType; } }         // For lists this is the type of the items
+            public bool HasPublicSetter { get { return hasPublicSetter; } }
+            public Action<object, IFudgeSerializer> Serializer { get { return serializer; } }
+            public Action<object, IFudgeField, IFudgeDeserializer> Adder { get { return adder; } }       // Used for lists
             public string SerializedName
             {
                 get { return serializedName; }
                 set { serializedName = value; }
             }
-            public PropertyType Type { get { return type; } }
-            public Type ValueType { get { return valueType; } }         // For lists this is the type of the items
-            public bool HasPublicSetter { get { return hasPublicSetter; } }
-            public Action<object, IFudgeSerializer> Serializer { get { return serializer; } }
-            public Action<object, object> Adder { get { return adderFunc; } }       // Used for lists
 
-            private PropertyType CalcType(FudgeContext context, PropertyInfo prop, out Type valueType, out Action<object, IFudgeSerializer> serializer, out Action<object, object> adder)
+            private PropertyType CalcType(FudgeContext context, PropertyInfo prop, out Type valueType, out Action<object, IFudgeSerializer> serializer, out Action<object, IFudgeField, IFudgeDeserializer> adder)
             {
                 valueType = prop.PropertyType;
-                adder = null;
-                serializer = null;
                 if (context.TypeDictionary.GetByCSharpType(valueType) != null)
                 {
                     // Just a simple field
@@ -100,12 +100,14 @@ namespace Fudge.Serialization.Reflection
                     {
                         // It's a list
                         valueType = interfaceType.GetGenericArguments()[0];
-                        adder = CreateMethodDelegate<Action<object, object>>("ListAdd", valueType);
+                        adder = CreateMethodDelegate<Action<object, IFudgeField, IFudgeDeserializer>>("ListAdd", valueType);
                         serializer = CreateMethodDelegate<Action<object, IFudgeSerializer>>("ListSerialize", valueType);
                         return PropertyType.List;
                     }
                 }
 
+                adder = CreateMethodDelegate<Action<object, IFudgeField, IFudgeDeserializer>>("ObjectAdd", valueType);
+                serializer = this.ObjectSerialize;
                 return PropertyType.Object;
             }
 
@@ -121,8 +123,9 @@ namespace Fudge.Serialization.Reflection
                 serializer.Write(this.SerializedName, val);
             }
 
-            private void PrimitiveAdd(object obj, object val)
+            private void PrimitiveAdd(object obj, IFudgeField field, IFudgeDeserializer deserializer)
             {
+                object val = context.TypeHandler.ConvertType(field.Value, ValueType);
                 Info.SetValue(obj, val, null);
             }
 
@@ -135,11 +138,26 @@ namespace Fudge.Serialization.Reflection
                 }
             }
 
-            private void ListAdd<T>(object obj, object val)
+            private void ListAdd<T>(object obj, IFudgeField field, IFudgeDeserializer deserializer)
             {
+                object val = context.TypeHandler.ConvertType(field.Value, ValueType);
                 var list = (IList<T>)Info.GetValue(obj, null);
                 list.Add((T)val);
             }
+
+            private void ObjectSerialize(object obj, IFudgeSerializer serializer)
+            {
+                // We can't tell whether it might have cycles, so serialize as a reference
+                object val = Info.GetValue(obj, null);
+                serializer.WriteRef(this.SerializedName, val);
+            }
+
+            private void ObjectAdd<T>(object obj, IFudgeField field, IFudgeDeserializer deserializer) where T : class
+            {
+                T subObject = deserializer.FromField<T>(field);
+                Info.SetValue(obj, subObject, null);
+            }
+
         }
     }
 }

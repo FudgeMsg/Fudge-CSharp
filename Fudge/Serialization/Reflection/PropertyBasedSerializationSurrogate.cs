@@ -77,6 +77,18 @@ namespace Fudge.Serialization.Reflection
                 return false;
             foreach (var prop in typeData.Properties)
             {
+                switch (prop.Type)
+                {
+                    case TypeData.PropertyType.FudgePrimitive:
+                    case TypeData.PropertyType.List:
+                    case TypeData.PropertyType.Object:
+                        // OK
+                        break;
+                    default:
+                        // Unknown
+                        return false;
+                }
+
                 if (!prop.HasPublicSetter && prop.Type != TypeData.PropertyType.List)
                 {
                     // Not bean-style
@@ -113,8 +125,8 @@ namespace Fudge.Serialization.Reflection
             TypeData.PropertyData prop;
             if (propMap.TryGetValue(field.Name, out prop))
             {
-                object val = context.TypeHandler.ConvertType(field.Value, prop.ValueType);
-                prop.Adder(state, val);
+                prop.Adder(state, field, deserializer);
+                return true;
             }
             return false;
         }
