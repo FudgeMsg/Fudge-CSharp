@@ -356,5 +356,11 @@ namespace Fudge.Types
                 && this.time.Equals(other.time)
                 && this.precision == other.precision;
         }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return date.GetHashCode() ^ time.GetHashCode() ^ precision.GetHashCode();
+        }
     }
 }

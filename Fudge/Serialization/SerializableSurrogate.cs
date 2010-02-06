@@ -48,7 +48,7 @@ namespace Fudge.Serialization
             this.constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
             if (constructor == null)
             {
-                throw new ArgumentOutOfRangeException("type", "Type " + type.FullName + " does not have a public default constructor.");
+                throw new FudgeRuntimeException("Type " + type.FullName + " does not have a public default constructor.");
             }
         }
 

@@ -27,14 +27,24 @@ namespace Fudge.Serialization
     {
         private readonly FudgeContext context;
         private readonly SerializationTypeMap typeMap;
+
         public const int TypeIdFieldOrdinal = 0;
+
+        public FudgeSerializer(FudgeContext context)
+            : this(context, null)
+        {
+        }
 
         public FudgeSerializer(FudgeContext context, SerializationTypeMap typeMap)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
+
             if (typeMap == null)
-                throw new ArgumentNullException("typeMap");
+            {
+                // TODO 20100202 t0rx -- Have serialization type map as context property?
+                typeMap = new SerializationTypeMap(context);
+            }
 
             this.context = context;
             this.typeMap = typeMap;

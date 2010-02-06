@@ -323,6 +323,7 @@ namespace Fudge
             public object ConvertType(object value, Type type)
             {
                 if (value == null) return null;
+                if (value.GetType() == type) return value;
 
                 if (!type.IsAssignableFrom(value.GetType()))
                 {

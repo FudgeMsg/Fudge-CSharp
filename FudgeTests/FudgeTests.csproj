@@ -68,6 +68,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\PropertyBasedSerializationSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\FudgeSurrogateSelectorTest.cs" />
     <Compile Include="Unit\Serialization\SerializableSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\SerializationExampleClasses.cs" />
     <Compile Include="Unit\FudgeContextPropertyTest.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />
     <Compile Include="Unit\Linq\ExpressionTreeStructureHasherTest.cs" />
+    <Compile Include="Unit\Serialization\SerializationTypeMapTest.cs" />
     <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
     <Compile Include="Unit\Types\DateFieldTypeTest.cs" />

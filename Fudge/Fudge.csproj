@@ -99,6 +99,9 @@
     <Compile Include="Serialization\IFudgeSerializer.cs" />
     <Compile Include="Serialization\IFudgeSerializationSurrogate.cs" />
     <Compile Include="Serialization\FudgeSerializationContext.cs" />
+    <Compile Include="Serialization\Reflection\PropertyBasedSerializationSurrogate.cs" />
+    <Compile Include="Serialization\Reflection\FudgeSurrogateSelector.cs" />
+    <Compile Include="Serialization\Reflection\TypeData.cs" />
     <Compile Include="Serialization\SerializableSurrogate.cs" />
     <Compile Include="Serialization\SerializationTypeMap.cs" />
     <Compile Include="Serialization\SerializationHeader.cs" />

@@ -18,17 +18,57 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Fudge.Serialization.Reflection;
+using System.Diagnostics;
 
 namespace Fudge.Serialization
 {
     public class SerializationTypeMap
     {
+        private readonly FudgeContext context;
         private readonly List<TypeData> typeDataList = new List<TypeData>();
         private readonly Dictionary<string, int> nameMap = new Dictionary<string, int>();
         private readonly Dictionary<Type, int> typeMap = new Dictionary<Type, int>();
+        private readonly FudgeSurrogateSelector surrogateSelector;
 
-        public SerializationTypeMap()
+        /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="AllowTypeDiscovery"/>.</summary>
+        public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("SerializationTypeMap.AllowTypeDiscovery", typeof(bool));
+
+        public SerializationTypeMap(FudgeContext context)
         {
+            this.context = context;
+            this.surrogateSelector = new FudgeSurrogateSelector(context);
+            this.AllowTypeDiscovery = (bool)context.GetProperty(AllowTypeDiscoveryProperty, true);
+        }
+
+        /// <summary>
+        /// Gets or sets whether Fudge will automatically try to register types.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// If this is <c>false</c>, then all types must be registered with the type map before
+        /// serialization or deserialization.
+        /// </para>
+        /// <para>
+        /// By default, this is <c>true</c>, i.e. types can be added automatically.  You can set the
+        /// <see cref="AllowTypeDiscoveryProperty"/> property in the <see cref="FudgeContext"/> before
+        /// constructing a <c>FudgeSerializer</c> to override this default, or set
+        /// <see cref="AllowTypeDiscovery"/> directly.
+        /// </para>
+        /// </remarks>
+        public bool AllowTypeDiscovery
+        {
+            get;
+            set;
+        }
+
+        public int AutoRegister(Type type)
+        {
+            string name = type.FullName;        // TODO 20100202 t0rx -- Allow user to override name with either a strategy or an attribute
+            var surrogateFactory = surrogateSelector.GetSurrogateFactory(type);
+            Debug.Assert(surrogateFactory != null);
+            int dataVersion = 0;                // TODO 20100202 t0rx -- Allow user to specify data version with an attribute
+            return RegisterType(type, name, surrogateFactory, dataVersion);
         }
 
         public void RegisterType(Type type, string name)
@@ -62,7 +102,7 @@ namespace Fudge.Serialization
             }
         }
 
-        private void RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory, int typeVersion)
+        private int RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory, int typeVersion)
         {
             // TODO t0rx 2009-10-18 -- Handle IFudgeSerializable
             int id = typeDataList.Count;
@@ -70,6 +110,7 @@ namespace Fudge.Serialization
             typeDataList.Add(entry);
             nameMap.Add(name, id);
             typeMap.Add(type, id);
+            return id;
         }
 
         public int GetTypeId(Type type)
@@ -79,6 +120,13 @@ namespace Fudge.Serialization
             {
                 return index;
             }
+
+            // Not found
+            if (AllowTypeDiscovery)
+            {
+                return AutoRegister(type);
+            }
+
             return -1;
         }
 
@@ -99,6 +147,15 @@ namespace Fudge.Serialization
             {
                 return typeDataList[index].SurrogateFactory;
             }
+
+            // Not found
+            if (AllowTypeDiscovery)
+            {
+                int typeId = AutoRegister(type);
+                if (typeId != -1)
+                    return typeDataList[index].SurrogateFactory;
+            }
+
             return null;
         }
 
@@ -136,7 +193,7 @@ namespace Fudge.Serialization
                 throw new ArgumentOutOfRangeException("typeVersions", "Lengths of names and type versions must match");
             }
 
-            SerializationTypeMap result = new SerializationTypeMap();
+            SerializationTypeMap result = new SerializationTypeMap(context);
             for (int i = 0; i < names.Length; i++)
             {
                 string name = names[i];
