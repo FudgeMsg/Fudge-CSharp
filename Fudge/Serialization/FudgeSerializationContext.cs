@@ -29,13 +29,15 @@ namespace Fudge.Serialization
         private readonly IFudgeStreamWriter writer;
         private readonly Queue<object> encodeQueue = new Queue<object>();
         private readonly Dictionary<object, int> idMap;     // Tracks IDs of objects that have already been serialised (or are in the process)
+        private readonly Dictionary<Type, int> lastTypes = new Dictionary<Type, int>();     // Tracks the last object of a given type
         private readonly SerializationTypeMap typeMap;
+        private int currentId = 0;
 
         public FudgeSerializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamWriter writer)
         {
             this.context = context;
             this.writer = writer;
-            this.idMap = new Dictionary<object, int>();     // TODO t0rx 2009-10-18 -- Worry about HashCode and Equals implementations
+            this.idMap = new Dictionary<object, int>();     // TODO 2009-10-18 t0rx -- Worry about HashCode and Equals implementations
             this.typeMap = typeMap;
         }
 
@@ -101,20 +103,45 @@ namespace Fudge.Serialization
             {
                 RegisterObject(nextObj);     // Must register before serialising in case of circular references
                 SerializeObject(nextObj, writer);
+                currentId++;
             }
         }
 
         private void SerializeObject(object obj, IFudgeStreamWriter writer)
         {
+            int id = currentId;
+
             writer.StartMessage();
 
             // Add in the type ID for when we deserialise
-            int typeId = typeMap.GetTypeId(obj.GetType());
-            writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, PrimitiveFieldTypes.IntType, typeId);
+            WriteTypeInformation(obj, id, writer);
 
             SerializeContents(obj);
 
             writer.EndMessage();
+
+            // Update where we last saw the type
+            lastTypes[obj.GetType()] = id;
+        }
+
+        private void WriteTypeInformation(object obj, int id, IFudgeStreamWriter writer)
+        {
+            Type type = obj.GetType();
+            int lastSeen;
+            if (lastTypes.TryGetValue(type, out lastSeen))
+            {
+                // Already had something of this type
+                int offset = lastSeen - id;
+                writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, PrimitiveFieldTypes.IntType, offset);
+            }
+            else
+            {
+                // Not seen before, so write out with base types
+                for (Type currentType = type; currentType != typeof(object); currentType = currentType.BaseType)
+                {
+                    writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, StringFieldType.Instance, type.AssemblyQualifiedName);    // TODO 2010-02-07 t0rx -- Allow type name strategy to be plugged in
+                }
+            }
         }
 
         #region IFudgeSerializer Members
@@ -143,7 +170,7 @@ namespace Fudge.Serialization
         {
             if (obj == null)
             {
-                // TODO torx 2009-10-18 -- Handle null references
+                // TODO 2009-10-18 torx -- Handle null references
             }
 
             Write(fieldName, ordinal, GetRefId(obj));
@@ -196,7 +223,7 @@ namespace Fudge.Serialization
         {
             if (obj == null)
             {
-                // TODO torx 2009-10-18 -- Handle null references
+                // TODO 2009-10-18 torx -- Handle null references
             }
 
             int id;

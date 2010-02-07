@@ -101,15 +101,33 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         }
 
         [Fact]
+        public void ListOfSubObjects()
+        {
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(ListOfObjectsClass)));
+
+            var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
+
+            var obj1 = new ListOfObjectsClass();
+            obj1.Subs.Add(new SimpleExampleClass { Name = "Bob", Age = 21 });
+
+            var msgs = serializer.SerializeToMsgs(obj1);
+            var obj2 = (ListOfObjectsClass)serializer.Deserialize(msgs);
+
+            Assert.NotSame(obj1, obj2);
+            Assert.NotSame(obj1.Subs[0], obj2.Subs[0]);
+            Assert.Equal(obj1.Subs[0].Name, obj2.Subs[0].Name);
+        }
+
+        [Fact]
         public void UnhandleableCases()
         {
             Assert.False(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(NoDefaultConstructorClass)));
             Assert.False(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(NoSetterClass)));
         }
 
-        // TODO 20100202 t0rx -- Test arrays
-        // TODO 20100202 t0rx -- Test maps
-        // TODO 20100202 t0rx -- Test object references
+        // TODO 2010-02-02 t0rx -- Test arrays
+        // TODO 2010-02-02 t0rx -- Test maps
+        // TODO 2010-02-02 t0rx -- Test object references
 
         public class SimpleExampleClass
         {
@@ -133,6 +151,13 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             public int Number { get; set; }
             public SimpleExampleClass Sub { get; set; }
+        }
+
+        public class ListOfObjectsClass
+        {
+            private readonly List<SimpleExampleClass> subs = new List<SimpleExampleClass>();
+
+            public IList<SimpleExampleClass> Subs { get { return subs; } }
         }
 
         public class NoDefaultConstructorClass

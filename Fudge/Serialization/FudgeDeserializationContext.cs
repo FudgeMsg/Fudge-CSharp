@@ -79,7 +79,7 @@ namespace Fudge.Serialization
                 {
                     Debug.Assert(reachedEnd);
 
-                    // TODO 20100124 t0rx -- Do we need a separate FudgeSerializatonException?
+                    // TODO 2010-01-24 t0rx -- Do we need a separate FudgeSerializatonException?
                     throw new FudgeRuntimeException("Attempt to deserialize object reference with ID " + refId + " but only " + unprocessedObjects.Count + " objects in stream.");
                 }
 
@@ -119,26 +119,48 @@ namespace Fudge.Serialization
 
         private object ProcessObject(int? refId, Type hintType, FudgeMsg message, out int typeId)
         {
-            int? msgTypeId = message.GetInt(FudgeSerializer.TypeIdFieldOrdinal);
-            if (msgTypeId == null)
+            Type objectType;
+            string typeName;
+            IFudgeField typeField = message.GetByOrdinal(FudgeSerializer.TypeIdFieldOrdinal);
+            if (typeField == null)
             {
                 if (hintType == null)
                 {
                     throw new FudgeRuntimeException("Serialized object has no type ID");
                 }
 
-                typeId = typeMap.GetTypeId(hintType);
-                if (typeId == -1)
+                objectType = hintType;
+            }
+            else if (typeField.Type == StringFieldType.Instance)
+            {
+                // It's the first time we've seen this type in this graph, so it contains the type names
+                typeName = (string)typeField.Value;
+                // TODO 2010-02-07 t0rx -- Allow type name strategy to be plugged in
+                objectType = Type.GetType(typeName);
+                if (objectType == null)
                 {
-                    throw new FudgeRuntimeException("Type " + hintType + " not registered with type map");
+                    // TODO 2010-02-07 t0rx -- Try ancestors
+                    throw new FudgeRuntimeException("Could not find type \"" + typeName + "\" to deserialize.");
                 }
             }
             else
             {
-                typeId = msgTypeId.Value;
+                if (refId == null)
+                {
+                    throw new FudgeRuntimeException("Cannot use relative type IDs in sub-messages.");
+                }
+                int previousObjId = refId.Value + Convert.ToInt32(typeField.Value);
+
+                if (previousObjId < 0 || previousObjId >= refId.Value)
+                {
+                    throw new FudgeRuntimeException("Illegal relative type ID in sub-message: " + typeField.Value);
+                }
+
+                objectType = reffedObjects[previousObjId].GetType();
             }
 
-            string typeName = typeMap.GetTypeName(typeId);
+            typeId = typeMap.GetTypeId(objectType);
+            typeName = typeMap.GetTypeName(typeId);
             var surrogateFactory = typeMap.GetSurrogateFactory(typeId);
             if (surrogateFactory == null)
             {
@@ -220,8 +242,7 @@ namespace Fudge.Serialization
             }
             else
             {
-                // TODO 20100124 t0rx -- Proper conversion of ref IDs
-                int refId = ((IConvertible)field.Value).ToInt32(null);
+                int refId = Convert.ToInt32(field.Value);
                 return (T)GetFromRef(refId);
             }
         }

@@ -39,16 +39,16 @@ namespace Fudge.Serialization.Reflection
             if (typeof(IFudgeSerializable).IsAssignableFrom(type))
             {
                 // We only need one surrogate as it is stateless
-                var factory = new SerializableSurrogate(type);
-                return (c => factory);
+                var surrogate = new SerializableSurrogate(type);
+                return c => surrogate;
             }
 
-            var typeData = new TypeData(context, type);
+            var typeData = TypeDataCache.FromContext(context).GetTypeData(type);
 
             if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
             {
-                var surrogate = new PropertyBasedSerializationSurrogate(context, type);
-                return (c => surrogate);
+                var surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
+                return c => surrogate;
             }
 
             return null;

@@ -102,6 +102,7 @@
     <Compile Include="Serialization\Reflection\PropertyBasedSerializationSurrogate.cs" />
     <Compile Include="Serialization\Reflection\FudgeSurrogateSelector.cs" />
     <Compile Include="Serialization\Reflection\TypeData.cs" />
+    <Compile Include="Serialization\Reflection\TypeDataCache.cs" />
     <Compile Include="Serialization\SerializableSurrogate.cs" />
     <Compile Include="Serialization\SerializationTypeMap.cs" />
     <Compile Include="Serialization\SerializationHeader.cs" />

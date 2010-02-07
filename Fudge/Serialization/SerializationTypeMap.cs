@@ -64,10 +64,10 @@ namespace Fudge.Serialization
 
         public int AutoRegister(Type type)
         {
-            string name = type.FullName;        // TODO 20100202 t0rx -- Allow user to override name with either a strategy or an attribute
+            string name = type.FullName;        // TODO 2010-02-02 t0rx -- Allow user to override name with either a strategy or an attribute
             var surrogateFactory = surrogateSelector.GetSurrogateFactory(type);
             Debug.Assert(surrogateFactory != null);
-            int dataVersion = 0;                // TODO 20100202 t0rx -- Allow user to specify data version with an attribute
+            int dataVersion = 0;                // TODO 2010-02-02 t0rx -- Allow user to specify data version with an attribute
             return RegisterType(type, name, surrogateFactory, dataVersion);
         }
 
@@ -104,7 +104,7 @@ namespace Fudge.Serialization
 
         private int RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory, int typeVersion)
         {
-            // TODO t0rx 2009-10-18 -- Handle IFudgeSerializable
+            // TODO 2009-10-18 t0rx -- Handle IFudgeSerializable
             int id = typeDataList.Count;
             var entry = new TypeData { Name = name, SurrogateFactory = surrogateFactory, TypeVersion = typeVersion, Type = type };
             typeDataList.Add(entry);
@@ -153,7 +153,7 @@ namespace Fudge.Serialization
             {
                 int typeId = AutoRegister(type);
                 if (typeId != -1)
-                    return typeDataList[index].SurrogateFactory;
+                    return typeDataList[typeId].SurrogateFactory;
             }
 
             return null;
@@ -209,7 +209,7 @@ namespace Fudge.Serialization
                 else
                 {
                     // Unknown
-                    // TODO t0rx 2009-10-18 -- Handling for unknown types
+                    // TODO 2009-10-18 t0rx -- Handling for unknown types
                     result.RegisterType(null, name, c => null);
                 }
             }
