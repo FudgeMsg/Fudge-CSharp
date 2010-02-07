@@ -47,7 +47,7 @@ namespace Fudge
         /// <param name="ordinal">Ordinal of the field, or <c>null</c> if none.</param>
         /// <param name="type">Type of the field, as a <see cref="FudgeFieldType"/>.</param>
         /// <param name="value">Value of the field.</param>
-        void WriteField(string name, int? ordinal, FudgeFieldType type, object value);     // TODO t0rx 2009-11-12 -- Do we need overloads of this, and auto-derivation of type? 
+        void WriteField(string name, int? ordinal, FudgeFieldType type, object value);     // TODO 2009-11-12 t0rx -- Do we need overloads of this, and auto-derivation of type? 
 
         /// <summary>
         /// Writes multiple fields to the data stream.

@@ -185,7 +185,7 @@ namespace Fudge
         /// <param name="fields">Enumerable of fields to add.</param>
         public void Add(IEnumerable<IFudgeField> fields)
         {
-            // TODO t0rx 20091017 -- Add this method to IMutableFudgeFieldContainer?
+            // TODO 2009-10-17 t0rx -- Add this method to IMutableFudgeFieldContainer?
             if (fields == null)
                 return; // Whatever
 

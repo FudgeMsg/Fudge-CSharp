@@ -61,7 +61,7 @@ namespace Fudge.Tests.Unit
             FudgeMsg inputMsg = new FudgeMsg(
                                     new Field("100", new byte[100]),
                                     new Field("1000", new byte[1000]),
-                                    new Field("10000", new byte[100000]));          // TODO t0rx 2009-10-08 -- Fix this field name in Fudge-Java and here so the interop still works
+                                    new Field("10000", new byte[100000]));          // TODO 2009-10-08 t0rx -- Fix this field name in Fudge-Java and here so the interop still works
 
             FudgeMsg outputMsg = CycleMessage(inputMsg, "variableWidthColumnSizes.dat");
 

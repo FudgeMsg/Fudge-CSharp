@@ -42,7 +42,7 @@ namespace Fudge.Serialization
 
             if (typeMap == null)
             {
-                // TODO 20100202 t0rx -- Have serialization type map as context property?
+                // TODO 2010-02-02 t0rx -- Have serialization type map as context property?
                 typeMap = new SerializationTypeMap(context);
             }
 
@@ -86,17 +86,5 @@ namespace Fudge.Serialization
             var reader = new FudgeMsgStreamReader(context, msgs);
             return Deserialize(reader);
         }
-
-        public FudgeContext Context
-        {
-            get { return context; }
-        }
-
-        public SerializationTypeMap TypeMap
-        {
-            get { return typeMap; }
-        }
-
-
     }
 }

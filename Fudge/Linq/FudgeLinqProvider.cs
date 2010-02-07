@@ -182,7 +182,7 @@ namespace Fudge.Linq
 
             public object Invoke(object[] args)
             {
-                // TODO t0rx 2009-10-25 -- Could add some form of FastInvoke to speed this up
+                // TODO 2009-10-25 t0rx -- Could add some form of FastInvoke to speed this up
                 return compiledQuery.DynamicInvoke(args);
             }
 

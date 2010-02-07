@@ -176,7 +176,7 @@ namespace Fudge.Types
         /// <returns><c>True</c> if the year is a leap year.</returns>
         public static bool IsLeap(int year)
         {
-            // TODO 20100109 t0rx -- What should the behaviour be for negative leap years?
+            // TODO 2010-01-09 t0rx -- What should the behaviour be for negative leap years?
             if (year % 100 == 0)
                 return (year % 400 == 0);
             else

@@ -42,8 +42,8 @@ namespace Fudge.Serialization
         {
             var result = new FudgeMsg();
             result.Add("version", serializationVersion);
-            result.AddAll("typeMap", typeMap.GetTypeNames().ToArray());                   // TODO t0rx 2009-10-17 -- Need to make FudgeMsg able to handle lists and other collections
-            result.AddAll("typeVersions", typeMap.GetTypeVersions().ToArray());           // TODO t0rx 2009-10-17 -- If all versions are zero, just leave out?
+            result.AddAll("typeMap", typeMap.GetTypeNames().ToArray());                   // TODO 2009-10-17 t0rx -- Need to make FudgeMsg able to handle lists and other collections
+            result.AddAll("typeVersions", typeMap.GetTypeVersions().ToArray());           // TODO 2009-10-17 t0rx -- If all versions are zero, just leave out?
             return result;
         }
     }

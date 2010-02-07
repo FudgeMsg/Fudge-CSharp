@@ -117,7 +117,7 @@ namespace Fudge.Tests.Unit.Types
             Assert.Equal("1001-01-01", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Day));
             Assert.Equal("1001-01", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Month));
             Assert.Equal("1001", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Year));
-            Assert.Equal("1000", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Century));    // REVIEW 20100110 t0rx -- Is this the right behaviour for centuries?
+            Assert.Equal("1000", new FudgeDate(10010101).ToString(FudgeDateTimePrecision.Century));    // REVIEW 2010-01-10 t0rx -- Is this the right behaviour for centuries?
         }
 
         [Fact]

@@ -51,7 +51,7 @@ namespace Fudge
         private FudgeTypeDictionary typeDictionary = new FudgeTypeDictionary();
         private readonly FudgeTypeHandler typeHandler;
         private ITaxonomyResolver taxonomyResolver;
-        private object[] properties;     // REVIEW t0rx 2009-11-28 -- Should we only create this on demand?
+        private object[] properties;     // REVIEW 2009-11-28 t0rx -- Should we only create this on demand?
         private FudgeStreamParser parser;
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Fudge
         {
             try
             {
-                var writer = new FudgeEncodedStreamWriter(this);            // TODO t0rx 2009-11-12 -- Fudge-Java gets this from an allocated queue
+                var writer = new FudgeEncodedStreamWriter(this);
                 writer.TaxonomyId = taxonomyId;
                 writer.Reset(bw);
                 writer.StartMessage();

@@ -188,7 +188,7 @@ namespace Fudge.Tests.Unit
         }
 
         [Fact]
-        public void AsQueriesToLongNoNames()        // TODO t0rx 2009-08-31 -- This test from Fudge-Java doesn't make sense
+        public void AsQueriesToLongNoNames()        // TODO 2009-08-31 t0rx -- This test from Fudge-Java doesn't make sense
         {
             FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
 

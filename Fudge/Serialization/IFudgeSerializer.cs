@@ -27,7 +27,7 @@ namespace Fudge.Serialization
     /// </summary>
     public interface IFudgeSerializer
     {
-        // TODO 20100123 t0rx -- Do we need fast versions for primitive types?
+        // TODO 2010-01-23 t0rx -- Do we need fast versions for primitive types?
 
         /// <summary>
         /// Writes a value as a field with a given name and/or ordinal.
