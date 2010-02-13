@@ -29,11 +29,17 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
     public class PropertyBasedSerializationSurrogateTest
     {
         private readonly FudgeContext context = new FudgeContext();
+        private readonly TypeDataCache typeDataCache;
+
+        public PropertyBasedSerializationSurrogateTest()
+        {
+            typeDataCache = new TypeDataCache(context);
+        }
 
         [Fact]
         public void SimpleExample()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(SimpleExampleClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(SimpleExampleClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -50,7 +56,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void SecondaryTypes()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(SecondaryTypeClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(SecondaryTypeClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -66,7 +72,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void PrimitiveLists()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(PrimitiveListClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(PrimitiveListClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -84,7 +90,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void SubObjects()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(SubObjectClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(SubObjectClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -103,7 +109,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void ListOfSubObjects()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(ListOfObjectsClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(ListOfObjectsClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -121,14 +127,14 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void UnhandleableCases()
         {
-            Assert.False(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(NoDefaultConstructorClass)));
-            Assert.False(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(NoSetterClass)));
+            Assert.False(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(NoDefaultConstructorClass)));
+            Assert.False(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(NoSetterClass)));
         }
 
         [Fact]
         public void StaticAndTransient()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(StaticTransientClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(StaticTransientClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -148,7 +154,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void RenamingFields()
         {
-            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(RenameFieldClass)));
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(RenameFieldClass)));
 
             var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
 
@@ -164,6 +170,63 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.NotSame(obj1, obj2);
             Assert.Equal(obj1.Name, obj2.Name);
             Assert.Equal(obj1.Age, obj2.Age);
+        }
+
+        [Fact]
+        public void FieldNameConventionsWithAttribute()
+        {
+            var obj1 = new FieldConventionAttributeClass { MyName = "Fred" };              // Specifies camelCase
+            var serializer = new FudgeSerializer(context);
+            
+            var msgs = serializer.SerializeToMsgs(obj1);
+            Assert.NotNull(msgs[1].GetByName("myName"));
+            
+            var obj2 = (FieldConventionAttributeClass)serializer.Deserialize(msgs);
+            Assert.Equal(obj1.MyName, obj2.MyName);
+        }
+
+        [Fact]
+        public void FieldNameConventionsWithContextProperty()
+        {
+            var context = new FudgeContext();           // So we don't mess with other unit tests
+            var obj1 = new FieldConventionClass {MyName = "Bobby", myAge = 6};
+            IList<FudgeMsg> msgs;
+            FudgeSerializer serializer;
+
+            serializer = new FudgeSerializer(context);
+            Assert.Equal(FudgeFieldNameConvention.Identity, serializer.TypeMap.FieldNameConvention);
+            msgs = serializer.SerializeToMsgs(obj1);
+            Assert.Equal("Bobby", msgs[1].GetString("MyName"));
+            Assert.Equal(6, msgs[1].GetInt("myAge"));
+            Assert.Equal(obj1, serializer.Deserialize(msgs));
+
+            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.AllLowerCase);
+            serializer = new FudgeSerializer(context);
+            msgs = serializer.SerializeToMsgs(obj1);
+            Assert.Equal("Bobby", msgs[1].GetString("myname"));
+            Assert.Equal(6, msgs[1].GetInt("myage"));
+            Assert.Equal(obj1, serializer.Deserialize(msgs));
+
+            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.AllUpperCase);
+            serializer = new FudgeSerializer(context);
+            msgs = serializer.SerializeToMsgs(obj1);
+            Assert.Equal("Bobby", msgs[1].GetString("MYNAME"));
+            Assert.Equal(6, msgs[1].GetInt("MYAGE"));
+            Assert.Equal(obj1, serializer.Deserialize(msgs));
+
+            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.CamelCase);
+            serializer = new FudgeSerializer(context);
+            msgs = serializer.SerializeToMsgs(obj1);
+            Assert.Equal("Bobby", msgs[1].GetString("myName"));
+            Assert.Equal(6, msgs[1].GetInt("myAge"));
+            Assert.Equal(obj1, serializer.Deserialize(msgs));
+
+            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.PascalCase);
+            serializer = new FudgeSerializer(context);
+            msgs = serializer.SerializeToMsgs(obj1);
+            Assert.Equal("Bobby", msgs[1].GetString("MyName"));
+            Assert.Equal(6, msgs[1].GetInt("MyAge"));
+            Assert.Equal(obj1, serializer.Deserialize(msgs));
         }
 
         // TODO 2010-02-02 t0rx -- Test arrays
@@ -226,6 +289,30 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             public string Name { get; set; }
 
             public int Age { get; set; }
+        }
+
+        [FudgeFieldNameConvention(FudgeFieldNameConvention.CamelCase)]
+        public class FieldConventionAttributeClass
+        {
+            public string MyName { get; set; }
+        }
+
+        public class FieldConventionClass
+        {
+            // Mix up the cases
+            public string MyName { get; set; }
+            public int myAge { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (FieldConventionClass)obj;
+                return MyName == other.MyName && myAge == other.myAge;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
         }
     }
 }

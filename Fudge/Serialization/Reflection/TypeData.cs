@@ -27,7 +27,7 @@ namespace Fudge.Serialization.Reflection
         private readonly TypeData subType;
         private readonly FudgeFieldType fieldType;
 
-        public TypeData(FudgeContext context, TypeDataCache cache, Type type)
+        public TypeData(FudgeContext context, TypeDataCache cache, Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             Type = type;
             DefaultConstructor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
@@ -36,11 +36,20 @@ namespace Fudge.Serialization.Reflection
 
             cache.RegisterTypeData(this);
 
-            Kind = CalcKind(context, cache, type, out subType, out fieldType);
-            ScanProperties(context, cache);
+            fieldNameConvention = OverrideFieldNameConvention(type, fieldNameConvention);
+            Kind = CalcKind(context, cache, type, fieldNameConvention, out subType, out fieldType);
+            ScanProperties(context, cache, fieldNameConvention);
         }
 
-        private static TypeKind CalcKind(FudgeContext context, TypeDataCache typeCache, Type type, out TypeData subType, out FudgeFieldType fieldType)
+        private static FudgeFieldNameConvention OverrideFieldNameConvention(Type type, FudgeFieldNameConvention fieldNameConvention)
+        {
+            var attribs = type.GetCustomAttributes(typeof(FudgeFieldNameConventionAttribute), true);
+            if (attribs.Length > 0)
+                fieldNameConvention = ((FudgeFieldNameConventionAttribute)attribs[0]).Convention;
+            return fieldNameConvention;
+        }
+
+        private static TypeKind CalcKind(FudgeContext context, TypeDataCache typeCache, Type type, FudgeFieldNameConvention fieldNameConvention, out TypeData subType, out FudgeFieldType fieldType)
         {
             subType = null;
             fieldType = context.TypeDictionary.GetByCSharpType(type);
@@ -55,7 +64,7 @@ namespace Fudge.Serialization.Reflection
             {
                 // It's a list
                 Type elementType = type.GetGenericArguments()[0];
-                subType = typeCache.GetTypeData(elementType);
+                subType = typeCache.GetTypeData(elementType, fieldNameConvention);
                 return TypeKind.List;
             }
 
@@ -65,7 +74,7 @@ namespace Fudge.Serialization.Reflection
                 {
                     // It's a list
                     Type elementType = type.GetGenericArguments()[0];
-                    subType = typeCache.GetTypeData(elementType);
+                    subType = typeCache.GetTypeData(elementType, fieldNameConvention);
                     return TypeKind.List;
                 }
             }
@@ -73,12 +82,12 @@ namespace Fudge.Serialization.Reflection
             return TypeKind.Object;
         }
 
-        private void ScanProperties(FudgeContext context, TypeDataCache cache)
+        private void ScanProperties(FudgeContext context, TypeDataCache cache, FudgeFieldNameConvention fieldNameConvention)
         {
             var props = Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var list = from prop in props
                        where prop.GetCustomAttributes(typeof(FudgeTransientAttribute), true).Length == 0
-                       select new PropertyData(cache, prop);
+                       select new PropertyData(cache, fieldNameConvention, prop);
             Properties = list.ToArray();
         }
 
@@ -107,21 +116,41 @@ namespace Fudge.Serialization.Reflection
             private string serializedName;
             private readonly TypeData typeData;
 
-            public PropertyData(TypeDataCache typeCache, PropertyInfo info)
+            public PropertyData(TypeDataCache typeCache, FudgeFieldNameConvention fieldNameConvention, PropertyInfo info)
             {
                 this.info = info;
                 this.name = info.Name;
                 this.hasPublicSetter = (info.GetSetMethod() != null);   // Can't just use CanWrite as it may be non-public
-                this.typeData = typeCache.GetTypeData(info.PropertyType);
+                this.typeData = typeCache.GetTypeData(info.PropertyType, fieldNameConvention);
 
                 var attribs = info.GetCustomAttributes(typeof(FudgeFieldName), true);
                 if (attribs.Length > 0)
                 {
+                    // Attribute takes priority over convention
                     this.serializedName = ((FudgeFieldName)attribs[0]).Name;
                 }
                 else
                 {
-                    this.serializedName = info.Name;
+                    switch (fieldNameConvention)
+                    {
+                        case FudgeFieldNameConvention.Identity:
+                            this.serializedName = info.Name;
+                            break;
+                        case FudgeFieldNameConvention.AllLowerCase:
+                            this.serializedName = info.Name.ToLower();
+                            break;
+                        case FudgeFieldNameConvention.AllUpperCase:
+                            this.serializedName = info.Name.ToUpper();
+                            break;
+                        case FudgeFieldNameConvention.CamelCase:
+                            this.serializedName = info.Name.Substring(0, 1).ToLower() + info.Name.Substring(1);
+                            break;
+                        case FudgeFieldNameConvention.PascalCase:
+                            this.serializedName = info.Name.Substring(0, 1).ToUpper() + info.Name.Substring(1);
+                            break;
+                        default:
+                            throw new FudgeRuntimeException("Unknown FudgeFieldNameConvention: " + fieldNameConvention.ToString());
+                    }
                 }
             }
 

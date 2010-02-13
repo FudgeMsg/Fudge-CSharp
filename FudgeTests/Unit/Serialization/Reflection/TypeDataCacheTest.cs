@@ -20,32 +20,21 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Fudge.Serialization.Reflection;
+using Fudge.Serialization;
 
 namespace Fudge.Tests.Unit.Serialization.Reflection
 {
     public class TypeDataCacheTest
     {
         [Fact]
-        public void CreatesInContextIfNotThere()
-        {
-            var context = new FudgeContext();
-            Assert.Null(context.GetProperty(TypeDataCache.TypeDataCacheProperty));
-
-            var cache = TypeDataCache.FromContext(context);
-            Assert.Same(cache, context.GetProperty(TypeDataCache.TypeDataCacheProperty));
-            var cache2 = TypeDataCache.FromContext(context);
-            Assert.Same(cache, cache2);
-        }
-
-        [Fact]
         public void GettingTypeData()
         {
             var context = new FudgeContext();
             var cache = new TypeDataCache(context);
 
-            TypeData data = cache.GetTypeData(this.GetType());
+            TypeData data = cache.GetTypeData(this.GetType(), FudgeFieldNameConvention.Identity);
             Assert.NotNull(data);
-            TypeData data2 = cache.GetTypeData(this.GetType());
+            TypeData data2 = cache.GetTypeData(this.GetType(), FudgeFieldNameConvention.Identity);
             Assert.Same(data, data2);
         }
 
@@ -56,8 +45,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var cache = new TypeDataCache(context);
 
             Assert.Throws<ArgumentNullException>(() => new TypeDataCache(null));
-            Assert.Throws<ArgumentNullException>(() => TypeDataCache.FromContext(null));
-            Assert.Throws<ArgumentNullException>(() => cache.GetTypeData(null));
+            Assert.Throws<ArgumentNullException>(() => cache.GetTypeData(null, FudgeFieldNameConvention.Identity));
         }
 
         [Fact]
@@ -66,7 +54,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var context = new FudgeContext();
             var cache = new TypeDataCache(context);
 
-            var data = cache.GetTypeData(typeof(Cycle));
+            var data = cache.GetTypeData(typeof(Cycle), FudgeFieldNameConvention.Identity);
             Assert.NotNull(data);
             Assert.Equal(data, data.Properties[0].TypeData);
         }

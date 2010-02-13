@@ -33,11 +33,11 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             // Basic case
             var selector = new FudgeSurrogateSelector(context);
-            var factory = selector.GetSurrogateFactory(typeof(DirectTest));
+            var factory = selector.GetSurrogateFactory(typeof(DirectTest), FudgeFieldNameConvention.Identity);
             Assert.IsType<SerializableSurrogate>(factory(context));
 
             // Test exception thrown if no default constructor
-            Assert.Throws<FudgeRuntimeException>(()=>selector.GetSurrogateFactory(typeof(DirectNoDefaultConstructorTest)));
+            Assert.Throws<FudgeRuntimeException>(() => selector.GetSurrogateFactory(typeof(DirectNoDefaultConstructorTest), FudgeFieldNameConvention.Identity));
         }
 
         #region Test classes

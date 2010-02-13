@@ -28,10 +28,9 @@ namespace Fudge.Serialization.Reflection
     /// </summary>
     public class TypeDataCache
     {
+        // TODO 2010-02-13 t0rx -- Should TypeDataCache be collapsed into SerializationTypeMap?
         private readonly FudgeContext context;
         private readonly Dictionary<Type, TypeData> cache = new Dictionary<Type, TypeData>();
-
-        public static readonly FudgeContextProperty TypeDataCacheProperty = new FudgeContextProperty("Serialization.TypeDataCache", typeof(TypeDataCache));
 
         public TypeDataCache(FudgeContext context)
         {
@@ -40,20 +39,7 @@ namespace Fudge.Serialization.Reflection
             this.context = context;
         }
 
-        public static TypeDataCache FromContext(FudgeContext context)
-        {
-            if (context == null)
-                throw new ArgumentNullException("context");
-            TypeDataCache result = (TypeDataCache)context.GetProperty(TypeDataCacheProperty);
-            if (result == null)
-            {
-                result = new TypeDataCache(context);
-                context.SetProperty(TypeDataCacheProperty, result);
-            }
-            return result;
-        }
-
-        public TypeData GetTypeData(Type type)
+        public TypeData GetTypeData(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
@@ -63,7 +49,7 @@ namespace Fudge.Serialization.Reflection
             {
                 if (!cache.TryGetValue(type, out result))
                 {
-                    result = new TypeData(context, this, type);
+                    result = new TypeData(context, this, type, fieldNameConvention);
                     Debug.Assert(cache.ContainsKey(type));                // TypeData registers itself during construction
                 }
             }

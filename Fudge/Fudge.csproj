@@ -91,6 +91,8 @@
     <Compile Include="ModifiedUTF8Util.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\FudgeFieldNameConvention.cs" />
+    <Compile Include="Serialization\FudgeFieldNameConventionAttribute.cs" />
     <Compile Include="Serialization\FudgeFieldNameAttribute.cs" />
     <Compile Include="Serialization\FudgeDeserializationContext.cs" />
     <Compile Include="Serialization\FudgeSerializationExtensions.cs" />

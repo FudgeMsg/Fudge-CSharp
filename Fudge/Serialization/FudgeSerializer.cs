@@ -50,6 +50,11 @@ namespace Fudge.Serialization
             this.typeMap = typeMap;
         }
 
+        public SerializationTypeMap TypeMap
+        {
+            get { return typeMap; }
+        }
+
         public void Serialize(IFudgeStreamWriter writer, object graph)
         {
             if (graph == null)

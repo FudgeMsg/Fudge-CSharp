@@ -32,13 +32,16 @@ namespace Fudge.Serialization
         private readonly FudgeSurrogateSelector surrogateSelector;
 
         /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="AllowTypeDiscovery"/>.</summary>
-        public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("SerializationTypeMap.AllowTypeDiscovery", typeof(bool));
+        public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("Serialization.AllowTypeDiscovery", typeof(bool));
+        /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="FieldNameConvention"/>.</summary>
+        public static readonly FudgeContextProperty FieldNameConventionProperty = new FudgeContextProperty("Serialization.FieldNameConvention", typeof(FudgeFieldNameConvention));
 
         public SerializationTypeMap(FudgeContext context)
         {
             this.context = context;
             this.surrogateSelector = new FudgeSurrogateSelector(context);
             this.AllowTypeDiscovery = (bool)context.GetProperty(AllowTypeDiscoveryProperty, true);
+            this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
         }
 
         /// <summary>
@@ -62,10 +65,25 @@ namespace Fudge.Serialization
             set;
         }
 
+        /// <summary>
+        /// Gets or sets the convention to use when converting .net property names to Fudge field names, by default Identity.
+        /// </summary>
+        /// <remarks>
+        /// On construction, the <see cref="FudgeSerializationTypeMap"/> will pick up any default specified
+        /// using the <see cref="FieldNameConventionProperty"/> property in the <see cref="FudgeContext"/>
+        /// of set <see cref="FudgeFieldNameConvention"/> directly.
+        /// </remarks>
+        /// <seealso cref="FudgeFieldNameConvention"/>
+        public FudgeFieldNameConvention FieldNameConvention
+        {
+            get;
+            set;
+        }
+
         public int AutoRegister(Type type)
         {
             string name = type.FullName;        // TODO 2010-02-02 t0rx -- Allow user to override name with either a strategy or an attribute
-            var surrogateFactory = surrogateSelector.GetSurrogateFactory(type);
+            var surrogateFactory = surrogateSelector.GetSurrogateFactory(type, FieldNameConvention);
             Debug.Assert(surrogateFactory != null);
             int dataVersion = 0;                // TODO 2010-02-02 t0rx -- Allow user to specify data version with an attribute
             return RegisterType(type, name, surrogateFactory, dataVersion);

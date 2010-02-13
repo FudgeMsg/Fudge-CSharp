@@ -37,11 +37,6 @@ namespace Fudge.Serialization.Reflection
         private readonly ConstructorInfo constructor;
         private readonly Dictionary<string, MorePropertyData> propMap = new Dictionary<string, MorePropertyData>();
 
-        public PropertyBasedSerializationSurrogate(FudgeContext context, Type type)
-            : this(context, TypeDataCache.FromContext(context).GetTypeData(type))
-        {
-        }
-
         internal PropertyBasedSerializationSurrogate(FudgeContext context, TypeData typeData)
         {
             if (context == null)
@@ -85,9 +80,9 @@ namespace Fudge.Serialization.Reflection
             }
         }
 
-        public static bool CanHandle(FudgeContext context, Type type)
+        public static bool CanHandle(TypeDataCache cache, FudgeFieldNameConvention fieldNameConvention, Type type)
         {
-            return CanHandle(TypeDataCache.FromContext(context).GetTypeData(type));
+            return CanHandle(cache.GetTypeData(type, fieldNameConvention));
         }
 
         internal static bool CanHandle(TypeData typeData)

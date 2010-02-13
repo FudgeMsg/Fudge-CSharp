@@ -25,6 +25,7 @@ namespace Fudge.Serialization.Reflection
     public class FudgeSurrogateSelector
     {
         private readonly FudgeContext context;
+        private readonly TypeDataCache typeDataCache;
 
         public FudgeSurrogateSelector(FudgeContext context)
         {
@@ -32,9 +33,10 @@ namespace Fudge.Serialization.Reflection
                 throw new ArgumentNullException("context");
 
             this.context = context;
+            this.typeDataCache = new TypeDataCache(context);
         }
 
-        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type)
+        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             if (typeof(IFudgeSerializable).IsAssignableFrom(type))
             {
@@ -43,7 +45,7 @@ namespace Fudge.Serialization.Reflection
                 return c => surrogate;
             }
 
-            var typeData = TypeDataCache.FromContext(context).GetTypeData(type);
+            var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);
 
             if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
             {
