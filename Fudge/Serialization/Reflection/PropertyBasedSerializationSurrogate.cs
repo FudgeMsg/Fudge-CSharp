@@ -191,7 +191,6 @@ namespace Fudge.Serialization.Reflection
                     case TypeData.TypeKind.List:
                         // TODO 2010-02-07 t0rx -- Serializing lists of lists
                         throw new FudgeRuntimeException("Serializing lists of lists is not yet supported.");
-                        break;
                     case TypeData.TypeKind.Object:
                         ObjectSerialize(prop, item, serializer);
                         break;

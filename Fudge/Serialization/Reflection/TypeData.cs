@@ -73,11 +73,13 @@ namespace Fudge.Serialization.Reflection
             return TypeKind.Object;
         }
 
-
         private void ScanProperties(FudgeContext context, TypeDataCache cache)
         {
-            var props = Type.GetProperties();                  // Gets all the properties with a public accessor
-            Properties = props.Select(prop => new PropertyData(cache, prop)).ToArray();
+            var props = Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var list = from prop in props
+                       where prop.GetCustomAttributes(typeof(FudgeTransientAttribute), true).Length == 0
+                       select new PropertyData(cache, prop);
+            Properties = list.ToArray();
         }
 
         public Type Type { get; private set; }
@@ -109,9 +111,18 @@ namespace Fudge.Serialization.Reflection
             {
                 this.info = info;
                 this.name = info.Name;
-                this.serializedName = info.Name;
                 this.hasPublicSetter = (info.GetSetMethod() != null);   // Can't just use CanWrite as it may be non-public
                 this.typeData = typeCache.GetTypeData(info.PropertyType);
+
+                var attribs = info.GetCustomAttributes(typeof(FudgeFieldName), true);
+                if (attribs.Length > 0)
+                {
+                    this.serializedName = ((FudgeFieldName)attribs[0]).Name;
+                }
+                else
+                {
+                    this.serializedName = info.Name;
+                }
             }
 
             public PropertyInfo Info { get { return info; } }

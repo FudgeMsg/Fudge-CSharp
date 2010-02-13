@@ -125,6 +125,47 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.False(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(NoSetterClass)));
         }
 
+        [Fact]
+        public void StaticAndTransient()
+        {
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(StaticTransientClass)));
+
+            var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
+
+            StaticTransientClass.Static = 17;
+            var obj1 = new StaticTransientClass {Transient = "Hello"};
+
+            var msgs = serializer.SerializeToMsgs(obj1);
+
+            StaticTransientClass.Static = 19;
+            var obj2 = (StaticTransientClass)serializer.Deserialize(msgs);
+
+            Assert.NotSame(obj1, obj2);
+            Assert.Equal(null, obj2.Transient);
+            Assert.Equal(19, StaticTransientClass.Static);
+        }
+
+        [Fact]
+        public void RenamingFields()
+        {
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(context, typeof(RenameFieldClass)));
+
+            var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
+
+            var obj1 = new RenameFieldClass { Name = "Albert", Age = 72 };
+
+            var msgs = serializer.SerializeToMsgs(obj1);
+            Assert.Null(msgs[1].GetString("Name"));
+            Assert.Equal("Albert", msgs[1].GetString("name"));
+            Assert.Equal(72, msgs[1].GetInt("Age"));
+
+            var obj2 = (RenameFieldClass)serializer.Deserialize(msgs);
+
+            Assert.NotSame(obj1, obj2);
+            Assert.Equal(obj1.Name, obj2.Name);
+            Assert.Equal(obj1.Age, obj2.Age);
+        }
+
         // TODO 2010-02-02 t0rx -- Test arrays
         // TODO 2010-02-02 t0rx -- Test maps
         // TODO 2010-02-02 t0rx -- Test object references
@@ -169,6 +210,22 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         public class NoSetterClass
         {
             public string Name { get; private set; }
+        }
+
+        public class StaticTransientClass
+        {
+            public static int Static { get; set; }
+
+            [FudgeTransient]
+            public string Transient { get; set; }
+        }
+
+        public class RenameFieldClass
+        {
+            [FudgeFieldName("name")]
+            public string Name { get; set; }
+
+            public int Age { get; set; }
         }
     }
 }
