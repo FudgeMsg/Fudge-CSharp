@@ -48,32 +48,33 @@ namespace Fudge.Serialization.Reflection
                 return BuildSurrogateFactory(type, (FudgeSurrogateAttribute)surrogateAttribute);
             }
 
+            // For all of these known types, we only need one surrogate as it is stateless
+            IFudgeSerializationSurrogate surrogate;
             if (typeof(IFudgeSerializable).IsAssignableFrom(type))
             {
-                // We only need one surrogate as it is stateless
-                var surrogate = new SerializableSurrogate(type);
-                return c => surrogate;
+                surrogate = new SerializableSurrogate(type);
             }
-
-            if (ListSurrogate.CanHandle(typeData))
+            else if (ArraySurrogate.CanHandle(typeData))
             {
-                var surrogate = new ListSurrogate(context, typeData);
-                return c => surrogate;
+                surrogate = new ArraySurrogate(context, typeData);
             }
-
-            if (ToFromFudgeMsgSurrogate.CanHandle(typeData))
+            else if (ListSurrogate.CanHandle(typeData))
             {
-                var surrogate = new ToFromFudgeMsgSurrogate(context, typeData);
-                return c => surrogate;
+                surrogate = new ListSurrogate(context, typeData);
             }
-
-            if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
+            else if (ToFromFudgeMsgSurrogate.CanHandle(typeData))
             {
-                var surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
-                return c => surrogate;
+                surrogate = new ToFromFudgeMsgSurrogate(context, typeData);
             }
-
-            throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);
+            else if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
+            {
+                surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
+            }
+            else
+            {
+                throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);
+            }
+            return c => surrogate;
         }
 
         private Func<FudgeContext, IFudgeSerializationSurrogate> BuildSurrogateFactory(Type type, FudgeSurrogateAttribute attrib)
