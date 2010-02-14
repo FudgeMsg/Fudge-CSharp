@@ -104,6 +104,7 @@
     <Compile Include="Serialization\IFudgeSerializer.cs" />
     <Compile Include="Serialization\IFudgeSerializationSurrogate.cs" />
     <Compile Include="Serialization\FudgeSerializationContext.cs" />
+    <Compile Include="Serialization\Reflection\ListSurrogate.cs" />
     <Compile Include="Serialization\Reflection\PropertyBasedSerializationSurrogate.cs" />
     <Compile Include="Serialization\Reflection\FudgeSurrogateSelector.cs" />
     <Compile Include="Serialization\Reflection\ToFromFudgeMsgSurrogate.cs" />

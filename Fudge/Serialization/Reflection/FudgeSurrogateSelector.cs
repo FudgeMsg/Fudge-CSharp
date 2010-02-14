@@ -55,6 +55,12 @@ namespace Fudge.Serialization.Reflection
                 return c => surrogate;
             }
 
+            if (ListSurrogate.CanHandle(typeData))
+            {
+                var surrogate = new ListSurrogate(context, typeData);
+                return c => surrogate;
+            }
+
             if (ToFromFudgeMsgSurrogate.CanHandle(typeData))
             {
                 var surrogate = new ToFromFudgeMsgSurrogate(context, typeData);

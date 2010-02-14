@@ -59,7 +59,7 @@ namespace Fudge.Serialization.Reflection
         public enum TypeKind
         {
             FudgePrimitive,
-            List,
+            Inline,
             Object
         }
 
@@ -82,23 +82,11 @@ namespace Fudge.Serialization.Reflection
             }
 
             // Check for lists
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
+            Type elementType;
+            if (ListSurrogate.IsList(type, out elementType))
             {
-                // It's a list
-                Type elementType = type.GetGenericArguments()[0];
                 subType = typeCache.GetTypeData(elementType, fieldNameConvention);
-                return TypeKind.List;
-            }
-
-            foreach (var interfaceType in type.GetInterfaces())
-            {
-                if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IList<>))
-                {
-                    // It's a list
-                    Type elementType = type.GetGenericArguments()[0];
-                    subType = typeCache.GetTypeData(elementType, fieldNameConvention);
-                    return TypeKind.List;
-                }
+                return TypeKind.Inline;
             }
 
             return TypeKind.Object;

@@ -46,38 +46,53 @@ namespace Fudge.Serialization
 
         public static void WriteAll<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> values)
         {
+            WriteAll(serializer, name, null, values);
+        }
+
+        public static void WriteAll<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> values)
+        {
             foreach (T value in values)
             {
-                serializer.Write(name, value);
+                serializer.Write(name, ordinal, value);
             }
         }
 
         public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
+            serializer.WriteAllSubMsgs(name, null, objects);
+        }
+
+        public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> objects)
+        {
             foreach (T obj in objects)
             {
-                serializer.WriteSubMsg(name, obj);
+                serializer.WriteSubMsg(name, ordinal, obj);
             }
         }
 
         public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
+            serializer.WriteAllRefs(name, null, objects);
+        }
+
+        public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> objects)
+        {
             var result = new List<int>();
             foreach (T obj in objects)
             {
-                serializer.WriteRef(name, obj);
+                serializer.WriteRef(name, ordinal, obj);
             }
         }
         /*
-        public static IEnumerable<T> AllFromFields<T>(this IFudgeDeserializer context, IEnumerable<IFudgeField> fields) where T : class
-        {
-            var result = new List<T>();
-            foreach (var field in fields)
-            {
-                result.Add(context.FromField<T>(field));
-            }
-            return result;
-        }
-        */
+                public static IEnumerable<T> AllFromFields<T>(this IFudgeDeserializer context, IEnumerable<IFudgeField> fields) where T : class
+                {
+                    var result = new List<T>();
+                    foreach (var field in fields)
+                    {
+                        result.Add(context.FromField<T>(field));
+                    }
+                    return result;
+                }
+                */
     }
 }

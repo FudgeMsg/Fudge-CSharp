@@ -23,6 +23,7 @@ using Fudge.Serialization.Reflection;
 using Fudge.Serialization;
 using Fudge.Encodings;
 using System.IO;
+using Fudge.Types;
 
 namespace Fudge.Tests.Unit.Serialization.Reflection
 {
@@ -81,6 +82,12 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             obj1.Names.Add("Sheila");
 
             var msgs = serializer.SerializeToMsgs(obj1);
+
+            // Check the serialized format
+            Assert.Equal(FudgeMsgFieldType.Instance, msgs[1].GetByName("Names").Type);
+            var listMsg = msgs[1].GetMessage("Names");
+            Assert.Equal("FudgeMsg[ => Fred,  => Sheila]", listMsg.ToString());
+
             var obj2 = (PrimitiveListClass)serializer.Deserialize(msgs);
 
             Assert.NotSame(obj1, obj2);
@@ -241,6 +248,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         // TODO 2010-02-02 t0rx -- Test arrays
         // TODO 2010-02-02 t0rx -- Test maps
         // TODO 2010-02-02 t0rx -- Test object references
+        // TODO 2010-02-14 t0rx -- Test lists of lists
 
         public class SimpleExampleClass
         {
