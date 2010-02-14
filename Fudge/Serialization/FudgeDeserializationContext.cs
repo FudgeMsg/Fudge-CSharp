@@ -220,6 +220,12 @@ namespace Fudge.Serialization
         #region IFudgeDeserializer Members
 
         /// <inheritdoc/>
+        public FudgeContext Context
+        {
+            get { return context; }
+        }
+
+        /// <inheritdoc/>
         public IFudgeFieldContainer GetUnreadFields()
         {
             var state = stack.Peek();

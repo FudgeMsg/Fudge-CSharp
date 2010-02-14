@@ -40,10 +40,11 @@ namespace Fudge.Serialization
         /// <param name="type">Type of the object, which must implement <see cref="IFudgeSerializable"/> and have a default constructor.</param>
         public SerializableSurrogate(Type type)
         {
-            if (type == null || !typeof(IFudgeSerializable).IsAssignableFrom(type))
-            {
+            if (type == null)
+                throw new ArgumentNullException("type");            
+            if (!typeof(IFudgeSerializable).IsAssignableFrom(type))
                 throw new ArgumentOutOfRangeException("type");
-            }
+
             this.type = type;
             this.constructor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
             if (constructor == null)

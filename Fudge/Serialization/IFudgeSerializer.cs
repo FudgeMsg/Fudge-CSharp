@@ -30,6 +30,11 @@ namespace Fudge.Serialization
         // TODO 2010-01-23 t0rx -- Do we need fast versions for primitive types?
 
         /// <summary>
+        /// Gets the <see cref="FudgeContext"/> for this deserializer.
+        /// </summary>
+        FudgeContext Context { get; }
+
+        /// <summary>
         /// Writes a value as a field with a given name and/or ordinal.
         /// </summary>
         /// <param name="fieldName">Name of field, may be <c>null</c>.</param>

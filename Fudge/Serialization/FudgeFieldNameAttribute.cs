@@ -25,13 +25,13 @@ namespace Fudge.Serialization
     /// Overrides the name of the field that a property will serialize as.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class FudgeFieldName : Attribute
+    public class FudgeFieldNameAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FudgeFieldName"/> class.
         /// </summary>
         /// <param name="name">Field name to use for this property.</param>
-        public FudgeFieldName(string name)
+        public FudgeFieldNameAttribute(string name)
         {
             this.Name = name;
         }

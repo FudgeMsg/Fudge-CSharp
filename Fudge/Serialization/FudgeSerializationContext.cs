@@ -146,6 +146,13 @@ namespace Fudge.Serialization
 
         #region IFudgeSerializer Members
 
+        /// <inheritdoc/>
+        public FudgeContext Context
+        {
+            get { return context; }
+        }
+
+        /// <inheritdoc/>
         public void Write(string fieldName, int? ordinal, object value)
         {
             FudgeFieldType type = context.TypeHandler.DetermineTypeFromValue(value);
@@ -156,6 +163,7 @@ namespace Fudge.Serialization
             writer.WriteField(fieldName, ordinal, type, value);
         }
 
+        /// <inheritdoc/>
         public void WriteSubMsg(string fieldName, int? ordinal, object obj)
         {
             if (obj != null)
@@ -166,6 +174,7 @@ namespace Fudge.Serialization
             }
         }
 
+        /// <inheritdoc/>
         public void WriteRef(string fieldName, int? ordinal, object obj)
         {
             if (obj == null)

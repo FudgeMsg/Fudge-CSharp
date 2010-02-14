@@ -229,6 +229,15 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.Equal(obj1, serializer.Deserialize(msgs));
         }
 
+        [Fact]
+        public void ConstuctorRangeChecking()
+        {
+            Assert.Throws<ArgumentNullException>(() => new PropertyBasedSerializationSurrogate(null, typeDataCache.GetTypeData(typeof(SimpleExampleClass), FudgeFieldNameConvention.Identity)));
+            Assert.Throws<ArgumentNullException>(() => new PropertyBasedSerializationSurrogate(context, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new PropertyBasedSerializationSurrogate(context, typeDataCache.GetTypeData(typeof(NoDefaultConstructorClass), FudgeFieldNameConvention.Identity)));
+        }
+
+
         // TODO 2010-02-02 t0rx -- Test arrays
         // TODO 2010-02-02 t0rx -- Test maps
         // TODO 2010-02-02 t0rx -- Test object references

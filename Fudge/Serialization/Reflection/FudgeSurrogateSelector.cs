@@ -47,13 +47,19 @@ namespace Fudge.Serialization.Reflection
 
             var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);
 
+            if (ToFromFudgeMsgSurrogate.CanHandle(typeData))
+            {
+                var surrogate = new ToFromFudgeMsgSurrogate(context, typeData);
+                return c => surrogate;
+            }
+
             if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
             {
                 var surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
                 return c => surrogate;
             }
 
-            return null;
+            throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);
         }
     }
 }

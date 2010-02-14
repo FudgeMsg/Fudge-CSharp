@@ -39,6 +39,28 @@ namespace Fudge.Serialization.Reflection
             fieldNameConvention = OverrideFieldNameConvention(type, fieldNameConvention);
             Kind = CalcKind(context, cache, type, fieldNameConvention, out subType, out fieldType);
             ScanProperties(context, cache, fieldNameConvention);
+
+            PublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            StaticPublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+        }
+
+        public Type Type { get; private set; }
+        public ConstructorInfo DefaultConstructor { get; private set; }
+        public ConstructorInfo[] Constructors { get; private set; }
+        public PropertyData[] Properties { get; private set; }
+        public object[] CustomAttributes { get; private set; }
+        public TypeKind Kind { get; private set; }
+        public TypeData SubTypeData { get { return subType; } }                      // For lists and arrays, this is the type of the elements in the list
+        public Type SubType { get { return subType == null ? null : subType.Type; } }
+        public FudgeFieldType FieldType { get { return fieldType; } }                   // If the Kind is primitive
+        public MethodInfo[] PublicMethods { get; private set; }
+        public MethodInfo[] StaticPublicMethods { get; private set; }
+
+        public enum TypeKind
+        {
+            FudgePrimitive,
+            List,
+            Object
         }
 
         private static FudgeFieldNameConvention OverrideFieldNameConvention(Type type, FudgeFieldNameConvention fieldNameConvention)
@@ -91,23 +113,6 @@ namespace Fudge.Serialization.Reflection
             Properties = list.ToArray();
         }
 
-        public Type Type { get; private set; }
-        public ConstructorInfo DefaultConstructor { get; private set; }
-        public ConstructorInfo[] Constructors { get; private set; }
-        public PropertyData[] Properties { get; private set; }
-        public object[] CustomAttributes { get; private set; }
-        public TypeKind Kind { get; private set; }
-        public TypeData SubTypeData { get { return subType; } }                      // For lists and arrays, this is the type of the elements in the list
-        public Type SubType { get { return subType == null ? null : subType.Type; } }
-        public FudgeFieldType FieldType { get { return fieldType; } }                   // If the Kind is primitive
-
-        public enum TypeKind
-        {
-            FudgePrimitive,
-            List,
-            Object
-        }
-
         public sealed class PropertyData
         {
             private readonly PropertyInfo info;
@@ -123,11 +128,11 @@ namespace Fudge.Serialization.Reflection
                 this.hasPublicSetter = (info.GetSetMethod() != null);   // Can't just use CanWrite as it may be non-public
                 this.typeData = typeCache.GetTypeData(info.PropertyType, fieldNameConvention);
 
-                var attribs = info.GetCustomAttributes(typeof(FudgeFieldName), true);
+                var attribs = info.GetCustomAttributes(typeof(FudgeFieldNameAttribute), true);
                 if (attribs.Length > 0)
                 {
                     // Attribute takes priority over convention
-                    this.serializedName = ((FudgeFieldName)attribs[0]).Name;
+                    this.serializedName = ((FudgeFieldNameAttribute)attribs[0]).Name;
                 }
                 else
                 {

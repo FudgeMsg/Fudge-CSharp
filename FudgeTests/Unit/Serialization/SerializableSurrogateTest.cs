@@ -23,7 +23,6 @@ using System.Reflection;
 
 namespace Fudge.Tests.Unit.Serialization
 {
-    /*
     public class SerializableSurrogateTest
     {
         [Fact]
@@ -33,9 +32,16 @@ namespace Fudge.Tests.Unit.Serialization
         }
 
         [Fact]
+        public void ConstructorRangeChecking()
+        {
+            Assert.Throws<ArgumentNullException>(() => new SerializableSurrogate(null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new SerializableSurrogate(typeof(SerializableSurrogateTest)));
+        }
+
+        [Fact]
         public void MakeSureHasDefaultConstructor()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<FudgeRuntimeException>(() =>
                 {
                     var surrogate = new SerializableSurrogate(typeof(Class1));
                 });
@@ -44,7 +50,7 @@ namespace Fudge.Tests.Unit.Serialization
         [Fact]
         public void MakeSureConstructorPublic()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.Throws<FudgeRuntimeException>(() =>
             {
                 var surrogate = new SerializableSurrogate(typeof(Class2));
             });
@@ -58,12 +64,22 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(FudgeMsg msg, IFudgeSerializer context)
+            public void Serialize(IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void Deserialize(FudgeMsg msg, int dataVersion, IFudgeDeserializer context)
+            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
             {
                 throw new NotImplementedException();
             }
@@ -79,12 +95,22 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(FudgeMsg msg, IFudgeSerializer context)
+            public void Serialize(IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void Deserialize(FudgeMsg msg, int dataVersion, IFudgeDeserializer context)
+            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
             {
                 throw new NotImplementedException();
             }
@@ -100,12 +126,22 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(FudgeMsg msg, IFudgeSerializer context)
+            public void Serialize(IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void Deserialize(FudgeMsg msg, int dataVersion, IFudgeDeserializer context)
+            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
             {
                 throw new NotImplementedException();
             }
@@ -113,5 +149,4 @@ namespace Fudge.Tests.Unit.Serialization
             #endregion
         }
     }
-     */
 }

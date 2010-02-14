@@ -27,6 +27,11 @@ namespace Fudge.Serialization
     public interface IFudgeDeserializer
     {
         /// <summary>
+        /// Gets the <see cref="FudgeContext"/> for this deserializer.
+        /// </summary>
+        FudgeContext Context { get; }
+
+        /// <summary>
         /// Gets any fields that have not been read by <see cref="IFudgeSerializable.DeserializeField"/> or <see cref="IFudgeSerializationSurrogate.DeserializeField"/>
         /// as an <see cref="IFudgeFieldContainer"/>.
         /// </summary>

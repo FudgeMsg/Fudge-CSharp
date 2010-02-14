@@ -37,7 +37,12 @@ namespace Fudge.Serialization.Reflection
         private readonly ConstructorInfo constructor;
         private readonly Dictionary<string, MorePropertyData> propMap = new Dictionary<string, MorePropertyData>();
 
-        internal PropertyBasedSerializationSurrogate(FudgeContext context, TypeData typeData)
+        /// <summary>
+        /// Constructs a new <see cref="PropertyBasedSerializationSurrogate"/>.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use.</param>
+        /// <param name="typeData"><see cref="TypeData"/> for the type for this surrogate.</param>
+        public PropertyBasedSerializationSurrogate(FudgeContext context, TypeData typeData)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
@@ -49,10 +54,7 @@ namespace Fudge.Serialization.Reflection
             this.context = context;
             this.type = typeData.Type;
 
-            if (typeData.DefaultConstructor == null)
-            {
-                throw new FudgeRuntimeException("Type " + type.FullName + " cannot use reflection-based serialization as it does not have a public default constructor.");
-            }
+            Debug.Assert(typeData.DefaultConstructor != null);      // Should have been caught in CanHandle()
             this.constructor = typeData.DefaultConstructor;
 
             // Pull out all the properties
@@ -80,6 +82,13 @@ namespace Fudge.Serialization.Reflection
             }
         }
 
+        /// <summary>
+        /// Determines whether this kind of surrogate can handle a given type
+        /// </summary>
+        /// <param name="cache"><see cref="TypeDataCache"/> for type data.</param>
+        /// <param name="fieldNameConvention">Convention to use for renaming fields.</param>
+        /// <param name="type">Type to test.</param>
+        /// <returns>True if this kind of surrogate can handle the type.</returns>
         public static bool CanHandle(TypeDataCache cache, FudgeFieldNameConvention fieldNameConvention, Type type)
         {
             return CanHandle(cache.GetTypeData(type, fieldNameConvention));
