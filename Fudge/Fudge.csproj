@@ -106,6 +106,7 @@
     <Compile Include="Serialization\FudgeSerializationContext.cs" />
     <Compile Include="Serialization\Reflection\ArraySurrogate.cs" />
     <Compile Include="Serialization\Reflection\CollectionSurrogateBase.cs" />
+    <Compile Include="Serialization\Reflection\DictionarySurrogate.cs" />
     <Compile Include="Serialization\Reflection\ListSurrogate.cs" />
     <Compile Include="Serialization\Reflection\PropertyBasedSerializationSurrogate.cs" />
     <Compile Include="Serialization\Reflection\FudgeSurrogateSelector.cs" />

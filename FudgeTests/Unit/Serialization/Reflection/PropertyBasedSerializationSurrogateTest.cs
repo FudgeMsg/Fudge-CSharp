@@ -169,6 +169,27 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         }
 
         [Fact]
+        public void Dictionaries()
+        {
+            Assert.True(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(DictionaryClass)));
+
+            var serializer = new FudgeSerializer(context);      // We're relying on it auto-discovering the type surrogate
+
+            var obj1 = new DictionaryClass();
+            obj1.Map = new Dictionary<string, SimpleExampleClass>();
+            obj1.Map["Fred"] = new SimpleExampleClass { Name = "Fred", Age = 23 };
+            obj1.Map["Jemima"] = new SimpleExampleClass { Name = "Jemima", Age = 17 };
+
+            var msgs = serializer.SerializeToMsgs(obj1);
+            var obj2 = (DictionaryClass)serializer.Deserialize(msgs);
+
+            Assert.NotSame(obj1, obj2);
+            Assert.NotSame(obj1.Map, obj2.Map);
+            Assert.Equal(obj1.Map["Fred"], obj2.Map["Fred"]);
+            Assert.Equal(obj1.Map["Jemima"], obj2.Map["Jemima"]);
+        }
+
+        [Fact]
         public void UnhandleableCases()
         {
             Assert.False(PropertyBasedSerializationSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(NoDefaultConstructorClass)));
@@ -281,16 +302,16 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.Throws<ArgumentOutOfRangeException>(() => new PropertyBasedSerializationSurrogate(context, typeDataCache.GetTypeData(typeof(NoDefaultConstructorClass), FudgeFieldNameConvention.Identity)));
         }
 
-
-        // TODO 2010-02-02 t0rx -- Test arrays
-        // TODO 2010-02-02 t0rx -- Test maps
-        // TODO 2010-02-02 t0rx -- Test object references
-        // TODO 2010-02-14 t0rx -- Test lists of lists
-
         public class SimpleExampleClass
         {
             public string Name { get; set; }
             public int Age { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                var other = (SimpleExampleClass)obj;
+                return other.Name == this.Name && other.Age == this.Age;
+            }
         }
 
         public class SecondaryTypeClass
@@ -326,6 +347,11 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         public class ListOfArraysClass
         {
             public IList<string[]> List { get; set; }
+        }
+
+        public class DictionaryClass
+        {
+            public IDictionary<string, SimpleExampleClass> Map { get; set; }
         }
 
         public class NoDefaultConstructorClass

@@ -33,15 +33,20 @@ namespace Fudge.Serialization.Reflection
         {
             this.context = context;
             this.typeData = typeData;
-            serializerDelegate = CreateMethodDelegate<Action<object, IFudgeSerializer>>(serializeMethodName, typeData.SubType);
-            deserializerDelegate = CreateMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(deserializeMethodName, typeData.SubType);
+            Type[] types = (typeData.SubType2 == null) ? new Type[] {typeData.SubType} : new Type[] {typeData.SubType, typeData.SubType2};
+            serializerDelegate = CreateMethodDelegate<Action<object, IFudgeSerializer>>(serializeMethodName, types);
+            deserializerDelegate = CreateMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(deserializeMethodName, types);
         }
 
 
         protected T CreateMethodDelegate<T>(string name, Type valueType) where T : class
         {
-            // TODO 2010-02-14 t0rx -- Extract into helper class
-            var method = this.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(new Type[] { valueType });
+            return CreateMethodDelegate<T>(name, new Type[] { valueType });
+        }
+
+        protected T CreateMethodDelegate<T>(string name, Type[] genericTypes) where T : class
+        {
+            var method = this.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericTypes);
             return Delegate.CreateDelegate(typeof(T), this, method) as T;
         }
 
@@ -70,19 +75,24 @@ namespace Fudge.Serialization.Reflection
 
         #endregion
 
-        protected void SerializeList<T>(object obj, IFudgeSerializer serializer)
+        protected void SerializeList<T>(object obj, IFudgeSerializer serializer)    
         {
             var list = (IList<T>)obj;
-            switch (typeData.SubTypeData.Kind)
+            SerializeList(list, serializer, typeData.SubTypeData.Kind, null);
+        }
+
+        protected static void SerializeList<T>(IEnumerable<T> list, IFudgeSerializer serializer, TypeData.TypeKind kind, int? ordinal)
+        {
+            switch (kind)
             {
                 case TypeData.TypeKind.FudgePrimitive:
-                    serializer.WriteAll(null, null, list);
+                    serializer.WriteAll(null, ordinal, list);
                     break;
                 case TypeData.TypeKind.Inline:
-                    serializer.WriteAllSubMsgs(null, null, list);
+                    serializer.WriteAllSubMsgs(null, ordinal, list);
                     break;
                 case TypeData.TypeKind.Object:
-                    serializer.WriteAllRefs(null, null, list);
+                    serializer.WriteAllRefs(null, ordinal, list);
                     break;
             }
         }
@@ -90,23 +100,25 @@ namespace Fudge.Serialization.Reflection
         protected object DeserializeList<T>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer) where T : class
         {
             var result = new List<T>(msg.GetNumFields());
-            switch (typeData.SubTypeData.Kind)
+            foreach (var field in msg)
             {
-                case TypeData.TypeKind.FudgePrimitive:
-                    foreach (var field in msg)
-                    {
-                        result.Add((T)context.TypeHandler.ConvertType(field.Value, typeof(T)));
-                    }
-                    break;
-                case TypeData.TypeKind.Inline:
-                case TypeData.TypeKind.Object:
-                    foreach (var field in msg)
-                    {
-                        result.Add(deserializer.FromField<T>(field));
-                    }
-                    break;
+                result.Add(DeserializeField<T>(field, deserializer, typeData.SubTypeData.Kind));
             }
             return result;
+        }
+
+        protected T DeserializeField<T>(IFudgeField field, IFudgeDeserializer deserializer, TypeData.TypeKind kind) where T : class
+        {
+            switch (kind)
+            {
+                case TypeData.TypeKind.FudgePrimitive:
+                    return (T)context.TypeHandler.ConvertType(field.Value, typeof(T));
+                case TypeData.TypeKind.Inline:
+                case TypeData.TypeKind.Object:
+                    return deserializer.FromField<T>(field);
+                default:
+                    throw new FudgeRuntimeException("Unknown TypeData.TypeKind: " + kind);
+            }
         }
 
     }

@@ -58,6 +58,10 @@ namespace Fudge.Serialization.Reflection
             {
                 surrogate = new ArraySurrogate(context, typeData);
             }
+            else if (DictionarySurrogate.CanHandle(typeData))
+            {
+                surrogate = new DictionarySurrogate(context, typeData);
+            }
             else if (ListSurrogate.CanHandle(typeData))
             {
                 surrogate = new ListSurrogate(context, typeData);

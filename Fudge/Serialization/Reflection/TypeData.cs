@@ -25,6 +25,7 @@ namespace Fudge.Serialization.Reflection
     public class TypeData
     {
         private readonly TypeData subType;
+        private readonly TypeData subType2;
         private readonly FudgeFieldType fieldType;
 
         public TypeData(FudgeContext context, TypeDataCache cache, Type type, FudgeFieldNameConvention fieldNameConvention)
@@ -37,7 +38,7 @@ namespace Fudge.Serialization.Reflection
             cache.RegisterTypeData(this);
 
             fieldNameConvention = OverrideFieldNameConvention(type, fieldNameConvention);
-            Kind = CalcKind(context, cache, type, fieldNameConvention, out subType, out fieldType);
+            Kind = CalcKind(context, cache, type, fieldNameConvention, out subType, out subType2, out fieldType);
             ScanProperties(context, cache, fieldNameConvention);
 
             PublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
@@ -50,8 +51,10 @@ namespace Fudge.Serialization.Reflection
         public PropertyData[] Properties { get; private set; }
         public object[] CustomAttributes { get; private set; }
         public TypeKind Kind { get; private set; }
-        public TypeData SubTypeData { get { return subType; } }                      // For lists and arrays, this is the type of the elements in the list
+        public TypeData SubTypeData { get { return subType; } }                      // For lists and arrays, this is the type of the elements in the list.  For dictionaries it's the key type
+        public TypeData SubType2Data { get { return subType2; } }                    // For dictionaries, this is the type of the values
         public Type SubType { get { return subType == null ? null : subType.Type; } }
+        public Type SubType2 { get { return subType2 == null ? null : subType2.Type; } }
         public FudgeFieldType FieldType { get { return fieldType; } }                   // If the Kind is primitive
         public MethodInfo[] PublicMethods { get; private set; }
         public MethodInfo[] StaticPublicMethods { get; private set; }
@@ -71,10 +74,11 @@ namespace Fudge.Serialization.Reflection
             return fieldNameConvention;
         }
 
-        private static TypeKind CalcKind(FudgeContext context, TypeDataCache typeCache, Type type, FudgeFieldNameConvention fieldNameConvention, out TypeData subType, out FudgeFieldType fieldType)
+        private static TypeKind CalcKind(FudgeContext context, TypeDataCache typeCache, Type type, FudgeFieldNameConvention fieldNameConvention, out TypeData subType, out TypeData subType2, out FudgeFieldType fieldType)
         {
             // TODO 2010-02-14 t0rx -- There seems to be some duplication here with the FudgeSurrogateSelector, should look at joining up
             subType = null;
+            subType2 = null;
             fieldType = context.TypeDictionary.GetByCSharpType(type);
             if (fieldType != null)
             {
@@ -86,6 +90,15 @@ namespace Fudge.Serialization.Reflection
             if (type.IsArray)
             {
                 subType = typeCache.GetTypeData(type.GetElementType(), fieldNameConvention);
+                return TypeKind.Inline;
+            }
+
+            // Check for dictionaries
+            Type keyType, valueType;
+            if (DictionarySurrogate.IsDictionary(type, out keyType, out valueType))
+            {
+                subType = typeCache.GetTypeData(keyType, fieldNameConvention);
+                subType2 = typeCache.GetTypeData(valueType, fieldNameConvention);
                 return TypeKind.Inline;
             }
 
