@@ -40,6 +40,43 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.Throws<FudgeRuntimeException>(() => selector.GetSurrogateFactory(typeof(DirectNoDefaultConstructorTest), FudgeFieldNameConvention.Identity));
         }
 
+        [Fact]
+        public void SurrogateAttribute()
+        {
+            var selector = new FudgeSurrogateSelector(context);
+
+            // SurrogateTest has a stateless surrogate, so should get back same one every time
+            var factory = selector.GetSurrogateFactory(typeof(SurrogateTest), FudgeFieldNameConvention.Identity);
+            var s1 = factory(context);
+            var s2 = factory(context);
+            Assert.IsType<SurrogateTest.SurrogateTestSurrogate>(s1);
+            Assert.Same(s1, s2);
+
+            // SurrogateTest2 is not stateless, so should get back different
+            factory = selector.GetSurrogateFactory(typeof(SurrogateTest2), FudgeFieldNameConvention.Identity);
+            s1 = factory(context);
+            s2 = factory(context);
+            Assert.IsType<SurrogateTest2.SurrogateTest2Surrogate>(s1);
+            Assert.NotSame(s1, s2);
+
+            // SurrogateTest3 has a constructor on the surrogate which takes type
+            factory = selector.GetSurrogateFactory(typeof(SurrogateTest3), FudgeFieldNameConvention.Identity);
+            s1 = factory(context);
+            s2 = factory(context);
+            Assert.IsType<SurrogateTest3.SurrogateTest3Surrogate>(s1);
+            Assert.NotSame(s1, s2);
+            Assert.Equal(typeof(SurrogateTest3), ((SurrogateTest3.SurrogateTest3Surrogate)s1).Type);
+
+            // SurrogateTest4 has a constructor on the surrogate which takes context and type
+            factory = selector.GetSurrogateFactory(typeof(SurrogateTest4), FudgeFieldNameConvention.Identity);
+            s1 = factory(context);
+            s2 = factory(context);
+            Assert.IsType<SurrogateTest4.SurrogateTest4Surrogate>(s1);
+            Assert.NotSame(s1, s2);
+            Assert.Equal(typeof(SurrogateTest4), ((SurrogateTest4.SurrogateTest4Surrogate)s1).Type);
+            Assert.Same(context, ((SurrogateTest4.SurrogateTest4Surrogate)s1).Context);
+        }
+
         #region Test classes
 
         private class DirectTest : IFudgeSerializable
@@ -98,6 +135,154 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             }
 
             #endregion
+        }
+
+        [FudgeSurrogate(typeof(SurrogateTestSurrogate), true)]
+        private class SurrogateTest
+        {
+            public SurrogateTest(int n)
+            {
+                Number = n;
+            }
+
+            public int Number { get; private set; }
+
+            public class SurrogateTestSurrogate : IFudgeSerializationSurrogate
+            {
+                #region IFudgeSerializationSurrogate Members
+
+                public void Serialize(object obj, IFudgeSerializer serializer)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                #endregion
+            }
+
+        }
+
+        [FudgeSurrogate(typeof(SurrogateTest2Surrogate), false)]
+        private class SurrogateTest2
+        {
+            public class SurrogateTest2Surrogate : IFudgeSerializationSurrogate
+            {
+                #region IFudgeSerializationSurrogate Members
+
+                public void Serialize(object obj, IFudgeSerializer serializer)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                #endregion
+            }
+        }
+
+        [FudgeSurrogate(typeof(SurrogateTest3Surrogate), false)]
+        private class SurrogateTest3
+        {
+            public class SurrogateTest3Surrogate : IFudgeSerializationSurrogate
+            {
+                public Type Type { get; set; }
+
+                public SurrogateTest3Surrogate(Type type)
+                {
+                    this.Type = type;
+                }
+
+                #region IFudgeSerializationSurrogate Members
+
+                public void Serialize(object obj, IFudgeSerializer serializer)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                #endregion
+            }
+        }
+
+        [FudgeSurrogate(typeof(SurrogateTest4Surrogate), false)]
+        private class SurrogateTest4
+        {
+            public class SurrogateTest4Surrogate : IFudgeSerializationSurrogate
+            {
+                public Type Type { get; set; }
+                public FudgeContext Context { get; set; }
+
+                public SurrogateTest4Surrogate(FudgeContext context, Type type)
+                {
+                    this.Context = context;
+                    this.Type = type;
+                }
+
+                #region IFudgeSerializationSurrogate Members
+
+                public void Serialize(object obj, IFudgeSerializer serializer)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
+                {
+                    throw new NotImplementedException();
+                }
+
+                #endregion
+            }
         }
 
         #endregion

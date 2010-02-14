@@ -97,6 +97,7 @@
     <Compile Include="Serialization\FudgeDeserializationContext.cs" />
     <Compile Include="Serialization\FudgeSerializationExtensions.cs" />
     <Compile Include="Serialization\FudgeSerializer.cs" />
+    <Compile Include="Serialization\FudgeSurrogateAttribute.cs" />
     <Compile Include="Serialization\FudgeTransientAttribute.cs" />
     <Compile Include="Serialization\IFudgeDeserializer.cs" />
     <Compile Include="Serialization\IFudgeSerializable.cs" />

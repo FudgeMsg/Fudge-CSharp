@@ -28,7 +28,7 @@ namespace Fudge.Serialization
     public class FudgeFieldNameAttribute : Attribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FudgeFieldName"/> class.
+        /// Initializes a new instance of the <see cref="FudgeFieldNameAttribute"/> class.
         /// </summary>
         /// <param name="name">Field name to use for this property.</param>
         public FudgeFieldNameAttribute(string name)
