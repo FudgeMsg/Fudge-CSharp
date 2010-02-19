@@ -31,14 +31,16 @@ namespace Fudge.Serialization
         private readonly Dictionary<object, int> idMap;     // Tracks IDs of objects that have already been serialised (or are in the process)
         private readonly Dictionary<Type, int> lastTypes = new Dictionary<Type, int>();     // Tracks the last object of a given type
         private readonly SerializationTypeMap typeMap;
+        private readonly IFudgeTypeMappingStrategy typeMappingStrategy;
         private int currentId = 0;
 
-        public FudgeSerializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamWriter writer)
+        public FudgeSerializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamWriter writer, IFudgeTypeMappingStrategy typeMappingStrategy)
         {
             this.context = context;
             this.writer = writer;
             this.idMap = new Dictionary<object, int>();     // TODO 2009-10-18 t0rx -- Worry about HashCode and Equals implementations
             this.typeMap = typeMap;
+            this.typeMappingStrategy = typeMappingStrategy;
         }
 
         public void QueueObject(object obj)
@@ -139,7 +141,8 @@ namespace Fudge.Serialization
                 // Not seen before, so write out with base types
                 for (Type currentType = type; currentType != typeof(object); currentType = currentType.BaseType)
                 {
-                    writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, StringFieldType.Instance, type.AssemblyQualifiedName);    // TODO 2010-02-07 t0rx -- Allow type name strategy to be plugged in
+                    string typeName = typeMappingStrategy.GetName(currentType);
+                    writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, StringFieldType.Instance, typeName);
                 }
             }
         }

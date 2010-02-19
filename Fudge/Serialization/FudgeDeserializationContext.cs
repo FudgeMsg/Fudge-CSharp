@@ -36,8 +36,9 @@ namespace Fudge.Serialization
         private readonly List<FudgeMsg> unprocessedObjects;
         private bool reachedEnd;
         private readonly Stack<State> stack;
+        private readonly IFudgeTypeMappingStrategy typeMappingStrategy;
 
-        public FudgeDeserializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamReader reader)
+        public FudgeDeserializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamReader reader, IFudgeTypeMappingStrategy typeMappingStrategy)
         {
             this.context = context;
             this.typeMap = typeMap;
@@ -48,6 +49,7 @@ namespace Fudge.Serialization
             this.unprocessedObjects = new List<FudgeMsg>();
             this.reachedEnd = false;
             this.stack = new Stack<State>();
+            this.typeMappingStrategy = typeMappingStrategy;
         }
 
         public object DeserializeGraph()
@@ -135,8 +137,7 @@ namespace Fudge.Serialization
             {
                 // It's the first time we've seen this type in this graph, so it contains the type names
                 typeName = (string)typeField.Value;
-                // TODO 2010-02-07 t0rx -- Allow type name strategy to be plugged in
-                objectType = Type.GetType(typeName);
+                objectType = typeMappingStrategy.GetType(typeName);
                 if (objectType == null)
                 {
                     // TODO 2010-02-07 t0rx -- Try ancestors

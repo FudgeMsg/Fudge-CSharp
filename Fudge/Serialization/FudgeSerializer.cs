@@ -30,6 +30,9 @@ namespace Fudge.Serialization
 
         public const int TypeIdFieldOrdinal = 0;
 
+        /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="TypeMappingStrategy"/>.</summary>
+        public static readonly FudgeContextProperty TypeMappingStrategyProperty = new FudgeContextProperty("Serialization.TypeMappingStrategy", typeof(IFudgeTypeMappingStrategy));
+
         public FudgeSerializer(FudgeContext context)
             : this(context, null)
         {
@@ -48,7 +51,11 @@ namespace Fudge.Serialization
 
             this.context = context;
             this.typeMap = typeMap;
+
+            this.TypeMappingStrategy = (IFudgeTypeMappingStrategy)context.GetProperty(TypeMappingStrategyProperty, new DefaultTypeMappingStrategy());
         }
+
+        public IFudgeTypeMappingStrategy TypeMappingStrategy { get; set; }
 
         public SerializationTypeMap TypeMap
         {
@@ -63,7 +70,7 @@ namespace Fudge.Serialization
             }
 
             // Delegate to FudgeSerializationContext to do the work
-            var serializationContext = new FudgeSerializationContext(context, typeMap, writer);
+            var serializationContext = new FudgeSerializationContext(context, typeMap, writer, TypeMappingStrategy);
             serializationContext.SerializeGraph(writer, graph);
         }
 
@@ -82,7 +89,7 @@ namespace Fudge.Serialization
             }
 
             // Delegate to FudgeDeserializer to do the work
-            var deserializer = new FudgeDeserializationContext(context, typeMap, reader);
+            var deserializer = new FudgeDeserializationContext(context, typeMap, reader, TypeMappingStrategy);
             return deserializer.DeserializeGraph();
         }
 

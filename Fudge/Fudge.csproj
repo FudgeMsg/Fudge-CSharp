@@ -91,6 +91,7 @@
     <Compile Include="ModifiedUTF8Util.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serialization\DefaultTypeMappingStrategy.cs" />
     <Compile Include="Serialization\FudgeFieldNameConvention.cs" />
     <Compile Include="Serialization\FudgeFieldNameConventionAttribute.cs" />
     <Compile Include="Serialization\FudgeFieldNameAttribute.cs" />
@@ -104,6 +105,8 @@
     <Compile Include="Serialization\IFudgeSerializer.cs" />
     <Compile Include="Serialization\IFudgeSerializationSurrogate.cs" />
     <Compile Include="Serialization\FudgeSerializationContext.cs" />
+    <Compile Include="Serialization\IFudgeTypeMappingStrategy.cs" />
+    <Compile Include="Serialization\JavaTypeMappingStrategy.cs" />
     <Compile Include="Serialization\Reflection\ArraySurrogate.cs" />
     <Compile Include="Serialization\Reflection\CollectionSurrogateBase.cs" />
     <Compile Include="Serialization\Reflection\DictionarySurrogate.cs" />

@@ -67,7 +67,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Unit\Serialization\DefaultTypeMappingStrategyTest.cs" />
     <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
+    <Compile Include="Unit\Serialization\JavaTypeMappingStrategyTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\PropertyBasedSerializationSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\FudgeSurrogateSelectorTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\ToFromFudgeMsgSurrogateTest.cs" />
