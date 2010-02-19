@@ -121,7 +121,7 @@ namespace Fudge.Serialization
 
         private object ProcessObject(int? refId, Type hintType, FudgeMsg message, out int typeId)
         {
-            Type objectType;
+            Type objectType = null;
             string typeName;
             IFudgeField typeField = message.GetByOrdinal(FudgeSerializer.TypeIdFieldOrdinal);
             if (typeField == null)
@@ -140,8 +140,13 @@ namespace Fudge.Serialization
                 objectType = typeMappingStrategy.GetType(typeName);
                 if (objectType == null)
                 {
-                    // TODO 2010-02-07 t0rx -- Try ancestors
-                    throw new FudgeRuntimeException("Could not find type \"" + typeName + "\" to deserialize.");
+                    var typeNames = message.GetAllValues<string>(FudgeSerializer.TypeIdFieldOrdinal);
+                    for (int i = 1; i < typeNames.Count; i++)       // 1 because we've already tried the first
+                    {
+                        objectType = typeMappingStrategy.GetType(typeNames[i]);
+                        if (objectType != null)
+                            break;                   // Found it
+                    }
                 }
             }
             else

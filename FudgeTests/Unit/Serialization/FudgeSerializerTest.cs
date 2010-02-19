@@ -135,5 +135,21 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.Equal("Fudge.Tests.Unit.Serialization.Explicit+Sibling", typeNames[0]);
             Assert.Equal("Fudge.Tests.Unit.Serialization.Explicit+Person", typeNames[1]);
         }
+
+        [Fact]
+        public void UsesFirstKnownType_FRN43()
+        {
+            var serializer = new FudgeSerializer(context);
+
+            var bob = new Explicit.Sibling { Name = "Bob" };
+
+            var msgs = serializer.SerializeToMsgs(bob);
+            // Replace the object one
+            msgs[1] = context.NewMessage(new Field(0, "Bibble"),
+                                         new Field(0, "Fudge.Tests.Unit.Serialization.Explicit+Sibling"),
+                                         new Field("name", "Bob"));
+            var bob2 = (Explicit.Sibling)serializer.Deserialize(msgs);
+            Assert.Equal("Bob", bob2.Name);
+        }
     }
 }
