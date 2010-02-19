@@ -34,10 +34,22 @@ namespace Fudge.Tests.Unit.Serialization
         }
 
         [Fact]
+        public void InnerClasses()
+        {
+            var mapper = new JavaTypeMappingStrategy("Fudge.Tests.Unit", "org.fudgemsg");
+            Assert.Equal("org.fudgemsg.serialization.JavaTypeMappingStrategyTest$Inner", mapper.GetName(typeof(Inner)));
+            Assert.Same(typeof(Inner), mapper.GetType("org.fudgemsg.serialization.JavaTypeMappingStrategyTest$Inner"));
+        }
+
+        [Fact]
         public void ConstructorRangeChecking()
         {
             Assert.Throws<ArgumentNullException>(() => new JavaTypeMappingStrategy(null, ""));
             Assert.Throws<ArgumentNullException>(() => new JavaTypeMappingStrategy("", null));
+        }
+
+        private class Inner
+        {
         }
     }
 }

@@ -48,11 +48,16 @@ namespace Fudge.Serialization
         {
             string name = base.GetName(type);
 
-            // Convert to Java package convention
+            // Split into package and class name
             string tail = name.StartsWith(dotNetPrefix) ? name.Substring(dotNetPrefix.Length) : name;
-            var parts = new List<string>(tail.Split('.'));
+            var parts = new List<string>(tail.Split('.'));            
             string last = parts[parts.Count - 1];
             parts.RemoveAt(parts.Count - 1);
+
+            // Handle inner classes
+            last = last.Replace('+', '$');
+
+            // Convert package name to lower-case and add back in class name
             string newTail = string.Join(".", parts.Select(s => s.ToLower()).Concat(new string[]{last}).ToArray());
             return javaPrefix + newTail;
         }
@@ -61,6 +66,7 @@ namespace Fudge.Serialization
         public override Type GetType(string name)
         {
             string tail = name.StartsWith(javaPrefix) ? name.Substring(javaPrefix.Length) : name;
+            tail = tail.Replace('$', '+');
             string newName = dotNetPrefix + tail;
             return base.GetCachedType(newName, true);
         }
