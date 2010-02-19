@@ -119,6 +119,21 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.NotSame(shirley, shirley2);
             Assert.Equal(1, shirley2.Siblings.Count);
             Assert.Same(bob2, shirley2.Siblings[0]);
-        }       
+        }
+
+        [Fact]
+        public void BaseTypesOutputAsWell_FRN43()
+        {
+            var serializer = new FudgeSerializer(context);
+
+            var bob = new Explicit.Sibling { Name = "Bob" };
+
+            var msgs = serializer.SerializeToMsgs(bob);
+
+            var typeNames = msgs[1].GetAllValues<string>(FudgeSerializer.TypeIdFieldOrdinal);
+            Assert.Equal(2, typeNames.Count);
+            Assert.Equal("Fudge.Tests.Unit.Serialization.Explicit+Sibling", typeNames[0]);
+            Assert.Equal("Fudge.Tests.Unit.Serialization.Explicit+Person", typeNames[1]);
+        }
     }
 }
