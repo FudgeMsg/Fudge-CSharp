@@ -89,6 +89,7 @@
     <Compile Include="Linq\FudgeExpressionTranslator.cs" />
     <Compile Include="Linq\FudgeLinqExtensions.cs" />
     <Compile Include="Linq\FudgeLinqProvider.cs" />
+    <Compile Include="Linq\NamespaceDoc.cs" />
     <Compile Include="ModifiedUTF8Util.cs" />
     <Compile Include="NamespaceDoc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

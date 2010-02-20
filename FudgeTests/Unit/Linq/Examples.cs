@@ -27,6 +27,7 @@ namespace Fudge.Tests.Unit.Linq
     {
         private class Tick
         {
+            // Models the data we are going to process
             public double Bid { get; set; }
             public double Ask { get; set; }
             public string Ticker { get; set; }
@@ -35,7 +36,7 @@ namespace Fudge.Tests.Unit.Linq
         [Fact]
         public void SimpleSelect()
         {
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR") };
 
             var query = from tick in msgs.AsQueryable<Tick>() select tick.Ticker;
 
@@ -47,7 +48,7 @@ namespace Fudge.Tests.Unit.Linq
         public void FudgeMsgVsIFudgeFieldContainer()
         {
             // Make sure that we can work with enumerables of IFudgeFieldContainer, enumerables of IFudgeMsg and also arrays directly
-            var array = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            var array = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR") };
             IEnumerable<IFudgeFieldContainer> containerList = array;
             IEnumerable<FudgeMsg> msgList = array;
             var query1 = from tick in containerList.AsQueryable<Tick>() select tick.Ticker;
@@ -61,7 +62,7 @@ namespace Fudge.Tests.Unit.Linq
         [Fact]
         public void SelectWithExpression()
         {
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR") };
 
             var query = from tick in msgs.AsQueryable<Tick>()
                         select tick.Bid * 2;
@@ -73,7 +74,7 @@ namespace Fudge.Tests.Unit.Linq
         [Fact]
         public void WhereFilter()
         {
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR") };
 
             var query = from tick in msgs.AsQueryable<Tick>()
                         where tick.Bid < 5.0
@@ -86,7 +87,9 @@ namespace Fudge.Tests.Unit.Linq
         [Fact]
         public void ComplexSelect()
         {
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            // This code is used in the Fudge.Linq namespace doc example.
+
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR") };
 
             var query = from tick in msgs.AsQueryable<Tick>()
                         where tick.Ask > 4.0
@@ -101,7 +104,7 @@ namespace Fudge.Tests.Unit.Linq
         [Fact]
         public void OrderBy()
         {
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR"), Create(5.2, 5.5, "ZIP") };
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR"), CreateTickMsg(5.2, 5.5, "ZIP") };
 
             var query = from tick in msgs.AsQueryable<Tick>()
                         orderby tick.Ask
@@ -123,7 +126,7 @@ namespace Fudge.Tests.Unit.Linq
         public void BindingParams()
         {
             // Make sure we can handle constants that are coming in from outside the query
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR"), Create(5.2, 5.5, "ZIP") };
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR"), CreateTickMsg(5.2, 5.5, "ZIP") };
             double bid = 2.4;
             var query = from tick in msgs.AsQueryable<Tick>()
                         where tick.Bid == bid               // bid here comes from outside the query
@@ -136,7 +139,7 @@ namespace Fudge.Tests.Unit.Linq
         [Fact]
         public void XmlExample()
         {
-            var msgs = new FudgeMsg[] { Create(10.3, 11.1, "FOO"), Create(2.4, 3.1, "BAR") };
+            var msgs = new FudgeMsg[] { CreateTickMsg(10.3, 11.1, "FOO"), CreateTickMsg(2.4, 3.1, "BAR") };
 
             XElement tree = new XElement("Ticks", from tick in msgs.AsQueryable<Tick>()
                                                   select new XElement("Tick",
@@ -158,7 +161,7 @@ namespace Fudge.Tests.Unit.Linq
             //</Ticks>
         }
 
-        private static FudgeMsg Create(double bid, double ask, string ticker)
+        private static FudgeMsg CreateTickMsg(double bid, double ask, string ticker)
         {
             FudgeMsg msg = new FudgeMsg(
                                 new Field("Bid", bid),
