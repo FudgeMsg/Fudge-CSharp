@@ -21,34 +21,89 @@ using System.Text;
 
 namespace Fudge.Serialization
 {
+    /// <summary>
+    /// Extension methods to simplify serialization code
+    /// </summary>
     public static class FudgeSerializationExtensions
     {
+        /// <summary>
+        /// Writes a field with a given name and value.
+        /// </summary>
+        /// <param name="serializer">Serializer to write the field.</param>
+        /// <param name="name">Name of field.</param>
+        /// <param name="value">Value of field.</param>
         public static void Write(this IFudgeSerializer serializer, string name, object value)
         {
             serializer.Write(name, null, value);
         }
 
+        /// <summary>
+        /// Serializes an object as an in-line submessage field with a given name.
+        /// </summary>
+        /// <param name="serializer">Serializer to write the field.</param>
+        /// <param name="name">Name of field.</param>
+        /// <param name="value">Object to serialize.</param>
+        /// <remarks>
+        /// By serializing the object as a sub-value, it will be written multiple times if referenced
+        /// multple times in the object graph, it cannot be part of a cycle of references, and it does
+        /// not support polymorphism.  If you need any of these features then use <see cref="WriteRef"/>
+        /// instead.
+        /// </remarks>
         public static void WriteSubMsg(this IFudgeSerializer serializer, string name, object value)
         {
             serializer.WriteSubMsg(name, null, value);
         }
 
+        /// <summary>
+        /// Serializes an object, leaving a reference in a field of a given name.
+        /// </summary>
+        /// <param name="serializer">Serializer to write the field.</param>
+        /// <param name="name">Name of field to contain reference.</param>
+        /// <param name="value">Object to serialize.</param>
+        /// <remarks>
+        /// By writing as a reference, cycles in the object graph are supported, the object is only
+        /// written once no matter how often referenced, and polymorphism is supported.  However,
+        /// the message structure is harder to follow, so if you do not need these features then
+        /// use <see cref="WriteSubMsg"/>.
+        /// </remarks>
         public static void WriteRef(this IFudgeSerializer serializer, string name, object value)
         {
             serializer.WriteRef(name, null, value);
         }
 
+        /// <summary>
+        /// Writes a field only if the given value isn't null.
+        /// </summary>
+        /// <typeparam name="T">Type of value.</typeparam>
+        /// <param name="serializer">Serializer to write the field.</param>
+        /// <param name="name">Name of the field.</param>
+        /// <param name="value">Value to write.</param>
         public static void WriteIfNotNull<T>(this IFudgeSerializer serializer, string name, T value) where T : class
         {
             if (value != null)
                 serializer.Write(name, value);
         }
 
+        /// <summary>
+        /// Writes all the values as a sequence of fields with the same name.
+        /// </summary>
+        /// <typeparam name="T">Type of values.</typeparam>
+        /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="values">Values to write.</param>
         public static void WriteAll<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> values)
         {
             WriteAll(serializer, name, null, values);
         }
 
+        /// <summary>
+        /// Writes all the values as a sequence of fields with the same name and ordinal.
+        /// </summary>
+        /// <typeparam name="T">Type of values.</typeparam>
+        /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
+        /// <param name="values">Values to write.</param>
         public static void WriteAll<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> values)
         {
             foreach (T value in values)
@@ -57,11 +112,28 @@ namespace Fudge.Serialization
             }
         }
 
+        /// <summary>
+        /// Serializes all the values as a sequence of submessages with the same field name.
+        /// </summary>
+        /// <typeparam name="T">Type of objects.</typeparam>
+        /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="objects">Objects to serialize.</param>
+        /// <remarks>See the remarks in <see cref="WriteSubMsg"/> regarding the limitations of writing as an in-line sub-message.</remarks>
         public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
             serializer.WriteAllSubMsgs(name, null, objects);
         }
 
+        /// <summary>
+        /// Serializes all the values as a sequence of submessages with the same field name and ordinal.
+        /// </summary>
+        /// <typeparam name="T">Type of objects.</typeparam>
+        /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
+        /// <param name="objects">Objects to serialize.</param>
+        /// <remarks>See the remarks in <see cref="WriteSubMsg"/> regarding the limitations of writing as an in-line sub-message.</remarks>
         public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> objects)
         {
             foreach (T obj in objects)
@@ -70,11 +142,28 @@ namespace Fudge.Serialization
             }
         }
 
+        /// <summary>
+        /// Serializes all the values as a sequence of references with the same field name.
+        /// </summary>
+        /// <typeparam name="T">Type of objects.</typeparam>
+        /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="objects">Objects to serialize.</param>
+        /// <remarks>See the remarks in <see cref="WriteRef"/> comparing against writing as an in-line sub-message.</remarks>
         public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
             serializer.WriteAllRefs(name, null, objects);
         }
 
+        /// <summary>
+        /// Serializes all the values as a sequence of references with the same field name and ordinal.
+        /// </summary>
+        /// <typeparam name="T">Type of objects.</typeparam>
+        /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
+        /// <param name="objects">Objects to serialize.</param>
+        /// <remarks>See the remarks in <see cref="WriteRef"/> comparing against writing as an in-line sub-message.</remarks>
         public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> objects)
         {
             var result = new List<int>();
@@ -83,16 +172,5 @@ namespace Fudge.Serialization
                 serializer.WriteRef(name, ordinal, obj);
             }
         }
-        /*
-                public static IEnumerable<T> AllFromFields<T>(this IFudgeDeserializer context, IEnumerable<IFudgeField> fields) where T : class
-                {
-                    var result = new List<T>();
-                    foreach (var field in fields)
-                    {
-                        result.Add(context.FromField<T>(field));
-                    }
-                    return result;
-                }
-                */
     }
 }

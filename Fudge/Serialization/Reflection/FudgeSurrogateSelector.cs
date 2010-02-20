@@ -23,11 +23,25 @@ using System.Diagnostics;
 
 namespace Fudge.Serialization.Reflection
 {
+    /// <summary>
+    /// Internal class to help choose a factory for the surrogate class that is used to serialize a given type.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="FudgeSurrogateSelector"/> will automatically handle lists, dictionaries and arrays, and
+    /// where possible create surrogates for other types (for example if they have properties with getters and
+    /// setters, or implement <see cref="IFudgeSerializable"/>).  It also follows the
+    /// <see cref="FudgeSurrogateAttribute"/> attribute to specify another class that is the surrogate for the
+    /// given type.
+    /// </remarks>
     public class FudgeSurrogateSelector
     {
         private readonly FudgeContext context;
         private readonly TypeDataCache typeDataCache;
-
+        
+        /// <summary>
+        /// Constructs a new <see cref="FudgeSurrogateSelector"/>.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> for this selector.</param>
         public FudgeSurrogateSelector(FudgeContext context)
         {
             if (context == null)
@@ -37,6 +51,13 @@ namespace Fudge.Serialization.Reflection
             this.typeDataCache = new TypeDataCache(context);
         }
 
+        /// <summary>
+        /// Gets a factory to create surrogates for a given type.
+        /// </summary>
+        /// <param name="type">Type for which to get surrogate factory.</param>
+        /// <param name="fieldNameConvention">Convention for mapping .net property names to serialized field names.</param>
+        /// <returns>Surrogate factory for the type.</returns>
+        /// <exception cref="FudgeRuntimeException">Thrown if no surrogate factory can be automatically created.</exception>
         public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);

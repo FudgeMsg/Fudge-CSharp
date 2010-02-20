@@ -25,6 +25,58 @@ namespace Fudge.Serialization
     /// Implement <c>IFudgeSerializable</c> to allow your class to serialize and deserialize to
     /// Fudge message streams.
     /// </summary>
+    /// <example>
+    /// This example shows a class implementing <see cref="IFudgeSerializable"/> directly:
+    /// <code>
+    /// public class Person : IFudgeSerializable
+    /// {
+    ///     public string Name { get; set; }
+    ///     public Address MainAddress { get; set; }
+    /// 
+    ///     public Person()
+    ///     {
+    ///     }
+    /// 
+    ///     #region IFudgeSerializable Members
+    /// 
+    ///     public virtual void Serialize(IFudgeSerializer serializer)
+    ///     {
+    ///         serializer.Write("name", Name);
+    ///         serializer.WriteSubMsg("mainAddress", MainAddress);     // We are writing it in-line, so polymorphism and reference cycles are not supported
+    ///     }
+    /// 
+    ///     public virtual void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+    ///     {
+    ///         // No init necessary
+    ///     }
+    /// 
+    ///     public virtual bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+    ///     {
+    ///         switch (field.Name)
+    ///         {
+    ///             case "name":
+    ///                 Name = field.GetString();
+    ///                 return true;
+    ///             case "mainAddress":
+    ///                 MainAddress = deserializer.FromField&lt;Address&gt;(field);
+    ///                 return true;
+    ///         }
+    /// 
+    ///         // Field not recognised
+    ///         return false;
+    ///     }
+    /// 
+    ///     public virtual void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+    ///     {
+    ///         // No tidy-up necessary
+    ///     }
+    /// 
+    ///     #endregion
+    /// }
+    /// </code>
+    /// The code for the <c>Address</c> class is not shown here, but it could similarly implement <see cref="IFudgeSerializable"/> or alternatively
+    /// use one of the other approaches to serialization - see the <see cref="Fudge.Serialization"/> namespace for more info.
+    /// </example>
     public interface IFudgeSerializable
     {
         /// <summary>

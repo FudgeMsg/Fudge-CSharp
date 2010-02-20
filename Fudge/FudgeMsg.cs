@@ -195,6 +195,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Adds all the values in the enumerable to this message as fields of a given name.
+        /// </summary>
+        /// <param name="name">Name of the field.</param>
+        /// <param name="values">Enumerable of values to add.</param>
         public void AddAll<T>(string name, IEnumerable<T> values)
         {
             foreach (T val in values)
@@ -203,6 +208,11 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Adds all the values in the enumerable to this message as fields with a given ordinal.
+        /// </summary>
+        /// <param name="ordinal">Ordinal of the field.</param>
+        /// <param name="values">Enumerable of values to add.</param>
         public void AddAll<T>(int ordinal, IEnumerable<T> values)
         {
             foreach (T val in values)
@@ -329,6 +339,12 @@ namespace Fudge
             return null;
         }
 
+        /// <summary>
+        /// Returns the values of all fields with a given name as a specific type.
+        /// </summary>
+        /// <typeparam name="T">Type to return values as.</typeparam>
+        /// <param name="name">Name of fields to get.</param>
+        /// <returns>List of values of the given type.</returns>
         public IList<T> GetAllValues<T>(string name)
         {
             var fields = GetAllByName(name);
@@ -341,6 +357,12 @@ namespace Fudge
             return result;
         }
 
+        /// <summary>
+        /// Returns the values of all fields with a given ordinal as a specific type.
+        /// </summary>
+        /// <typeparam name="T">Type to return values as.</typeparam>
+        /// <param name="ordinal">Ordinal of fields to get.</param>
+        /// <returns>List of values of the given type.</returns>
         public IList<T> GetAllValues<T>(int ordinal)
         {
             var fields = GetAllByOrdinal(ordinal);
@@ -399,6 +421,13 @@ namespace Fudge
             return index == -1 ? null : fields[index].Value;
         }
 
+        /// <summary>
+        /// Finds ths index of the first field with matching name or ordinal.
+        /// </summary>
+        /// <param name="name">Name of field, or <c>null</c> to match on ordinal.</param>
+        /// <param name="ordinal">Ordinal of field, or <c>null</c> to match on name.</param>
+        /// <returns>Index of first matching field, or <c>-1</c> if not found.</returns>
+        /// <remarks>If the ordinal matches, the name is not compared.</remarks>
         protected int GetIndex(string name, int? ordinal)
         {
             int nFields = fields.Count;

@@ -32,6 +32,10 @@ namespace Fudge.Serialization.Reflection
         private readonly FudgeContext context;
         private readonly Dictionary<Type, TypeData> cache = new Dictionary<Type, TypeData>();
 
+        /// <summary>
+        /// Cosntructs a new <see cref="TypeDataCache"/>.
+        /// </summary>
+        /// <param name="context">Context for this cache.</param>
         public TypeDataCache(FudgeContext context)
         {
             if (context == null)
@@ -39,6 +43,12 @@ namespace Fudge.Serialization.Reflection
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets the type data for a given type, constructing if necessary.
+        /// </summary>
+        /// <param name="type">Type for which to get data.</param>
+        /// <param name="fieldNameConvention">Convention for mapping .net property names to serialized field names.</param>
+        /// <returns><see cref="TypeData"/> for the given type.</returns>
         public TypeData GetTypeData(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             if (type == null)

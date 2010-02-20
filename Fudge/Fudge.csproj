@@ -63,6 +63,7 @@
     <Compile Include="Encodings\FudgeStreamReaderBase.cs" />
     <Compile Include="Encodings\FudgeXmlStreamReader.cs" />
     <Compile Include="Encodings\FudgeXmlStreamWriter.cs" />
+    <Compile Include="Encodings\NamespaceDoc.cs" />
     <Compile Include="Field.cs" />
     <Compile Include="FudgeContext.cs" />
     <Compile Include="FudgeContextProperty.cs" />
@@ -107,10 +108,12 @@
     <Compile Include="Serialization\FudgeSerializationContext.cs" />
     <Compile Include="Serialization\IFudgeTypeMappingStrategy.cs" />
     <Compile Include="Serialization\JavaTypeMappingStrategy.cs" />
+    <Compile Include="Serialization\NamespaceDoc.cs" />
     <Compile Include="Serialization\Reflection\ArraySurrogate.cs" />
     <Compile Include="Serialization\Reflection\CollectionSurrogateBase.cs" />
     <Compile Include="Serialization\Reflection\DictionarySurrogate.cs" />
     <Compile Include="Serialization\Reflection\ListSurrogate.cs" />
+    <Compile Include="Serialization\Reflection\NamespaceDoc.cs" />
     <Compile Include="Serialization\Reflection\PropertyBasedSerializationSurrogate.cs" />
     <Compile Include="Serialization\Reflection\FudgeSurrogateSelector.cs" />
     <Compile Include="Serialization\Reflection\ToFromFudgeMsgSurrogate.cs" />

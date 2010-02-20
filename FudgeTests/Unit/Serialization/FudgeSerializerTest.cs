@@ -19,12 +19,42 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Fudge.Serialization;
+using System.IO;
+using Fudge.Encodings;
+using System.Diagnostics;
 
 namespace Fudge.Tests.Unit.Serialization
 {
     public class FudgeSerializerTest
     {
         private readonly FudgeContext context = new FudgeContext();
+
+        [Fact]
+        public void VerySimpleExample()
+        {
+            // This code is used as the example in the NamespaceDoc for Fudge.Serialization
+
+            // Create a context and a serializer
+            var context = new FudgeContext();
+            var serializer = new FudgeSerializer(context);
+
+            // Our object to serialize
+            var temperatureRange = new TemperatureRange { High = 28.3, Low = 13.2, Average = 19.6 };
+
+            // Serialize it to a MemoryStream
+            var stream = new MemoryStream();
+            var streamWriter = new FudgeEncodedStreamWriter(context, stream);
+            serializer.Serialize(streamWriter, temperatureRange);
+
+            // Reset the stream and deserialize a new object from it
+            stream.Position = 0;
+            var streamReader = new FudgeEncodedStreamReader(context, stream);
+            var range2 = (TemperatureRange)serializer.Deserialize(streamReader);
+
+            // Just check a value matches
+            Debug.Assert(range2.Average == 19.6);
+        }
+
 
         [Fact]
         public void SimpleExampleWithSurrogate()
@@ -150,6 +180,13 @@ namespace Fudge.Tests.Unit.Serialization
                                          new Field("name", "Bob"));
             var bob2 = (Explicit.Sibling)serializer.Deserialize(msgs);
             Assert.Equal("Bob", bob2.Name);
+        }
+
+        public class TemperatureRange
+        {
+            public double High { get; set; }
+            public double Low { get; set; }
+            public double Average { get; set; }
         }
     }
 }

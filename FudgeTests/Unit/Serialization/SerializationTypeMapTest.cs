@@ -33,7 +33,7 @@ namespace Fudge.Tests.Unit.Serialization
             var map1 = new SerializationTypeMap(context);
             Assert.True(map1.AllowTypeDiscovery);
 
-            context.SetProperty(SerializationTypeMap.AllowTypeDiscoveryProperty, false);
+            context.SetProperty(FudgeSerializer.AllowTypeDiscoveryProperty, false);
             var map2 = new SerializationTypeMap(context);
             Assert.False(map2.AllowTypeDiscovery);
         }

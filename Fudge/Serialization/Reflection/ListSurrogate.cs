@@ -22,24 +22,49 @@ using System.Reflection;
 
 namespace Fudge.Serialization.Reflection
 {
+    /// <summary>
+    /// Handles serialization and deserialization of generic lists.
+    /// </summary>
     public class ListSurrogate : CollectionSurrogateBase
     {
-        public ListSurrogate(FudgeContext context, TypeData typeData) : base(context, typeData, "SerializeList", "DeserializeList")
+        /// <summary>
+        /// Constructs a new instance for a specific list type
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> for this surrogate.</param>
+        /// <param name="typeData"><see cref="TypeData"/> describing the type to serialize.</param>
+        public ListSurrogate(FudgeContext context, TypeData typeData)
+            : base(context, typeData, "SerializeList", "DeserializeList")
         {
         }
 
+        /// <summary>
+        /// Detects whether a given type can be serialized with this class.
+        /// </summary>
+        /// <param name="typeData">Type to test.</param>
+        /// <returns><c>true</c> if this class can handle the type.</returns>
         public static bool CanHandle(TypeData typeData)
         {
             Type elementType;
             return IsList(typeData.Type, out elementType);
         }
 
+        /// <summary>
+        /// Detects whether a given type is a generic list.
+        /// </summary>
+        /// <param name="type">Type to test.</param>
+        /// <returns><c>true</c> if the type is a list.</returns>
         public static bool IsList(Type type)
         {
             Type elementType;
             return IsList(type, out elementType);
         }
 
+        /// <summary>
+        /// Detects whether a given type is a generic dictionary and obtains the element type.
+        /// </summary>
+        /// <param name="type">Type to test.</param>
+        /// <param name="elementType">Returns the type of the elements.</param>
+        /// <returns><c>true</c> if the type is a list.</returns>
         public static bool IsList(Type type, out Type elementType)
         {
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
@@ -62,6 +87,5 @@ namespace Fudge.Serialization.Reflection
             elementType = null;
             return false;
         }
-
     }
 }

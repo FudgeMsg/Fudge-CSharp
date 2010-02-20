@@ -21,27 +21,52 @@ using System.Text;
 
 namespace Fudge.Serialization.Reflection
 {
+    /// <summary>
+    /// Handles serialization and deserialization of generic dictionaries.
+    /// </summary>
     public class DictionarySurrogate : CollectionSurrogateBase
     {
         private const int keysOrdinal = 1;
         private const int valuesOrdinal = 2;
 
+        /// <summary>
+        /// Constructs a new instance for a specific dictionary type
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> for this surrogate.</param>
+        /// <param name="typeData"><see cref="TypeData"/> describing the type to serialize.</param>
         public DictionarySurrogate(FudgeContext context, TypeData typeData)
             : base(context, typeData, "SerializeDictionary", "DeserializeDictionary")
         {
         }
 
+        /// <summary>
+        /// Detects whether a given type can be serialized with this class.
+        /// </summary>
+        /// <param name="typeData">Type to test.</param>
+        /// <returns><c>true</c> if this class can handle the type.</returns>
         public static bool CanHandle(TypeData typeData)
         {
             return IsDictionary(typeData.Type);
         }
 
+        /// <summary>
+        /// Detects whether a given type is a generic dictionary.
+        /// </summary>
+        /// <param name="type">Type to test.</param>
+        /// <returns><c>true</c> if the type is a dictionary.</returns>
         public static bool IsDictionary(Type type)
         {
             Type keyType, valueType;
             return IsDictionary(type, out keyType, out valueType);
         }
 
+        /// <summary>
+        /// Detects whether a given type is a generic dictionary and obtains the key and value types.
+        /// </summary>
+        /// <param name="type">Type to test.</param>
+        /// <param name="keyType">Returns the type of the keys.</param>
+        /// <param name="valueType">Returns the type of the values.</param>
+        /// <returns><c>true</c> if the type is a dictionary.</returns>
         public static bool IsDictionary(Type type, out Type keyType, out Type valueType)
         {
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>))
@@ -68,7 +93,7 @@ namespace Fudge.Serialization.Reflection
             return false;
         }
 
-        protected void SerializeDictionary<K, V>(object obj, IFudgeSerializer serializer)
+        private void SerializeDictionary<K, V>(object obj, IFudgeSerializer serializer)
         {
             var dictionary = (IDictionary<K, V>)obj;
 
@@ -76,7 +101,7 @@ namespace Fudge.Serialization.Reflection
             SerializeList(dictionary.Values, serializer, typeData.SubType2Data.Kind, valuesOrdinal);    // Guaranteed to be matching order
         }
 
-        protected object DeserializeDictionary<K, V>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
+        private object DeserializeDictionary<K, V>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             where K : class
             where V : class
         {

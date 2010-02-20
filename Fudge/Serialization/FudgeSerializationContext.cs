@@ -23,6 +23,12 @@ using Fudge.Encodings;
 
 namespace Fudge.Serialization
 {
+    /// <summary>
+    /// Provides an implementation of <see cref="IFudgeSerializer"/> used by the <see cref="FudgeSerializer"/>.
+    /// </summary>
+    /// <remarks>
+    /// You should not need to use this class directly.
+    /// </remarks>
     internal class FudgeSerializationContext : IFudgeSerializer
     {
         private readonly FudgeContext context;

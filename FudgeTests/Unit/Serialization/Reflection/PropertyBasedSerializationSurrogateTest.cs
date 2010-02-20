@@ -265,28 +265,28 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.Equal(6, msgs[1].GetInt("myAge"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
-            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.AllLowerCase);
+            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.AllLowerCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
             Assert.Equal("Bobby", msgs[1].GetString("myname"));
             Assert.Equal(6, msgs[1].GetInt("myage"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
-            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.AllUpperCase);
+            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.AllUpperCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
             Assert.Equal("Bobby", msgs[1].GetString("MYNAME"));
             Assert.Equal(6, msgs[1].GetInt("MYAGE"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
-            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.CamelCase);
+            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.CamelCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
             Assert.Equal("Bobby", msgs[1].GetString("myName"));
             Assert.Equal(6, msgs[1].GetInt("myAge"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
-            context.SetProperty(SerializationTypeMap.FieldNameConventionProperty, FudgeFieldNameConvention.PascalCase);
+            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.PascalCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
             Assert.Equal("Bobby", msgs[1].GetString("MyName"));

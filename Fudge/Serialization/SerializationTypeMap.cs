@@ -31,17 +31,12 @@ namespace Fudge.Serialization
         private readonly Dictionary<Type, int> typeMap = new Dictionary<Type, int>();
         private readonly FudgeSurrogateSelector surrogateSelector;
 
-        /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="AllowTypeDiscovery"/>.</summary>
-        public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("Serialization.AllowTypeDiscovery", typeof(bool));
-        /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="FieldNameConvention"/>.</summary>
-        public static readonly FudgeContextProperty FieldNameConventionProperty = new FudgeContextProperty("Serialization.FieldNameConvention", typeof(FudgeFieldNameConvention));
-
         public SerializationTypeMap(FudgeContext context)
         {
             this.context = context;
             this.surrogateSelector = new FudgeSurrogateSelector(context);
-            this.AllowTypeDiscovery = (bool)context.GetProperty(AllowTypeDiscoveryProperty, true);
-            this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
+            this.AllowTypeDiscovery = (bool)context.GetProperty(FudgeSerializer.AllowTypeDiscoveryProperty, true);
+            this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
         }
 
         /// <summary>

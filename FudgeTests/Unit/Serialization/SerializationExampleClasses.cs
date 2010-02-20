@@ -26,6 +26,7 @@ namespace Fudge.Tests.Unit.Serialization
     {
         // The explicit classes implement serialization directly rather than using reflection
 
+        // Note that Person is also used as the example in the docs for IFudgeSerializable.
         public class Person : IFudgeSerializable
         {
             public string Name { get; set; }
@@ -40,7 +41,7 @@ namespace Fudge.Tests.Unit.Serialization
             public virtual void Serialize(IFudgeSerializer serializer)
             {
                 serializer.Write("name", Name);
-                serializer.WriteSubMsg("mainAddress", MainAddress);
+                serializer.WriteSubMsg("mainAddress", MainAddress);     // We are writing it in-line, so polymorphism and reference cycles are not supported
             }
 
             public virtual void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)

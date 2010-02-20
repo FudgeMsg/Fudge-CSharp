@@ -28,7 +28,7 @@ namespace Fudge.Serialization
     public class FudgeFieldNameConventionAttribute : Attribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FudgeFieldName"/> class.
+        /// Initializes a new instance of the <see cref="FudgeFieldNameConventionAttribute"/> class.
         /// </summary>
         /// <param name="convention">Field name to use for this property.</param>
         public FudgeFieldNameConventionAttribute(FudgeFieldNameConvention convention)

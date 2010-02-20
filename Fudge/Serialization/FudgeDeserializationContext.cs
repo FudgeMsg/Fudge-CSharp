@@ -25,7 +25,13 @@ using System.Diagnostics;
 
 namespace Fudge.Serialization
 {
-    public class FudgeDeserializationContext : IFudgeDeserializer
+    /// <summary>
+    /// Provides an implementation of <see cref="IFudgeDeserializer"/> used by the <see cref="FudgeSerializer"/>.
+    /// </summary>
+    /// <remarks>
+    /// You should not need to use this class directly.
+    /// </remarks>
+    internal class FudgeDeserializationContext : IFudgeDeserializer
     {
         private readonly FudgeContext context;
         private readonly SerializationTypeMap typeMap;

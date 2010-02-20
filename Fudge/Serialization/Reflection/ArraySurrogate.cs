@@ -22,19 +22,32 @@ using System.Reflection;
 
 namespace Fudge.Serialization.Reflection
 {
+    /// <summary>
+    /// Handles serialization and deserialization of arrays.
+    /// </summary>
     public class ArraySurrogate : CollectionSurrogateBase
     {
+        /// <summary>
+        /// Constructs a new instance for a specific array type
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> for this surrogate.</param>
+        /// <param name="typeData"><see cref="TypeData"/> describing the type to serialize.</param>
         public ArraySurrogate(FudgeContext context, TypeData typeData)
             : base(context, typeData, "SerializeList", "DeserializeArray")
         {
         }
 
+        /// <summary>
+        /// Detects whether a given type can be serialized with this class.
+        /// </summary>
+        /// <param name="type">Type to test.</param>
+        /// <returns><c>true</c> if this class can handle the type.</returns>
         public static bool CanHandle(TypeData type)
         {
             return type.Type.IsArray;
         }
 
-        protected object DeserializeArray<T>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer) where T : class
+        private object DeserializeArray<T>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer) where T : class
         {
             var list = (IList<T>)DeserializeList<T>(msg, deserializer);
             return list.ToArray();

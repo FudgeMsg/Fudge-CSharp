@@ -25,6 +25,13 @@ namespace Fudge.Serialization
     /// Implement <see cref="IFudgeTypeMappingStrategy"/> to provide a strategy for mapping types
     /// to the names that identify them in the serialization stream, and the reverse mapping.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// To specify a type mapper other than the default, either set this in <see cref="FudgeSerializer.TypeMappingStrategy"/>
+    /// or through <see cref="FudgeContext.SetProperty"/> using <see cref="FudgeSerializer.TypeMappingStrategyProperty"/>.
+    /// </para>
+    /// <para>See <see cref="JavaTypeMappingStrategy"/> for an example.</para>
+    /// </remarks>
     public interface IFudgeTypeMappingStrategy
     {
         /// <summary>
