@@ -38,6 +38,7 @@ namespace Fudge.Serialization
         private readonly Dictionary<Type, int> lastTypes = new Dictionary<Type, int>();     // Tracks the last object of a given type
         private readonly SerializationTypeMap typeMap;
         private readonly IFudgeTypeMappingStrategy typeMappingStrategy;
+        private readonly List<object> inlineStack = new List<object>();                     // Used to check for cycles in inlined messages - see comments in CheckForInlineCycles
         private int currentId = 0;
 
         public FudgeSerializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamWriter writer, IFudgeTypeMappingStrategy typeMappingStrategy)
@@ -79,6 +80,10 @@ namespace Fudge.Serialization
 
         public void SerializeContents(object obj)
         {
+            CheckForInlineCycles(obj);
+
+            inlineStack.Add(obj);
+
             var surrogateFactory = typeMap.GetSurrogateFactory(obj.GetType());
             if (surrogateFactory == null)
             {
@@ -88,6 +93,18 @@ namespace Fudge.Serialization
             var surrogate = surrogateFactory(context);
 
             surrogate.Serialize(obj, this);
+
+            inlineStack.RemoveAt(inlineStack.Count - 1);
+        }
+
+        private void CheckForInlineCycles(object obj)
+        {
+            // We're using a List rather than a stack because enumerating a stack is much slower
+            for (int i = inlineStack.Count - 1; i >= 0; i--)
+            {
+                if (obj == inlineStack[i])
+                    throw new FudgeRuntimeException("Cycle detected in inlined objects at object of type " + obj.GetType());
+            }
         }
 
         public void SerializeGraph(IFudgeStreamWriter writer, object graph)
