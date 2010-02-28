@@ -77,9 +77,9 @@ namespace Fudge.Serialization.Reflection
                         }
                         propData.Serializer = this.InlineSerialize;
                         break;
-                    case TypeData.TypeKind.Object:
-                        propData.Adder = CreateMethodDelegate<Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer>>("ObjectAdd", prop.Type);
-                        propData.Serializer = this.ObjectSerialize;
+                    case TypeData.TypeKind.Reference:
+                        propData.Adder = CreateMethodDelegate<Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer>>("ReferenceAdd", prop.Type);
+                        propData.Serializer = this.ReferenceSerialize;
                         break;
                     default:
                         throw new FudgeRuntimeException("Invalid property type in PropertyBasedSerializationSurrogate for " + type.FullName + "." + prop.Name);    // Should have been caught in CanHandle
@@ -110,7 +110,7 @@ namespace Fudge.Serialization.Reflection
                 {
                     case TypeData.TypeKind.FudgePrimitive:
                     case TypeData.TypeKind.Inline:
-                    case TypeData.TypeKind.Object:
+                    case TypeData.TypeKind.Reference:
                         // OK
                         break;
                     default:
@@ -188,52 +188,6 @@ namespace Fudge.Serialization.Reflection
             prop.PropertyData.Info.SetValue(obj, val, null);
         }
 
-        /*
-        private void ListSerialize<T>(MorePropertyData prop, object val, IFudgeSerializer serializer)
-        {
-            var list = (IList<T>)val;
-
-            foreach (T item in list)
-            {
-                switch(prop.PropertyData.TypeData.SubTypeData.Kind)
-                {
-                    case TypeData.TypeKind.FudgePrimitive:
-                        PrimitiveSerialize(prop, item, serializer);
-                        break;
-                    case TypeData.TypeKind.List:
-                        // TODO 2010-02-07 t0rx -- Serializing lists of lists
-                        throw new FudgeRuntimeException("Serializing lists of lists is not yet supported.");
-                    case TypeData.TypeKind.Object:
-                        ObjectSerialize(prop, item, serializer);
-                        break;
-                    default:
-                        throw new FudgeRuntimeException("Unknown kind of type.");
-                }
-            }
-        }
-
-        private void ListAdd<T>(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer)
-        {
-            object val = null;
-            switch (prop.PropertyData.TypeData.SubTypeData.Kind)
-            {
-                case TypeData.TypeKind.FudgePrimitive:
-                    val = context.TypeHandler.ConvertType(field.Value, prop.PropertyData.TypeData.SubType);
-                    break;
-                case TypeData.TypeKind.Inline:
-                    // TODO 2010-02-07 t0rx -- Deserializing lists of lists
-                    throw new FudgeRuntimeException("Deserializing lists of lists is not yet supported.");
-                case TypeData.TypeKind.Object:
-                    val = deserializer.FromField<object>(field);
-                    break;
-                default:
-                    throw new FudgeRuntimeException("Unknown kind of type.");
-            }
-            var list = (IList<T>)prop.PropertyData.Info.GetValue(obj, null);
-            list.Add((T)val);
-        }
-        */
-
         private void InlineSerialize(MorePropertyData prop, object val, IFudgeSerializer serializer)
         {
             serializer.WriteSubMsg(prop.PropertyData.SerializedName, val);
@@ -253,13 +207,13 @@ namespace Fudge.Serialization.Reflection
                 currentList.Add(item);
         }
 
-        private void ObjectSerialize(MorePropertyData prop, object val, IFudgeSerializer serializer)
+        private void ReferenceSerialize(MorePropertyData prop, object val, IFudgeSerializer serializer)
         {
             // We can't tell whether it might have cycles, so serialize as a reference
             serializer.WriteRef(prop.PropertyData.SerializedName, val);
         }
 
-        private void ObjectAdd<T>(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer) where T : class
+        private void ReferenceAdd<T>(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer) where T : class
         {
             T subObject = deserializer.FromField<T>(field);
             prop.PropertyData.Info.SetValue(obj, subObject, null);

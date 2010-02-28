@@ -38,12 +38,6 @@ namespace Fudge.Serialization.Reflection
             deserializerDelegate = CreateMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(deserializeMethodName, types);
         }
 
-
-        protected T CreateMethodDelegate<T>(string name, Type valueType) where T : class
-        {
-            return CreateMethodDelegate<T>(name, new Type[] { valueType });
-        }
-
         protected T CreateMethodDelegate<T>(string name, Type[] genericTypes) where T : class
         {
             var method = this.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericTypes);
@@ -91,7 +85,7 @@ namespace Fudge.Serialization.Reflection
                 case TypeData.TypeKind.Inline:
                     serializer.WriteAllSubMsgs(null, ordinal, list);
                     break;
-                case TypeData.TypeKind.Object:
+                case TypeData.TypeKind.Reference:
                     serializer.WriteAllRefs(null, ordinal, list);
                     break;
             }
@@ -114,7 +108,7 @@ namespace Fudge.Serialization.Reflection
                 case TypeData.TypeKind.FudgePrimitive:
                     return (T)context.TypeHandler.ConvertType(field.Value, typeof(T));
                 case TypeData.TypeKind.Inline:
-                case TypeData.TypeKind.Object:
+                case TypeData.TypeKind.Reference:
                     return deserializer.FromField<T>(field);
                 default:
                     throw new FudgeRuntimeException("Unknown TypeData.TypeKind: " + kind);

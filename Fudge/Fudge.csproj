@@ -98,6 +98,7 @@
     <Compile Include="Serialization\FudgeFieldNameConventionAttribute.cs" />
     <Compile Include="Serialization\FudgeFieldNameAttribute.cs" />
     <Compile Include="Serialization\FudgeDeserializationContext.cs" />
+    <Compile Include="Serialization\FudgeInlineAttribute.cs" />
     <Compile Include="Serialization\FudgeSerializationExtensions.cs" />
     <Compile Include="Serialization\FudgeSerializer.cs" />
     <Compile Include="Serialization\FudgeSurrogateAttribute.cs" />

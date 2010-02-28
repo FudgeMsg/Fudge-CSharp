@@ -49,7 +49,7 @@ namespace Fudge.Serialization
         /// </para>
         /// <para>
         /// By default, this is <c>true</c>, i.e. types can be added automatically.  You can set the
-        /// <see cref="AllowTypeDiscoveryProperty"/> property in the <see cref="FudgeContext"/> before
+        /// <see cref="FudgeSerializer.AllowTypeDiscoveryProperty"/> property in the <see cref="FudgeContext"/> before
         /// constructing a <c>FudgeSerializer</c> to override this default, or set
         /// <see cref="AllowTypeDiscovery"/> directly.
         /// </para>
@@ -64,8 +64,8 @@ namespace Fudge.Serialization
         /// Gets or sets the convention to use when converting .net property names to Fudge field names, by default Identity.
         /// </summary>
         /// <remarks>
-        /// On construction, the <see cref="FudgeSerializationTypeMap"/> will pick up any default specified
-        /// using the <see cref="FieldNameConventionProperty"/> property in the <see cref="FudgeContext"/>
+        /// On construction, the <see cref="SerializationTypeMap"/> will pick up any default specified
+        /// using the <see cref="FudgeSerializer.FieldNameConventionProperty"/> property in the <see cref="FudgeContext"/>
         /// of set <see cref="FudgeFieldNameConvention"/> directly.
         /// </remarks>
         /// <seealso cref="FudgeFieldNameConvention"/>
@@ -99,7 +99,7 @@ namespace Fudge.Serialization
         /// </summary>
         /// <param name="type"></param>
         /// <param name="name"></param>
-        /// <param name="globalSurrogate"></param>
+        /// <param name="statelessSurrogate"></param>
         public void RegisterType(Type type, string name, IFudgeSerializationSurrogate statelessSurrogate)
         {
             RegisterType(type, name, c => statelessSurrogate, 0);
@@ -194,6 +194,7 @@ namespace Fudge.Serialization
         /// Remap this type map into a new one based on a different ordering/set of type names.
         /// </summary>
         /// <param name="names"></param>
+        /// <param name="typeVersions"></param>
         /// <returns></returns>
         public SerializationTypeMap Remap(string[] names, int[] typeVersions)
         {

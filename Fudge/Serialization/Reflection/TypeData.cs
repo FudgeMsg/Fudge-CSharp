@@ -38,7 +38,15 @@ namespace Fudge.Serialization.Reflection
             cache.RegisterTypeData(this);
 
             fieldNameConvention = OverrideFieldNameConvention(type, fieldNameConvention);
-            Kind = CalcKind(context, cache, type, fieldNameConvention, out subType, out subType2, out fieldType);
+
+            var kind = CalcKind(context, cache, type, fieldNameConvention, out subType, out subType2, out fieldType);
+            var inlineAttrib = GetCustomAttribute<FudgeInlineAttribute>();
+            if (inlineAttrib != null)
+            {
+                kind = inlineAttrib.Inline ? TypeKind.Inline : TypeKind.Reference;
+            }
+            Kind = kind;
+
             ScanProperties(context, cache, fieldNameConvention);
 
             PublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
@@ -59,11 +67,21 @@ namespace Fudge.Serialization.Reflection
         public MethodInfo[] PublicMethods { get; private set; }
         public MethodInfo[] StaticPublicMethods { get; private set; }
 
+        public T GetCustomAttribute<T>() where T : Attribute
+        {
+            foreach (object attrib in CustomAttributes)
+            {
+                if (attrib.GetType() == typeof(T))
+                    return (T)attrib;
+            }
+            return null;
+        }
+
         public enum TypeKind
         {
             FudgePrimitive,
             Inline,
-            Object
+            Reference
         }
 
         private static FudgeFieldNameConvention OverrideFieldNameConvention(Type type, FudgeFieldNameConvention fieldNameConvention)
@@ -110,7 +128,7 @@ namespace Fudge.Serialization.Reflection
                 return TypeKind.Inline;
             }
 
-            return TypeKind.Object;
+            return TypeKind.Reference;
         }
 
         private void ScanProperties(FudgeContext context, TypeDataCache cache, FudgeFieldNameConvention fieldNameConvention)
@@ -129,6 +147,7 @@ namespace Fudge.Serialization.Reflection
             private readonly bool hasPublicSetter;
             private string serializedName;
             private readonly TypeData typeData;
+            private readonly TypeKind kind;
 
             public PropertyData(TypeDataCache typeCache, FudgeFieldNameConvention fieldNameConvention, PropertyInfo info)
             {
@@ -137,11 +156,11 @@ namespace Fudge.Serialization.Reflection
                 this.hasPublicSetter = (info.GetSetMethod() != null);   // Can't just use CanWrite as it may be non-public
                 this.typeData = typeCache.GetTypeData(info.PropertyType, fieldNameConvention);
 
-                var attribs = info.GetCustomAttributes(typeof(FudgeFieldNameAttribute), true);
-                if (attribs.Length > 0)
+                var fieldNameAttrib = GetCustomAttribute<FudgeFieldNameAttribute>(info);
+                if (fieldNameAttrib != null)
                 {
                     // Attribute takes priority over convention
-                    this.serializedName = ((FudgeFieldNameAttribute)attribs[0]).Name;
+                    this.serializedName = fieldNameAttrib.Name;
                 }
                 else
                 {
@@ -166,18 +185,37 @@ namespace Fudge.Serialization.Reflection
                             throw new FudgeRuntimeException("Unknown FudgeFieldNameConvention: " + fieldNameConvention.ToString());
                     }
                 }
+
+                var inlineAttrib = GetCustomAttribute<FudgeInlineAttribute>(info);
+                if (inlineAttrib == null)
+                {
+                    this.kind = typeData.Kind;
+                }
+                else
+                {
+                    this.kind = inlineAttrib.Inline ? TypeKind.Inline : TypeKind.Reference;
+                }
             }
 
             public PropertyInfo Info { get { return info; } }
             public string Name { get { return name; } }
             public TypeData TypeData { get { return typeData; } }
             public Type Type { get { return typeData.Type; } }
-            public TypeKind Kind { get { return typeData.Kind; } }
+            public TypeKind Kind { get { return kind; } }
             public bool HasPublicSetter { get { return hasPublicSetter; } }
             public string SerializedName
             {
                 get { return serializedName; }
                 set { serializedName = value; }
+            }
+
+            private T GetCustomAttribute<T>(PropertyInfo info) where T : Attribute
+            {
+                var attribs = info.GetCustomAttributes(typeof(T), true);
+                if (attribs.Length > 0)
+                    return (T)attribs[0];
+
+                return null;
             }
         }
     }

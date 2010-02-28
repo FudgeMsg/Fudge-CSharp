@@ -22,6 +22,7 @@ using Fudge.Serialization;
 using System.IO;
 using Fudge.Encodings;
 using System.Diagnostics;
+using Fudge.Types;
 
 namespace Fudge.Tests.Unit.Serialization
 {
@@ -182,11 +183,63 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.Equal("Bob", bob2.Name);
         }
 
+        [Fact]
+        public void InlineAttribute_FRN48()
+        {
+            var serializer = new FudgeSerializer(context);
+
+            var parent = new InlineParent();
+
+            var msgs = serializer.SerializeToMsgs(parent);
+            var msg = msgs[1];
+
+            Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("In").Type);
+            Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("InForcedOut").Type);     // Reference collapses to byte
+            Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("Out").Type);
+            Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("OutForcedIn").Type);
+        }
+
         public class TemperatureRange
         {
             public double High { get; set; }
             public double Low { get; set; }
             public double Average { get; set; }
         }
+
+        #region Inlining test classes
+
+        [FudgeInline]
+        private class Inlined
+        {
+            public bool Value { get; set; }
+        }
+
+        private class NotInlined
+        {
+            public bool Value { get; set; }
+        }
+
+        private class InlineParent
+        {
+            public InlineParent()
+            {
+                In = new Inlined();
+                InForcedOut = new Inlined();
+                Out = new NotInlined();
+                OutForcedIn = new NotInlined();
+            }
+
+            public Inlined In { get; set; }
+
+            [FudgeInline(false)]    // Override the type
+            public Inlined InForcedOut { get; set; }
+
+            public NotInlined Out { get; set; }
+
+            [FudgeInline]    // Override the type
+            public NotInlined OutForcedIn { get; set; }
+        }
+
+        #endregion
     }
 }
