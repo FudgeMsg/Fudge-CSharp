@@ -60,7 +60,8 @@ namespace Fudge.Serialization
 
         public object DeserializeGraph()
         {
-            var header = new SerializationHeader(ReadNextMessage(), typeMap);
+            // TODO 2010-02-28 t0rx -- Get rid of serialization header altogether?
+            //var header = new SerializationHeader(ReadNextMessage(), typeMap);
 
             // We simply return the first object
             object result = GetFromRef(0);

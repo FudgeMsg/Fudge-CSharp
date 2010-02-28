@@ -84,8 +84,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var msgs = serializer.SerializeToMsgs(obj1);
 
             // Check the serialized format
-            Assert.Equal(FudgeMsgFieldType.Instance, msgs[1].GetByName("Names").Type);
-            var listMsg = msgs[1].GetMessage("Names");
+            Assert.Equal(FudgeMsgFieldType.Instance, msgs[0].GetByName("Names").Type);
+            var listMsg = msgs[0].GetMessage("Names");
             Assert.Equal("FudgeMsg[ => Fred,  => Sheila]", listMsg.ToString());
 
             var obj2 = (PrimitiveListClass)serializer.Deserialize(msgs);
@@ -226,9 +226,9 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var obj1 = new RenameFieldClass { Name = "Albert", Age = 72 };
 
             var msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Null(msgs[1].GetString("Name"));
-            Assert.Equal("Albert", msgs[1].GetString("name"));
-            Assert.Equal(72, msgs[1].GetInt("Age"));
+            Assert.Null(msgs[0].GetString("Name"));
+            Assert.Equal("Albert", msgs[0].GetString("name"));
+            Assert.Equal(72, msgs[0].GetInt("Age"));
 
             var obj2 = (RenameFieldClass)serializer.Deserialize(msgs);
 
@@ -244,7 +244,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var serializer = new FudgeSerializer(context);
             
             var msgs = serializer.SerializeToMsgs(obj1);
-            Assert.NotNull(msgs[1].GetByName("myName"));
+            Assert.NotNull(msgs[0].GetByName("myName"));
             
             var obj2 = (FieldConventionAttributeClass)serializer.Deserialize(msgs);
             Assert.Equal(obj1.MyName, obj2.MyName);
@@ -261,36 +261,36 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             serializer = new FudgeSerializer(context);
             Assert.Equal(FudgeFieldNameConvention.Identity, serializer.TypeMap.FieldNameConvention);
             msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[1].GetString("MyName"));
-            Assert.Equal(6, msgs[1].GetInt("myAge"));
+            Assert.Equal("Bobby", msgs[0].GetString("MyName"));
+            Assert.Equal(6, msgs[0].GetInt("myAge"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
             context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.AllLowerCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[1].GetString("myname"));
-            Assert.Equal(6, msgs[1].GetInt("myage"));
+            Assert.Equal("Bobby", msgs[0].GetString("myname"));
+            Assert.Equal(6, msgs[0].GetInt("myage"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
             context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.AllUpperCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[1].GetString("MYNAME"));
-            Assert.Equal(6, msgs[1].GetInt("MYAGE"));
+            Assert.Equal("Bobby", msgs[0].GetString("MYNAME"));
+            Assert.Equal(6, msgs[0].GetInt("MYAGE"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
             context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.CamelCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[1].GetString("myName"));
-            Assert.Equal(6, msgs[1].GetInt("myAge"));
+            Assert.Equal("Bobby", msgs[0].GetString("myName"));
+            Assert.Equal(6, msgs[0].GetInt("myAge"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
 
             context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.PascalCase);
             serializer = new FudgeSerializer(context);
             msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[1].GetString("MyName"));
-            Assert.Equal(6, msgs[1].GetInt("MyAge"));
+            Assert.Equal("Bobby", msgs[0].GetString("MyName"));
+            Assert.Equal(6, msgs[0].GetInt("MyAge"));
             Assert.Equal(obj1, serializer.Deserialize(msgs));
         }
 

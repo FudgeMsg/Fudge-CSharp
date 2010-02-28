@@ -21,6 +21,8 @@ using System.Text;
 
 namespace Fudge.Serialization
 {
+    /*
+    // TODO 2010-02-28 t0rx -- Get rid of serialization header altogether?
     internal class SerializationHeader
     {
         private const int serializationVersion = 1;
@@ -47,4 +49,5 @@ namespace Fudge.Serialization
             return result;
         }
     }
+     */
 }

@@ -161,7 +161,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             var msgs = serializer.SerializeToMsgs(bob);
 
-            var typeNames = msgs[1].GetAllValues<string>(FudgeSerializer.TypeIdFieldOrdinal);
+            var typeNames = msgs[0].GetAllValues<string>(FudgeSerializer.TypeIdFieldOrdinal);
             Assert.Equal(2, typeNames.Count);
             Assert.Equal("Fudge.Tests.Unit.Serialization.Explicit+Sibling", typeNames[0]);
             Assert.Equal("Fudge.Tests.Unit.Serialization.Explicit+Person", typeNames[1]);
@@ -176,7 +176,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             var msgs = serializer.SerializeToMsgs(bob);
             // Replace the object one
-            msgs[1] = context.NewMessage(new Field(0, "Bibble"),
+            msgs[0] = context.NewMessage(new Field(0, "Bibble"),
                                          new Field(0, "Fudge.Tests.Unit.Serialization.Explicit+Sibling"),
                                          new Field("name", "Bob"));
             var bob2 = (Explicit.Sibling)serializer.Deserialize(msgs);
@@ -191,7 +191,7 @@ namespace Fudge.Tests.Unit.Serialization
             var parent = new InlineParent();
 
             var msgs = serializer.SerializeToMsgs(parent);
-            var msg = msgs[1];
+            var msg = msgs[0];
 
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("In").Type);
             Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("InForcedOut").Type);     // Reference collapses to byte
@@ -207,19 +207,19 @@ namespace Fudge.Tests.Unit.Serialization
 
             // Check default
             var serializer = new FudgeSerializer(context2);
-            var msg = serializer.SerializeToMsgs(parent)[1];
+            var msg = serializer.SerializeToMsgs(parent)[0];
             Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("Out").Type);
 
             // Inline
             context2.SetProperty(FudgeSerializer.InlineByDefault, true);
             serializer = new FudgeSerializer(context2);
-            msg = serializer.SerializeToMsgs(parent)[1];
+            msg = serializer.SerializeToMsgs(parent)[0];
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("Out").Type);
 
             // Don't inline
             context2.SetProperty(FudgeSerializer.InlineByDefault, false);
             serializer = new FudgeSerializer(context2);
-            msg = serializer.SerializeToMsgs(parent)[1];
+            msg = serializer.SerializeToMsgs(parent)[0];
             Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("Out").Type);
         }
 

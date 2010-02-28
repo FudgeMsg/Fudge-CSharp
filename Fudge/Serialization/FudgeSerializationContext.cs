@@ -110,8 +110,9 @@ namespace Fudge.Serialization
         public void SerializeGraph(IFudgeStreamWriter writer, object graph)
         {
             // Write the header message
-            var header = new SerializationHeader(typeMap);
-            writer.WriteMsg(header.ToMessage());
+            // TODO 2010-02-28 t0rx -- Get rid of serialization header altogether?
+            //var header = new SerializationHeader(typeMap);
+            //writer.WriteMsg(header.ToMessage());
 
             // Write out all the objects
             QueueObject(graph);
