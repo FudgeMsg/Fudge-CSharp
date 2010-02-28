@@ -204,12 +204,10 @@ namespace Fudge.Serialization
         /// <inheritdoc/>
         public void WriteRef(string fieldName, int? ordinal, object obj)
         {
-            if (obj == null)
+            if (obj != null)
             {
-                // TODO 2009-10-18 torx -- Handle null references
+                Write(fieldName, ordinal, GetRefId(obj));
             }
-
-            Write(fieldName, ordinal, GetRefId(obj));
         }
 
         #endregion

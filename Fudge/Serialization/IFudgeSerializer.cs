@@ -48,6 +48,7 @@ namespace Fudge.Serialization
         /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
         /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
         /// <param name="obj">Child object to write.</param>
+        /// <remarks>If <c>obj</c> is <c>null</c> then the sub-message will be omitted.</remarks>
         void WriteSubMsg(string fieldName, int? ordinal, object obj);
 
         /// <summary>
@@ -56,6 +57,7 @@ namespace Fudge.Serialization
         /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
         /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
         /// <param name="obj">Child object to write.</param>
+        /// <remarks>If <c>obj</c> is <c>null</c> then the reference will be omitted.</remarks>
         void WriteRef(string fieldName, int? ordinal, object obj);
     }
 }

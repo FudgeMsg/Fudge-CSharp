@@ -189,6 +189,7 @@ namespace Fudge.Tests.Unit.Serialization
             var serializer = new FudgeSerializer(context);
 
             var parent = new InlineParent();
+            parent.SetUp();
 
             var msgs = serializer.SerializeToMsgs(parent);
             var msg = msgs[0];
@@ -204,6 +205,7 @@ namespace Fudge.Tests.Unit.Serialization
         {
             var context2 = new FudgeContext();
             var parent = new InlineParent();
+            parent.SetUp();
 
             // Check default
             var serializer = new FudgeSerializer(context2);
@@ -221,6 +223,28 @@ namespace Fudge.Tests.Unit.Serialization
             serializer = new FudgeSerializer(context2);
             msg = serializer.SerializeToMsgs(parent)[0];
             Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("Out").Type);
+        }
+
+        [Fact]
+        public void SerializingNulls_FRN51()
+        {
+            var serializer = new FudgeSerializer(context);
+
+            var parent = new InlineParent();
+
+            parent.In = null;
+            parent.InForcedOut = new Inlined();
+            parent.Out = null;
+            parent.OutForcedIn = new NotInlined();
+
+            var msgs = serializer.SerializeToMsgs(parent);
+            var msg = msgs[0];
+            var parent2 = (InlineParent)serializer.Deserialize(msgs);
+
+            Assert.Null(parent2.In);
+            Assert.NotNull(parent2.InForcedOut);
+            Assert.Null(parent2.Out);
+            Assert.NotNull(parent2.OutForcedIn);
         }
 
         public class TemperatureRange
@@ -246,6 +270,10 @@ namespace Fudge.Tests.Unit.Serialization
         private class InlineParent
         {
             public InlineParent()
+            {
+            }
+
+            public void SetUp()
             {
                 In = new Inlined();
                 InForcedOut = new Inlined();
