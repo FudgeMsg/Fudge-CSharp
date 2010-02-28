@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Fudge.Types;
 
 namespace Fudge.Serialization
 {
@@ -91,6 +92,7 @@ namespace Fudge.Serialization
         /// <param name="serializer">Serializer to write the fields.</param>
         /// <param name="name">Name of the fields.</param>
         /// <param name="values">Values to write.</param>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
         public static void WriteAll<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> values)
         {
             WriteAll(serializer, name, null, values);
@@ -104,11 +106,19 @@ namespace Fudge.Serialization
         /// <param name="name">Name of the fields.</param>
         /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
         /// <param name="values">Values to write.</param>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
         public static void WriteAll<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> values)
         {
             foreach (T value in values)
             {
-                serializer.Write(name, ordinal, value);
+                if (value != null)
+                {
+                    serializer.Write(name, ordinal, value);
+                }
+                else
+                {
+                    serializer.Write(name, ordinal, IndicatorType.Instance);
+                }
             }
         }
 
@@ -120,6 +130,7 @@ namespace Fudge.Serialization
         /// <param name="name">Name of the fields.</param>
         /// <param name="objects">Objects to serialize.</param>
         /// <remarks>See the remarks in <see cref="WriteSubMsg"/> regarding the limitations of writing as an in-line sub-message.</remarks>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
         public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
             serializer.WriteAllSubMsgs(name, null, objects);
@@ -134,11 +145,19 @@ namespace Fudge.Serialization
         /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
         /// <param name="objects">Objects to serialize.</param>
         /// <remarks>See the remarks in <see cref="WriteSubMsg"/> regarding the limitations of writing as an in-line sub-message.</remarks>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
         public static void WriteAllSubMsgs<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> objects)
         {
             foreach (T obj in objects)
             {
-                serializer.WriteSubMsg(name, ordinal, obj);
+                if (obj != null)
+                {
+                    serializer.WriteSubMsg(name, ordinal, obj);
+                }
+                else
+                {
+                    serializer.Write(name, ordinal, IndicatorType.Instance);
+                }
             }
         }
 
@@ -149,7 +168,10 @@ namespace Fudge.Serialization
         /// <param name="serializer">Serializer to write the fields.</param>
         /// <param name="name">Name of the fields.</param>
         /// <param name="objects">Objects to serialize.</param>
-        /// <remarks>See the remarks in <see cref="WriteRef"/> comparing against writing as an in-line sub-message.</remarks>
+        /// <remarks>
+        /// <para><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</para>
+        /// <para>See the remarks in <see cref="WriteRef"/> comparing against writing as an in-line sub-message.</para>
+        /// </remarks>
         public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, IEnumerable<T> objects)
         {
             serializer.WriteAllRefs(name, null, objects);
@@ -163,13 +185,23 @@ namespace Fudge.Serialization
         /// <param name="name">Name of the fields.</param>
         /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
         /// <param name="objects">Objects to serialize.</param>
-        /// <remarks>See the remarks in <see cref="WriteRef"/> comparing against writing as an in-line sub-message.</remarks>
+        /// <remarks>
+        /// <para><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</para>
+        /// <para>See the remarks in <see cref="WriteRef"/> comparing against writing as an in-line sub-message.</para>
+        /// </remarks>
         public static void WriteAllRefs<T>(this IFudgeSerializer serializer, string name, int? ordinal, IEnumerable<T> objects)
         {
             var result = new List<int>();
             foreach (T obj in objects)
             {
-                serializer.WriteRef(name, ordinal, obj);
+                if (obj != null)
+                {
+                    serializer.WriteRef(name, ordinal, obj);
+                }
+                else
+                {
+                    serializer.Write(name, ordinal, IndicatorType.Instance);
+                }
             }
         }
     }

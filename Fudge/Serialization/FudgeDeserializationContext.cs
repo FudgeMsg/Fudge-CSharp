@@ -259,6 +259,11 @@ namespace Fudge.Serialization
                 int typeId;
                 return (T)ProcessObject(null, typeof(T), subMsg, out typeId);
             }
+            else if (field.Type == IndicatorFieldType.Instance)
+            {
+                // Indicator means null
+                return null;
+            }
             else
             {
                 int refId = Convert.ToInt32(field.Value);

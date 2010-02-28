@@ -71,6 +71,7 @@
     <Compile Include="Unit\Serialization\FudgeSerializationContextTest.cs" />
     <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
     <Compile Include="Unit\Serialization\JavaTypeMappingStrategyTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\CollectionSurrogateBaseTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\PropertyBasedSerializationSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\FudgeSurrogateSelectorTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\ToFromFudgeMsgSurrogateTest.cs" />
