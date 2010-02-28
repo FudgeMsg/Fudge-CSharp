@@ -199,6 +199,30 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("OutForcedIn").Type);
         }
 
+        [Fact]
+        public void InlineThroughContext_FRN50()
+        {
+            var context2 = new FudgeContext();
+            var parent = new InlineParent();
+
+            // Check default
+            var serializer = new FudgeSerializer(context2);
+            var msg = serializer.SerializeToMsgs(parent)[1];
+            Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("Out").Type);
+
+            // Inline
+            context2.SetProperty(FudgeSerializer.InlineByDefault, true);
+            serializer = new FudgeSerializer(context2);
+            msg = serializer.SerializeToMsgs(parent)[1];
+            Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("Out").Type);
+
+            // Don't inline
+            context2.SetProperty(FudgeSerializer.InlineByDefault, false);
+            serializer = new FudgeSerializer(context2);
+            msg = serializer.SerializeToMsgs(parent)[1];
+            Assert.Equal(PrimitiveFieldTypes.SByteType, msg.GetByName("Out").Type);
+        }
+
         public class TemperatureRange
         {
             public double High { get; set; }

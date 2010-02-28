@@ -46,6 +46,11 @@ namespace Fudge.Serialization
         /// <summary>Property of the <see cref="FudgeContext"/> that specifies whether types can automatically by serialized or whether they must be explicitly
         /// registered in the <see cref="SerializationTypeMap"/>.  By default this is <c>true</c>, i.e. types do not need explicitly registering.</summary>
         public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("Serialization.AllowTypeDiscovery", typeof(bool));
+        /// <summary>Property of the <see cref="FudgeContext"/> that specifies whether types are by default inlined rather than referenced.  If
+        /// you leave this unspecified then if will default to <c>false</c> - i.e. objects are referenced.</summary>
+        /// <remarks>Whilst inlining sub-objects makes the message structure more readable, it prohibits cycles in the object graph and also means that
+        /// a sub-object that appears more than once in the graph will be serialized multiple times and deserialized as multiple objects.</remarks>
+        public static readonly FudgeContextProperty InlineByDefault = new FudgeContextProperty("Serialization.InlineByDefault", typeof(bool));
 
         /// <summary>
         /// Constructs a new <see cref="FudgeSerializer"/> instance.
