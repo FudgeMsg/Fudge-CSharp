@@ -70,6 +70,6 @@ namespace Fudge.Serialization
         /// method.
         /// </para>
         /// </remarks>
-        void Register(object obj);
+        void Register(IFudgeFieldContainer msg, object obj);
     }
 }

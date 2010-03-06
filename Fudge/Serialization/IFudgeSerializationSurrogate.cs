@@ -38,43 +38,45 @@ namespace Fudge.Serialization
         /// </summary>
         /// <param name="obj">Object to serialize.</param>
         /// <param name="serializer">Serializer to receive the data.</param>
-        void Serialize(object obj, IFudgeSerializer serializer);
+        void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer);
 
-        /// <summary>
-        /// Begins the deserialization process for a new object.
-        /// </summary>
-        /// <param name="deserializer">Deserializer providing the data.</param>
-        /// <param name="dataVersion">Version of the message data structure.</param>
-        /// <returns>State object to be used in <see cref="DeserializeField"/> and <see cref="EndDeserialize"/>.</returns>
-        /// <remarks>
-        /// <para>Surrogates typically follow two patterns - they either process each field as it is streamed in through
-        /// <see cref="DeserializeField"/>, or they call <see cref="IFudgeDeserializer.GetUnreadFields"/> in <c>BeginDeserialize</c>
-        /// to get all the fields as a <see cref="IFudgeFieldContainer"/> and then process directly.</para>
-        /// <para>The state returned from <c>BeginDeserialize</c> is useful in situations where a single surrogate instance
-        /// is used to deserialize multiple real objects to avoid constructing a new one each time.</para>
-        /// </remarks>
-        object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion);
+        object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer);
 
-        /// <summary>
-        /// Deserializes the contents of the field into the object.
-        /// </summary>
-        /// <param name="deserializer">Deserializer providing the data.</param>
-        /// <param name="field">Data to deserialize.</param>
-        /// <param name="dataVersion">Version of the message data structure.</param>
-        /// <param name="state">State created in <see cref="BeginDeserialize"/>.</param>
-        /// <returns><c>true</c> if the field was consumed, or <c>false</c> if the field is unused.</returns>
-        /// <remarks>Unused fields can be collected in <see cref="EndDeserialize"/> to support evolvability of data.</remarks>
-        bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state);
+        ///// <summary>
+        ///// Begins the deserialization process for a new object.
+        ///// </summary>
+        ///// <param name="deserializer">Deserializer providing the data.</param>
+        ///// <param name="dataVersion">Version of the message data structure.</param>
+        ///// <returns>State object to be used in <see cref="DeserializeField"/> and <see cref="EndDeserialize"/>.</returns>
+        ///// <remarks>
+        ///// <para>Surrogates typically follow two patterns - they either process each field as it is streamed in through
+        ///// <see cref="DeserializeField"/>, or they call <see cref="IFudgeDeserializer.GetUnreadFields"/> in <c>BeginDeserialize</c>
+        ///// to get all the fields as a <see cref="IFudgeFieldContainer"/> and then process directly.</para>
+        ///// <para>The state returned from <c>BeginDeserialize</c> is useful in situations where a single surrogate instance
+        ///// is used to deserialize multiple real objects to avoid constructing a new one each time.</para>
+        ///// </remarks>
+        //object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion);
 
-        /// <summary>
-        /// Called after all data for an object have been processed, to enable tidy-up.
-        /// </summary>
-        /// <param name="deserializer">Deserializer providing the data.</param>
-        /// <param name="dataVersion">Version of the message data structure.</param>
-        /// <param name="state">State created in <see cref="BeginDeserialize"/>.</param>
-        /// <returns>Newly deserialized object.</returns>
-        /// <remarks>Surrogates for evolvable objects should call <see cref="IFudgeDeserializer.GetUnreadFields"/> here to obtain
-        /// any fields that were not directly consumed by the object in <see cref="DeserializeField"/>.</remarks>
-        object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state);
+        ///// <summary>
+        ///// Deserializes the contents of the field into the object.
+        ///// </summary>
+        ///// <param name="deserializer">Deserializer providing the data.</param>
+        ///// <param name="field">Data to deserialize.</param>
+        ///// <param name="dataVersion">Version of the message data structure.</param>
+        ///// <param name="state">State created in <see cref="BeginDeserialize"/>.</param>
+        ///// <returns><c>true</c> if the field was consumed, or <c>false</c> if the field is unused.</returns>
+        ///// <remarks>Unused fields can be collected in <see cref="EndDeserialize"/> to support evolvability of data.</remarks>
+        //bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state);
+
+        ///// <summary>
+        ///// Called after all data for an object have been processed, to enable tidy-up.
+        ///// </summary>
+        ///// <param name="deserializer">Deserializer providing the data.</param>
+        ///// <param name="dataVersion">Version of the message data structure.</param>
+        ///// <param name="state">State created in <see cref="BeginDeserialize"/>.</param>
+        ///// <returns>Newly deserialized object.</returns>
+        ///// <remarks>Surrogates for evolvable objects should call <see cref="IFudgeDeserializer.GetUnreadFields"/> here to obtain
+        ///// any fields that were not directly consumed by the object in <see cref="DeserializeField"/>.</remarks>
+        //object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state);
     }
 }

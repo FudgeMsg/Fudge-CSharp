@@ -93,12 +93,12 @@ namespace Fudge.Serialization.Reflection
             return false;
         }
 
-        private void SerializeDictionary<K, V>(object obj, IFudgeSerializer serializer)
+        private void SerializeDictionary<K, V>(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             var dictionary = (IDictionary<K, V>)obj;
 
-            SerializeList(dictionary.Keys, serializer, typeData.SubTypeData.Kind, keysOrdinal);
-            SerializeList(dictionary.Values, serializer, typeData.SubType2Data.Kind, valuesOrdinal);    // Guaranteed to be matching order
+            SerializeList(dictionary.Keys, msg, serializer, typeData.SubTypeData.Kind, keysOrdinal);
+            SerializeList(dictionary.Values, msg, serializer, typeData.SubType2Data.Kind, valuesOrdinal);    // Guaranteed to be matching order
         }
 
         private object DeserializeDictionary<K, V>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)

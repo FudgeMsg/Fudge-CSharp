@@ -35,29 +35,12 @@ namespace Fudge.Serialization
         FudgeContext Context { get; }
 
         /// <summary>
-        /// Writes a value as a field with a given name and/or ordinal.
-        /// </summary>
-        /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
-        /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
-        /// <param name="value">Value of field.</param>
-        void Write(string fieldName, int? ordinal, object value);
-
-        /// <summary>
         /// Writes a child object as a serialized sub-message with a given name and/or ordinal.
         /// </summary>
         /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
         /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
         /// <param name="obj">Child object to write.</param>
         /// <remarks>If <c>obj</c> is <c>null</c> then the sub-message will be omitted.</remarks>
-        void WriteSubMsg(string fieldName, int? ordinal, object obj);
-
-        /// <summary>
-        /// Writes a child object as a reference to a serialized message with a given name and/or ordinal.
-        /// </summary>
-        /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
-        /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
-        /// <param name="obj">Child object to write.</param>
-        /// <remarks>If <c>obj</c> is <c>null</c> then the reference will be omitted.</remarks>
-        void WriteRef(string fieldName, int? ordinal, object obj);
+        void WriteInline(IMutableFudgeFieldContainer msg, string fieldName, int? ordinal, object obj);
     }
 }

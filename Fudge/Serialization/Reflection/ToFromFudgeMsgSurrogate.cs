@@ -27,8 +27,8 @@ namespace Fudge.Serialization.Reflection
     /// A surrogate that works with classes providing <c>ToFudgeMsg</c> and static <c>FromFudgeMsg</c> methods.
     /// </summary>
     /// <remarks>
-    /// The full signatures of the methods are <c>public IFudgeFieldContainer ToFudgeMsg(IFudgeSerializer serializer)</c> and
-    /// <c>public static &lt;YourType&gt; FromFudgeMsg(IFudgeFieldContainer msg, IFudgeDeserializer deserializer, int dataVersion)</c>.
+    /// The full signatures of the methods are <c>public void ToFudgeMsg(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)</c> and
+    /// <c>public static &lt;YourType&gt; FromFudgeMsg(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)</c>.
     /// </remarks>
     public class ToFromFudgeMsgSurrogate : IFudgeSerializationSurrogate
     {
@@ -78,15 +78,15 @@ namespace Fudge.Serialization.Reflection
         private static MethodInfo GetToMsg(TypeData typeData)
         {
             return typeData.PublicMethods.FirstOrDefault(m => m.Name == "ToFudgeMsg"
-                                                           && m.ReturnType == typeof(IFudgeFieldContainer)
-                                                           && ParamMatch(m, new Type[] { typeof(IFudgeSerializer) }));
+                                                           && m.ReturnType == typeof(void)
+                                                           && ParamMatch(m, new Type[] { typeof(IMutableFudgeFieldContainer), typeof(IFudgeSerializer) }));
         }
 
         private static MethodInfo GetFromMsg(TypeData typeData)
         {
             return typeData.StaticPublicMethods.FirstOrDefault(m => m.Name == "FromFudgeMsg"
                                                                  && m.ReturnType == typeData.Type
-                                                                 && ParamMatch(m, new Type[] { typeof(IFudgeFieldContainer), typeof(IFudgeDeserializer), typeof(int) }));
+                                                                 && ParamMatch(m, new Type[] { typeof(IFudgeFieldContainer), typeof(IFudgeDeserializer) }));
         }
 
         private static bool ParamMatch(MethodInfo method, Type[] types)
@@ -107,35 +107,17 @@ namespace Fudge.Serialization.Reflection
         #region IFudgeSerializationSurrogate Members
 
         /// <inheritdoc/>
-        public void Serialize(object obj, IFudgeSerializer serializer)
+        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            IFudgeFieldContainer msg = (IFudgeFieldContainer)toFudgeMsgMethod.Invoke(obj, new object[] { serializer });
-            foreach (var field in msg)
-            {
-                serializer.Write(field.Name, field.Ordinal, field.Value);
-            }
+            toFudgeMsgMethod.Invoke(obj, new object[] { msg, serializer });
         }
 
         /// <inheritdoc/>
-        public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+        public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
-            var msg = deserializer.GetUnreadFields();
-            var result = fromFudgeMsgMethod.Invoke(null, new object[] { msg, deserializer, dataVersion });
-            deserializer.Register(result);
+            var result = fromFudgeMsgMethod.Invoke(null, new object[] { msg, deserializer });
+            deserializer.Register(msg, result);
             return result;
-        }
-
-        /// <inheritdoc/>
-        public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
-        {
-            // Should already have been consumed
-            return false;
-        }
-
-        /// <inheritdoc/>
-        public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
-        {
-            return state;
         }
 
         #endregion

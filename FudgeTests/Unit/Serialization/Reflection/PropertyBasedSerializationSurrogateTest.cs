@@ -46,8 +46,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
             var obj1 = new SimpleExampleClass { Name = "Dennis", Age = 37 };
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (SimpleExampleClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (SimpleExampleClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.Equal(obj1.Name, obj2.Name);
@@ -63,8 +63,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
             var obj1 = new SecondaryTypeClass { Id = Guid.NewGuid() };
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (SecondaryTypeClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (SecondaryTypeClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.Equal(obj1.Id, obj2.Id);
@@ -81,14 +81,14 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             obj1.Names.Add("Fred");
             obj1.Names.Add("Sheila");
 
-            var msgs = serializer.SerializeToMsgs(obj1);
+            var msg = serializer.SerializeToMsg(obj1);
 
             // Check the serialized format
-            Assert.Equal(FudgeMsgFieldType.Instance, msgs[0].GetByName("Names").Type);
-            var listMsg = msgs[0].GetMessage("Names");
+            Assert.Equal(FudgeMsgFieldType.Instance, msg.GetByName("Names").Type);
+            var listMsg = msg.GetMessage("Names");
             Assert.Equal("FudgeMsg[ => Fred,  => Sheila]", listMsg.ToString());
 
-            var obj2 = (PrimitiveListClass)serializer.Deserialize(msgs);
+            var obj2 = (PrimitiveListClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.Equal(obj1.Names, obj2.Names);
@@ -105,8 +105,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             obj1.Number = 17;
             obj1.Sub = new SimpleExampleClass { Name = "Bob", Age = 21 };
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (SubObjectClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (SubObjectClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.NotSame(obj1.Sub, obj2.Sub);
@@ -123,8 +123,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var obj1 = new ListOfObjectsClass();
             obj1.Subs.Add(new SimpleExampleClass { Name = "Bob", Age = 21 });
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (ListOfObjectsClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (ListOfObjectsClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.NotSame(obj1.Subs[0], obj2.Subs[0]);
@@ -141,8 +141,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var obj1 = new ArrayOfObjectsClass();
             obj1.Subs = new SimpleExampleClass[] {new SimpleExampleClass { Name = "Bob", Age = 21 }};
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (ArrayOfObjectsClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (ArrayOfObjectsClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.NotSame(obj1.Subs[0], obj2.Subs[0]);
@@ -160,8 +160,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             obj1.List = new List<string[]>();
             obj1.List.Add(new string[] { "Bob", "Mavis" });
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (ListOfArraysClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (ListOfArraysClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.NotSame(obj1.List[0], obj2.List[0]);
@@ -180,8 +180,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             obj1.Map["Fred"] = new SimpleExampleClass { Name = "Fred", Age = 23 };
             obj1.Map["Jemima"] = new SimpleExampleClass { Name = "Jemima", Age = 17 };
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (DictionaryClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (DictionaryClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.NotSame(obj1.Map, obj2.Map);
@@ -206,10 +206,10 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             StaticTransientClass.Static = 17;
             var obj1 = new StaticTransientClass {Transient = "Hello"};
 
-            var msgs = serializer.SerializeToMsgs(obj1);
+            var msg = serializer.SerializeToMsg(obj1);
 
             StaticTransientClass.Static = 19;
-            var obj2 = (StaticTransientClass)serializer.Deserialize(msgs);
+            var obj2 = (StaticTransientClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.Equal(null, obj2.Transient);
@@ -225,12 +225,12 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
             var obj1 = new RenameFieldClass { Name = "Albert", Age = 72 };
 
-            var msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Null(msgs[0].GetString("Name"));
-            Assert.Equal("Albert", msgs[0].GetString("name"));
-            Assert.Equal(72, msgs[0].GetInt("Age"));
+            var msg = serializer.SerializeToMsg(obj1);
+            Assert.Null(msg.GetString("Name"));
+            Assert.Equal("Albert", msg.GetString("nom"));
+            Assert.Equal(72, msg.GetInt("Age"));
 
-            var obj2 = (RenameFieldClass)serializer.Deserialize(msgs);
+            var obj2 = (RenameFieldClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.Equal(obj1.Name, obj2.Name);
@@ -243,10 +243,10 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var obj1 = new FieldConventionAttributeClass { MyName = "Fred" };              // Specifies camelCase
             var serializer = new FudgeSerializer(context);
             
-            var msgs = serializer.SerializeToMsgs(obj1);
-            Assert.NotNull(msgs[0].GetByName("myName"));
+            var msg = serializer.SerializeToMsg(obj1);
+            Assert.NotNull(msg.GetByName("MYNAME"));
             
-            var obj2 = (FieldConventionAttributeClass)serializer.Deserialize(msgs);
+            var obj2 = (FieldConventionAttributeClass)serializer.Deserialize(msg);
             Assert.Equal(obj1.MyName, obj2.MyName);
         }
 
@@ -255,43 +255,44 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             var context = new FudgeContext();           // So we don't mess with other unit tests
             var obj1 = new FieldConventionClass {MyName = "Bobby", myAge = 6};
-            IList<FudgeMsg> msgs;
+            FudgeMsg msg;
             FudgeSerializer serializer;
 
+            // Default is identity
             serializer = new FudgeSerializer(context);
             Assert.Equal(FudgeFieldNameConvention.Identity, serializer.TypeMap.FieldNameConvention);
-            msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[0].GetString("MyName"));
-            Assert.Equal(6, msgs[0].GetInt("myAge"));
-            Assert.Equal(obj1, serializer.Deserialize(msgs));
+            msg = serializer.SerializeToMsg(obj1);
+            Assert.Equal("Bobby", msg.GetString("MyName"));
+            Assert.Equal(6, msg.GetInt("myAge"));
+            Assert.Equal(obj1, serializer.Deserialize(msg));
 
-            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.AllLowerCase);
+            context.SetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.AllLowerCase);
             serializer = new FudgeSerializer(context);
-            msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[0].GetString("myname"));
-            Assert.Equal(6, msgs[0].GetInt("myage"));
-            Assert.Equal(obj1, serializer.Deserialize(msgs));
+            msg = serializer.SerializeToMsg(obj1);
+            Assert.Equal("Bobby", msg.GetString("myname"));
+            Assert.Equal(6, msg.GetInt("myage"));
+            Assert.Equal(obj1, serializer.Deserialize(msg));
 
-            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.AllUpperCase);
+            context.SetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.AllUpperCase);
             serializer = new FudgeSerializer(context);
-            msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[0].GetString("MYNAME"));
-            Assert.Equal(6, msgs[0].GetInt("MYAGE"));
-            Assert.Equal(obj1, serializer.Deserialize(msgs));
+            msg = serializer.SerializeToMsg(obj1);
+            Assert.Equal("Bobby", msg.GetString("MYNAME"));
+            Assert.Equal(6, msg.GetInt("MYAGE"));
+            Assert.Equal(obj1, serializer.Deserialize(msg));
 
-            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.CamelCase);
+            context.SetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.CamelCase);
             serializer = new FudgeSerializer(context);
-            msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[0].GetString("myName"));
-            Assert.Equal(6, msgs[0].GetInt("myAge"));
-            Assert.Equal(obj1, serializer.Deserialize(msgs));
+            msg = serializer.SerializeToMsg(obj1);
+            Assert.Equal("Bobby", msg.GetString("myName"));
+            Assert.Equal(6, msg.GetInt("myAge"));
+            Assert.Equal(obj1, serializer.Deserialize(msg));
 
-            context.SetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.PascalCase);
+            context.SetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.PascalCase);
             serializer = new FudgeSerializer(context);
-            msgs = serializer.SerializeToMsgs(obj1);
-            Assert.Equal("Bobby", msgs[0].GetString("MyName"));
-            Assert.Equal(6, msgs[0].GetInt("MyAge"));
-            Assert.Equal(obj1, serializer.Deserialize(msgs));
+            msg = serializer.SerializeToMsg(obj1);
+            Assert.Equal("Bobby", msg.GetString("MyName"));
+            Assert.Equal(6, msg.GetInt("MyAge"));
+            Assert.Equal(obj1, serializer.Deserialize(msg));
         }
 
         [Fact]
@@ -375,13 +376,13 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
         public class RenameFieldClass
         {
-            [FudgeFieldName("name")]
+            [FudgeFieldName("nom")]
             public string Name { get; set; }
 
             public int Age { get; set; }
         }
 
-        [FudgeFieldNameConvention(FudgeFieldNameConvention.CamelCase)]
+        [FudgeFieldNameConvention(FudgeFieldNameConvention.AllUpperCase)]
         public class FieldConventionAttributeClass
         {
             public string MyName { get; set; }

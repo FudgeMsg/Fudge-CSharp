@@ -37,8 +37,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             testClass.Array = new SomeInlineClass[] { new SomeInlineClass { Name = "C" }, null, new SomeInlineClass { Name = "D" } };
 
             var serializer = new FudgeSerializer(context);
-            var msgs = serializer.SerializeToMsgs(testClass);
-            var testClass2 = (TestClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(testClass);
+            var testClass2 = (TestClass)serializer.Deserialize(msg);
 
             Assert.Equal("A", testClass2.List[0].Name);
             Assert.Null(testClass2.List[1]);

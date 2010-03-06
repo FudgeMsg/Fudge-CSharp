@@ -130,44 +130,52 @@ namespace Fudge.Serialization.Reflection
         #region IFudgeSerializationSurrogate Members
 
         /// <inheritdoc/>
-        public void Serialize(object obj, IFudgeSerializer serializer)
+        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             foreach (var entry in propMap)
             {
                 string name = entry.Key;
                 MorePropertyData prop = entry.Value;
                 object val = prop.PropertyData.Info.GetValue(obj, null);
-                prop.Serializer(prop, val, serializer);
+
+                if (val != null)
+                {
+                    prop.Serializer(prop, val, msg, serializer);
+                }
             }
         }
 
         /// <inheritdoc/>
-        public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+        public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
             object newObj = constructor.Invoke(null);
-            deserializer.Register(newObj);
+
+            // Register now in case any cycles in the object graph
+            deserializer.Register(msg, newObj);
+
+            foreach (var field in msg)
+            {
+                DeserializeField(deserializer, field, newObj);
+            }
+
             return newObj;
         }
 
-        /// <inheritdoc/>
-        public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
+        #endregion
+
+        private bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, object obj)
         {
+            if (field.Name == null)
+                return false;           // Can't process without a name (yet)
+
             MorePropertyData prop;
             if (propMap.TryGetValue(field.Name, out prop))
             {
-                prop.Adder(prop, state, field, deserializer);
+                prop.Adder(prop, obj, field, deserializer);
                 return true;
             }
             return false;
         }
-
-        /// <inheritdoc/>
-        public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
-        {
-            return state;
-        }
-
-        #endregion
 
         #region Helper functions
 
@@ -177,9 +185,9 @@ namespace Fudge.Serialization.Reflection
             return Delegate.CreateDelegate(typeof(T), this, method) as T;
         }
 
-        private void PrimitiveSerialize(MorePropertyData prop, object val, IFudgeSerializer serializer)
+        private void PrimitiveSerialize(MorePropertyData prop, object val, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            serializer.Write(prop.PropertyData.SerializedName, val);
+            msg.Add(prop.PropertyData.SerializedName, val);
         }
 
         private void PrimitiveAdd(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer)
@@ -188,9 +196,9 @@ namespace Fudge.Serialization.Reflection
             prop.PropertyData.Info.SetValue(obj, val, null);
         }
 
-        private void InlineSerialize(MorePropertyData prop, object val, IFudgeSerializer serializer)
+        private void InlineSerialize(MorePropertyData prop, object val, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            serializer.WriteSubMsg(prop.PropertyData.SerializedName, val);
+            serializer.WriteInline(msg, prop.PropertyData.SerializedName, val);
         }
 
         private void InlineAdd<T>(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer) where T : class
@@ -207,10 +215,10 @@ namespace Fudge.Serialization.Reflection
                 currentList.Add(item);
         }
 
-        private void ReferenceSerialize(MorePropertyData prop, object val, IFudgeSerializer serializer)
+        private void ReferenceSerialize(MorePropertyData prop, object val, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            // We can't tell whether it might have cycles, so serialize as a reference
-            serializer.WriteRef(prop.PropertyData.SerializedName, val);
+            // Serializer will in-line or not as appropriate
+            msg.Add(prop.PropertyData.SerializedName, null, prop.PropertyData.TypeData.FieldType, val);
         }
 
         private void ReferenceAdd<T>(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer) where T : class
@@ -224,7 +232,7 @@ namespace Fudge.Serialization.Reflection
         private class MorePropertyData
         {
             public TypeData.PropertyData PropertyData { get; set; }
-            public Action<MorePropertyData, object, IFudgeSerializer> Serializer { get; set; }
+            public Action<MorePropertyData, object, IMutableFudgeFieldContainer, IFudgeSerializer> Serializer { get; set; }
             public Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer> Adder { get; set; }
         }
     }

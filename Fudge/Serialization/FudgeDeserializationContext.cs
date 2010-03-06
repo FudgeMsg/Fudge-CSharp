@@ -38,9 +38,8 @@ namespace Fudge.Serialization
         private readonly IFudgeStreamReader reader;
         private readonly FudgeMsgStreamWriter msgWriter;
         private readonly FudgeStreamPipe pipe;
-        private readonly List<object> reffedObjects;        // Holds objects that have been (or are being deserialised) that are references
-        private readonly List<FudgeMsg> unprocessedObjects;
-        private bool reachedEnd;
+        private readonly List<MsgAndObj> objectList;        // Holds messages and the objects they've deserialized into (for use with references)
+        private readonly Dictionary<IFudgeFieldContainer, int> msgToIndexMap = new Dictionary<IFudgeFieldContainer, int>();
         private readonly Stack<State> stack;
         private readonly IFudgeTypeMappingStrategy typeMappingStrategy;
 
@@ -51,25 +50,38 @@ namespace Fudge.Serialization
             this.reader = reader;
             this.msgWriter = new FudgeMsgStreamWriter(context);
             this.pipe = new FudgeStreamPipe(reader, msgWriter);
-            this.reffedObjects = new List<object>();
-            this.unprocessedObjects = new List<FudgeMsg>();
-            this.reachedEnd = false;
+            this.objectList = new List<MsgAndObj>();
             this.stack = new Stack<State>();
             this.typeMappingStrategy = typeMappingStrategy;
         }
 
         public object DeserializeGraph()
         {
-            // TODO 2010-02-28 t0rx -- Get rid of serialization header altogether?
-            //var header = new SerializationHeader(ReadNextMessage(), typeMap);
-
             // We simply return the first object
+            var msg = ReadNextMessage();
+
+            WalkMessage(msg);
+
             object result = GetFromRef(0);
 
-            // Ensure we've exhausted the stream
-            ReadUpToEnd();
-
             return result;
+        }
+
+        private void WalkMessage(FudgeMsg msg)
+        {
+            // TODO: Should do this as it's streaming in rather than separately
+            MsgAndObj msgAndObj = new MsgAndObj();
+            msgAndObj.Msg = msg;
+            int index = objectList.Count;
+            objectList.Add(msgAndObj);
+            msgToIndexMap[msg] = index;
+            foreach (var field in msg)
+            {
+                if (field.Type == FudgeMsgFieldType.Instance)
+                {
+                    WalkMessage((FudgeMsg)field.Value);
+                }
+            }
         }
 
         private object GetFromRef(int? refId)
@@ -81,52 +93,43 @@ namespace Fudge.Serialization
 
             int index = refId.Value;
 
-            while (unprocessedObjects.Count <= index)
+            if (index < 0 || index >= objectList.Count)
             {
-                FudgeMsg msg = ReadNextMessage();
-                if (msg == null)
-                {
-                    Debug.Assert(reachedEnd);
-
-                    // TODO 2010-01-24 t0rx -- Do we need a separate FudgeSerializatonException?
-                    throw new FudgeRuntimeException("Attempt to deserialize object reference with ID " + refId + " but only " + unprocessedObjects.Count + " objects in stream.");
-                }
-
-                unprocessedObjects.Add(msg);
-                reffedObjects.Add(null);            // Placeholder
+                throw new FudgeRuntimeException("Attempt to deserialize object reference with ID " + refId + " but only " + objectList.Count + " objects in stream so far.");
             }
-            Debug.Assert(unprocessedObjects.Count == reffedObjects.Count);
 
-            object result = reffedObjects[index];
-            if (result == null)
+            var msgAndObj = objectList[index];
+            if (msgAndObj.Obj == null)
             {
                 // Not processed yet
-                result = ProcessObject(index, null);
+                ProcessObject(index, null);
+
+                Debug.Assert(msgAndObj.Obj != null);
             }
-            return result;
+            return msgAndObj.Obj;
         }
 
         private object ProcessObject(int index, Type hintType)
         {
-            Debug.Assert(reffedObjects[index] == null);
-            Debug.Assert(unprocessedObjects[index] != null);
+            Debug.Assert(objectList[index].Obj == null);
+            Debug.Assert(objectList[index].Msg != null);
 
-            var message = unprocessedObjects[index];
-            unprocessedObjects[index] = null;                           // Just making sure we don't try to process the same one twice
+            var message = objectList[index].Msg;
+            objectList[index].Msg = null;                           // Just making sure we don't try to process the same one twice
             int typeId;
             object result = ProcessObject(index, hintType, message, out typeId);
 
             // Make sure the object was registered by the surrogate
-            if (reffedObjects[index] == null)
+            if (objectList[index].Obj == null)
             {
                 throw new SerializationException("Object not registered during deserialization with type " + typeMap.GetTypeName(typeId));
             }
-            Debug.Assert(result == reffedObjects[index]);
+            Debug.Assert(result == objectList[index].Obj);
 
             return result;
         }
 
-        private object ProcessObject(int? refId, Type hintType, FudgeMsg message, out int typeId)
+        private object ProcessObject(int refId, Type hintType, FudgeMsg message, out int typeId)
         {
             Type objectType = null;
             string typeName;
@@ -158,18 +161,15 @@ namespace Fudge.Serialization
             }
             else
             {
-                if (refId == null)
-                {
-                    throw new FudgeRuntimeException("Cannot use relative type IDs in sub-messages.");
-                }
-                int previousObjId = refId.Value + Convert.ToInt32(typeField.Value);
+                int previousObjId = refId + Convert.ToInt32(typeField.Value);
 
-                if (previousObjId < 0 || previousObjId >= refId.Value)
+                if (previousObjId < 0 || previousObjId >= refId)
                 {
                     throw new FudgeRuntimeException("Illegal relative type ID in sub-message: " + typeField.Value);
                 }
 
-                objectType = reffedObjects[previousObjId].GetType();
+                object previous = GetFromRef(previousObjId);
+                objectType = previous.GetType();
             }
 
             typeId = typeMap.GetTypeId(objectType);
@@ -184,50 +184,23 @@ namespace Fudge.Serialization
             {
                 throw new SerializationException("Surrogate factory for type " + typeName + " returned null surrogate.");
             }
-            int typeVersion = typeMap.GetTypeVersion(typeId);
 
-            var state = new State(message, refId, typeVersion, typeName);
+            var state = new State(message, refId, typeName);
 
             stack.Push(state);
-            object surrogateState = surrogate.BeginDeserialize(this, typeVersion);
 
-            IFudgeField field;
-            while ((field = state.NextField()) != null)
-            {
-                if (!surrogate.DeserializeField(this, field, typeVersion, surrogateState))
-                    state.AddToUnused(field);
-            }
-
-            var result = surrogate.EndDeserialize(this, typeVersion, surrogateState);
+            object result = surrogate.Deserialize(message, this);
 
             stack.Pop();
             return result;
         }
 
-
         private FudgeMsg ReadNextMessage()
         {
-            if (reachedEnd)
-                return null;
-
             pipe.ProcessOne();
             var msg = msgWriter.DequeueMessage();
 
-            if (msg.GetNumFields() == 0)
-            {
-                reachedEnd = true;
-                msg = null;
-            }
-
             return msg;
-        }
-
-        private void ReadUpToEnd()
-        {
-            while (!reachedEnd)
-            {
-                ReadNextMessage();
-            }
         }
 
         #region IFudgeDeserializer Members
@@ -257,7 +230,8 @@ namespace Fudge.Serialization
                 // SubMsg
                 var subMsg = (FudgeMsg)field.Value;
                 int typeId;
-                return (T)ProcessObject(null, typeof(T), subMsg, out typeId);
+                int refId = msgToIndexMap[subMsg];
+                return (T)ProcessObject(refId, typeof(T), subMsg, out typeId);
             }
             else if (field.Type == IndicatorFieldType.Instance)
             {
@@ -266,51 +240,50 @@ namespace Fudge.Serialization
             }
             else
             {
-                int refId = Convert.ToInt32(field.Value);
-                return (T)GetFromRef(refId);
+                int relativeRef = Convert.ToInt32(field.Value);
+                int refIndex = relativeRef + stack.Peek().RefId;
+
+                return (T)GetFromRef(refIndex);
             }
         }
 
         /// <inheritdoc/>
-        public void Register(object obj)
+        public void Register(IFudgeFieldContainer msg, object obj)
         {
+            // TODO 20100306 t0rx -- check state matches
             State state = stack.Peek();
-            if (state.RefId == null)
-                return;                     // Don't care
 
-            int index = state.RefId.Value;
-            Debug.Assert(reffedObjects.Count > index);
+            int index = state.RefId;
+            Debug.Assert(objectList.Count > index);
 
-            if (reffedObjects[index] != null)
+            if (objectList[index].Obj != null)
             {
                 throw new SerializationException("Attempt to register same deserialized object twice for type " + state.TypeName + " refID=" + index);
             }
 
-            reffedObjects[index] = obj;
+            objectList[index].Obj = obj;
         }
 
         #endregion
 
-        private class State
+        private sealed class State
         {
             private readonly FudgeContext context;
-            private readonly int? refId;
+            private readonly int refId;
             private readonly Queue<IFudgeField> fields;
-            private readonly int typeVersion;
             private readonly List<IFudgeField> unusedFields;
             private readonly string typeName;
 
-            public State(FudgeMsg msg, int? refId, int typeVersion, string typeName)
+            public State(FudgeMsg msg, int refId, string typeName)
             {
                 this.context = msg.Context;
                 this.fields = new Queue<IFudgeField>(msg.GetAllFields());
                 this.refId = refId;
-                this.typeVersion = typeVersion;
                 this.unusedFields = new List<IFudgeField>();
                 this.typeName = typeName;
             }
 
-            public int? RefId
+            public int RefId
             {
                 get { return refId; }
             }
@@ -349,6 +322,12 @@ namespace Fudge.Serialization
 
                 return result;
             }
+        }
+
+        private class MsgAndObj
+        {
+            public FudgeMsg Msg;
+            public object Obj;
         }
     }
 }

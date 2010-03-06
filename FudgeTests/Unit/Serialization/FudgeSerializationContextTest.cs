@@ -32,10 +32,10 @@ namespace Fudge.Tests.Unit.Serialization
 
             var testObj = new ClassWithCycles();
             testObj.Child = new ClassWithCycles();
-            serializer.SerializeToMsgs(testObj);        // Doesn't throw because no cycles
+            serializer.SerializeToMsg(testObj);        // Doesn't throw because no cycles
 
             testObj.Child = testObj;
-            Assert.Throws<FudgeRuntimeException>(() => serializer.SerializeToMsgs(testObj));
+            Assert.Throws<FudgeRuntimeException>(() => serializer.SerializeToMsg(testObj));
         }
 
         private class ClassWithCycles

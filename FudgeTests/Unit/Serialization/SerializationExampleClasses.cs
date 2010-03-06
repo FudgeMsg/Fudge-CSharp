@@ -38,18 +38,23 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public virtual void Serialize(IFudgeSerializer serializer)
+            public virtual void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
-                serializer.Write("name", Name);
-                serializer.WriteSubMsg("mainAddress", MainAddress);     // We are writing it in-line, so polymorphism and reference cycles are not supported
+                msg.Add("name", Name);
+                msg.AddIfNotNull("mainAddress", MainAddress);
             }
 
-            public virtual void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            public virtual void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
-                // No init necessary
+                foreach (IFudgeField field in msg)
+                {
+                    DeserializeField(deserializer, field);
+                }
             }
 
-            public virtual bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+            #endregion
+
+            protected virtual bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field)
             {
                 switch (field.Name)
                 {
@@ -64,13 +69,6 @@ namespace Fudge.Tests.Unit.Serialization
                 // Field not recognised
                 return false;
             }
-
-            public virtual void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
-            {
-                // No tidy-up necessary
-            }
-
-            #endregion
         }
 
         public class Sibling : Person
@@ -86,19 +84,19 @@ namespace Fudge.Tests.Unit.Serialization
                 get { return siblings; }
             }
 
-            public override void Serialize(IFudgeSerializer serializer)
+            public override void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 // Add our parent's fields
-                base.Serialize(serializer);
+                base.Serialize(msg, serializer);
 
                 // Now tag on ours
-                serializer.WriteAllRefs("siblings", siblings);
+                msg.AddAll("siblings", siblings);
             }
 
-            public override bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+            protected override bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field)
             {
                 // Let the base process first
-                if (base.DeserializeField(deserializer, field, dataVersion))
+                if (base.DeserializeField(deserializer, field))
                     return true;
 
                 // Now process our fields
@@ -137,41 +135,27 @@ namespace Fudge.Tests.Unit.Serialization
         {
             #region IFudgeSerializationSurrogate Members
 
-            public void Serialize(object obj, IFudgeSerializer serializer)
+            public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 var address = (Address)obj;
-                serializer.Write("line1", address.Line1);
-                serializer.Write("line2", address.Line2);
-                serializer.WriteIfNotNull("zip", address.Zip);
+                msg.AddIfNotNull("line1", address.Line1);
+                msg.AddIfNotNull("line2", address.Line2);
+                msg.AddIfNotNull("zip", address.Zip);
             }
 
-            public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
-                // This is less efficient than processing each field as streamed through DeserializeField, but it's simpler
-                IFudgeFieldContainer msg = deserializer.GetUnreadFields();
                 var address = new Address(msg.GetString("line1"),
                                           msg.GetString("line2"),
                                           msg.GetString("zip"));
-                deserializer.Register(address);
+                deserializer.Register(msg, address);
                 return address;
-            }
-
-            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
-            {
-                // All was done in BeginDeserialize
-                return false;
-            }
-
-            public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
-            {
-                // state is our object
-                return state;
             }
 
             #endregion
         }
 
-        public class Tick : IFudgeSerializable
+        public sealed class Tick : IFudgeSerializable
         {
             public string Ticker { get; set; }
             public double Bid { get; set; }
@@ -179,30 +163,18 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IFudgeSerializer serializer)
+            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
-                serializer.Write("ticker", Ticker);
-                serializer.Write("bid", Bid);
-                serializer.Write("offer", Offer);
+                msg.Add("ticker", Ticker);
+                msg.Add("bid", Bid);
+                msg.Add("offer", Offer);
             }
 
-            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
-                // This is less efficient than processing each field as streamed through DeserializeField, but it shows
-                // how you can process using message stuff
-                IFudgeFieldContainer msg = deserializer.GetUnreadFields();
                 Ticker = msg.GetString("ticker");
                 Bid = msg.GetDouble("bid") ?? 0.0;
                 Offer = msg.GetDouble("offer") ?? 0.0;
-            }
-
-            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
-            {
-                return false;
-            }
-
-            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
-            {
             }
 
             #endregion

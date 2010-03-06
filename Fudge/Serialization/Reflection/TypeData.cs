@@ -128,14 +128,7 @@ namespace Fudge.Serialization.Reflection
                 return TypeKind.Inline;
             }
 
-            if ((bool)context.GetProperty(FudgeSerializer.InlineByDefault, false))
-            {
-                return TypeKind.Inline;
-            }
-            else
-            {
-                return TypeKind.Reference;
-            }
+            return TypeKind.Reference;
         }
 
         private void ScanProperties(FudgeContext context, TypeDataCache cache, FudgeFieldNameConvention fieldNameConvention)

@@ -32,25 +32,30 @@ namespace Fudge.Serialization
     /// {
     ///     public string Name { get; set; }
     ///     public Address MainAddress { get; set; }
-    /// 
+    ///
     ///     public Person()
     ///     {
     ///     }
-    /// 
+    ///
     ///     #region IFudgeSerializable Members
-    /// 
-    ///     public virtual void Serialize(IFudgeSerializer serializer)
+    ///
+    ///     public virtual void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
     ///     {
-    ///         serializer.Write("name", Name);
-    ///         serializer.WriteSubMsg("mainAddress", MainAddress);     // We are writing it in-line, so polymorphism and reference cycles are not supported
+    ///         msg.Add("name", Name);
+    ///         msg.AddIfNotNull("mainAddress", MainAddress);
     ///     }
-    /// 
-    ///     public virtual void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+    ///
+    ///     public virtual void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
     ///     {
-    ///         // No init necessary
+    ///         foreach (IFudgeField field in msg)
+    ///         {
+    ///             DeserializeField(deserializer, field);
+    ///         }
     ///     }
-    /// 
-    ///     public virtual bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
+    ///
+    ///     #endregion
+    ///
+    ///     protected virtual bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field)
     ///     {
     ///         switch (field.Name)
     ///         {
@@ -58,20 +63,13 @@ namespace Fudge.Serialization
     ///                 Name = field.GetString();
     ///                 return true;
     ///             case "mainAddress":
-    ///                 MainAddress = deserializer.FromField&lt;Address&gt;(field);
+    ///                 MainAddress = deserializer.FromField<Address>(field);
     ///                 return true;
     ///         }
-    /// 
+    ///
     ///         // Field not recognised
     ///         return false;
     ///     }
-    /// 
-    ///     public virtual void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
-    ///     {
-    ///         // No tidy-up necessary
-    ///     }
-    /// 
-    ///     #endregion
     /// }
     /// </code>
     /// The code for the <c>Address</c> class is not shown here, but it could similarly implement <see cref="IFudgeSerializable"/> or alternatively
@@ -80,35 +78,17 @@ namespace Fudge.Serialization
     public interface IFudgeSerializable
     {
         /// <summary>
-        /// Serializes the object to a Fudge serializer.
+        /// Serializes the object into a message.
         /// </summary>
+        /// <param name="msg">Message to serialize the object into.</param>
         /// <param name="serializer">Serializer to receive the data.</param>
-        void Serialize(IFudgeSerializer serializer);
+        void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer);
 
         /// <summary>
-        /// Begins the deserialization process the object.
+        /// Deserializes a message into the object.
         /// </summary>
+        /// <param name="msg">Message containing the data.</param>
         /// <param name="deserializer">Deserializer providing the data.</param>
-        /// <param name="dataVersion">Version of the message data structure.</param>
-        void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion);
-
-        /// <summary>
-        /// Deserializes the contents of the field into the object.
-        /// </summary>
-        /// <param name="deserializer">Deserializer providing the data.</param>
-        /// <param name="field">Data to deserialize.</param>
-        /// <param name="dataVersion">Version of the message data structure.</param>
-        /// <returns><c>true</c> if the field was consumed, or <c>false</c> if the field is unused.</returns>
-        /// <remarks>Unused fields can be collected in <see cref="EndDeserialize"/> to support evolvability of data.</remarks>
-        bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion);
-
-        /// <summary>
-        /// Called after all data for an object have been processed, to enable tidy-up.
-        /// </summary>
-        /// <param name="deserializer">Deserializer providing the data.</param>
-        /// <param name="dataVersion">Version of the message data structure.</param>
-        /// <remarks>Evolvable objects should call <see cref="IFudgeDeserializer.GetUnreadFields"/> here to obtain
-        /// any fields that were not directly consumed by the object in <see cref="DeserializeField"/>.</remarks>
-        void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion);
+        void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer);
     }
 }

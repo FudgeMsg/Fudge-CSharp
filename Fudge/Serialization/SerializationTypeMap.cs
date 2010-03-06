@@ -35,8 +35,8 @@ namespace Fudge.Serialization
         {
             this.context = context;
             this.surrogateSelector = new FudgeSurrogateSelector(context);
-            this.AllowTypeDiscovery = (bool)context.GetProperty(FudgeSerializer.AllowTypeDiscoveryProperty, true);
-            this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(FudgeSerializer.FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
+            this.AllowTypeDiscovery = (bool)context.GetProperty(ContextProperties.AllowTypeDiscoveryProperty, true);
+            this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Fudge.Serialization
         {
             // TODO 2009-10-18 t0rx -- Handle IFudgeSerializable
             int id = typeDataList.Count;
-            var entry = new TypeData { Name = name, SurrogateFactory = surrogateFactory, TypeVersion = typeVersion, Type = type };
+            var entry = new TypeData { Name = name, SurrogateFactory = surrogateFactory, Type = type };
             typeDataList.Add(entry);
             nameMap.Add(name, id);
             typeMap.Add(type, id);
@@ -148,11 +148,6 @@ namespace Fudge.Serialization
             return typeDataList.ConvertAll(entry => entry.Name);
         }
 
-        public IList<int> GetTypeVersions()
-        {
-            return typeDataList.ConvertAll(entry => entry.TypeVersion);
-        }
-
         public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type)
         {
             int index;
@@ -178,11 +173,6 @@ namespace Fudge.Serialization
                 return null;
 
             return typeDataList[typeId].SurrogateFactory;
-        }
-
-        public int GetTypeVersion(int typeId)
-        {
-            return typeDataList[typeId].TypeVersion;
         }
 
         public string GetTypeName(int typeId)
@@ -235,7 +225,6 @@ namespace Fudge.Serialization
             public Type Type { get; set; }
             public string Name { get; set; }
             public Func<FudgeContext, IFudgeSerializationSurrogate> SurrogateFactory { get; set; }
-            public int TypeVersion { get; set; }
         }
     }
 }

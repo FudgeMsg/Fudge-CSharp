@@ -56,34 +56,19 @@ namespace Fudge.Serialization
         #region IFudgeSerializationSurrogate Members
 
         /// <inheritdoc/>
-        public void Serialize(object obj, IFudgeSerializer serializer)
+        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             IFudgeSerializable ser = (IFudgeSerializable)obj;
-            ser.Serialize(serializer);
+            ser.Serialize(msg, serializer);
         }
 
         /// <inheritdoc/>
-        public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+        public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
             IFudgeSerializable result = (IFudgeSerializable)constructor.Invoke(null);
-            deserializer.Register(result);
-            result.BeginDeserialize(deserializer, dataVersion);
+            deserializer.Register(msg, result);
+            result.Deserialize(msg, deserializer);
             return result;
-        }
-
-        /// <inheritdoc/>
-        public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
-        {
-            IFudgeSerializable obj = (IFudgeSerializable)state;
-            return obj.DeserializeField(deserializer, field, dataVersion);
-        }
-
-        /// <inheritdoc/>
-        public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
-        {
-            IFudgeSerializable obj = (IFudgeSerializable)state;
-            obj.EndDeserialize(deserializer, dataVersion);
-            return obj;
         }
 
         #endregion

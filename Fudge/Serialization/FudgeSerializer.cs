@@ -39,19 +39,6 @@ namespace Fudge.Serialization
         /// <summary>Constant defining the ordinal for the field in which type information is stored.</summary>
         public const int TypeIdFieldOrdinal = 0;
 
-        /// <summary>Property of the <see cref="FudgeContext"/> that overrides the default value of <see cref="TypeMappingStrategy"/>.</summary>
-        public static readonly FudgeContextProperty TypeMappingStrategyProperty = new FudgeContextProperty("Serialization.TypeMappingStrategy", typeof(IFudgeTypeMappingStrategy));
-        /// <summary>Property of the <see cref="FudgeContext"/> that sets the <see cref="FudgeFieldNameConvention"/> (<see cref="FudgeFieldNameConvention.Identity"/> by default).</summary>
-        public static readonly FudgeContextProperty FieldNameConventionProperty = new FudgeContextProperty("Serialization.FieldNameConvention", typeof(FudgeFieldNameConvention));
-        /// <summary>Property of the <see cref="FudgeContext"/> that specifies whether types can automatically by serialized or whether they must be explicitly
-        /// registered in the <see cref="SerializationTypeMap"/>.  By default this is <c>true</c>, i.e. types do not need explicitly registering.</summary>
-        public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("Serialization.AllowTypeDiscovery", typeof(bool));
-        /// <summary>Property of the <see cref="FudgeContext"/> that specifies whether types are by default inlined rather than referenced.  If
-        /// you leave this unspecified then if will default to <c>false</c> - i.e. objects are referenced.</summary>
-        /// <remarks>Whilst inlining sub-objects makes the message structure more readable, it prohibits cycles in the object graph and also means that
-        /// a sub-object that appears more than once in the graph will be serialized multiple times and deserialized as multiple objects.</remarks>
-        public static readonly FudgeContextProperty InlineByDefault = new FudgeContextProperty("Serialization.InlineByDefault", typeof(bool));
-
         /// <summary>
         /// Constructs a new <see cref="FudgeSerializer"/> instance.
         /// </summary>
@@ -80,7 +67,7 @@ namespace Fudge.Serialization
             this.context = context;
             this.typeMap = typeMap;
 
-            this.TypeMappingStrategy = (IFudgeTypeMappingStrategy)context.GetProperty(TypeMappingStrategyProperty, new DefaultTypeMappingStrategy());
+            this.TypeMappingStrategy = (IFudgeTypeMappingStrategy)context.GetProperty(ContextProperties.TypeMappingStrategyProperty, new DefaultTypeMappingStrategy());
         }
 
         /// <summary>
@@ -110,7 +97,7 @@ namespace Fudge.Serialization
 
             // Delegate to FudgeSerializationContext to do the work
             var serializationContext = new FudgeSerializationContext(context, typeMap, writer, TypeMappingStrategy);
-            serializationContext.SerializeGraph(writer, graph);
+            serializationContext.SerializeGraph(graph);
         }
 
         /// <summary>
@@ -118,11 +105,11 @@ namespace Fudge.Serialization
         /// </summary>
         /// <param name="graph">Starting point for graph of objects to serialize.</param>
         /// <returns>List of FudgeMsg objects containing the serialized state.</returns>
-        public IList<FudgeMsg> SerializeToMsgs(object graph)
+        public FudgeMsg SerializeToMsg(object graph)
         {
             var writer = new FudgeMsgStreamWriter(context);
             Serialize(writer, graph);
-            return writer.PeekAllMessages();
+            return writer.DequeueMessage();
         }
 
         /// <summary>
@@ -145,11 +132,11 @@ namespace Fudge.Serialization
         /// <summary>
         /// Convenience method to deserialize an object graph from a list of messages.
         /// </summary>
-        /// <param name="msgs">Messages containing serialized state.</param>
+        /// <param name="msg">Message containing serialized state.</param>
         /// <returns>Deserialized object graph.</returns>
-        public object Deserialize(IEnumerable<FudgeMsg> msgs)
+        public object Deserialize(FudgeMsg msg)
         {
-            var reader = new FudgeMsgStreamReader(context, msgs);
+            var reader = new FudgeMsgStreamReader(context, new FudgeMsg[] {msg});
             return Deserialize(reader);
         }
     }

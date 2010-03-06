@@ -18,12 +18,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Fudge.Types;
 
 namespace Fudge
 {
     public static class FudgeExtensions
     {
-        public static void AddIfNotNull(this FudgeMsg msg, string name, object value)
+        public static void AddIfNotNull(this IMutableFudgeFieldContainer msg, string name, object value)
         {
             if (value != null)
             {
@@ -31,11 +32,61 @@ namespace Fudge
             }
         }
 
-        public static void AddIfNotNull(this FudgeMsg msg, int ordinal, object value)
+        public static void AddIfNotNull(this IMutableFudgeFieldContainer msg, int ordinal, object value)
         {
             if (value != null)
             {
                 msg.Add(ordinal, value);
+            }
+        }
+
+        /// <summary>
+        /// Writes all the values as a sequence of fields with the same name and ordinal.
+        /// </summary>
+        /// <typeparam name="T">Type of values.</typeparam>
+        /// <param name="msg">Message to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="values">Values to write.</param>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
+        public static void AddAll<T>(this IMutableFudgeFieldContainer msg, string name, IEnumerable<T> values)
+        {
+            AddAll(msg, name, null, values);
+        }
+
+        /// <summary>
+        /// Writes all the values as a sequence of fields with the same name and ordinal.
+        /// </summary>
+        /// <typeparam name="T">Type of values.</typeparam>
+        /// <param name="msg">Message to write the fields.</param>
+        /// <param name="ordinal">Ordinal of the fields.</param>
+        /// <param name="values">Values to write.</param>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
+        public static void AddAll<T>(this IMutableFudgeFieldContainer msg, int ordinal, IEnumerable<T> values)
+        {
+            AddAll(msg, null, ordinal, values);
+        }
+
+        /// <summary>
+        /// Writes all the values as a sequence of fields with the same name and ordinal.
+        /// </summary>
+        /// <typeparam name="T">Type of values.</typeparam>
+        /// <param name="msg">Message to write the fields.</param>
+        /// <param name="name">Name of the fields.</param>
+        /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
+        /// <param name="values">Values to write.</param>
+        /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
+        public static void AddAll<T>(this IMutableFudgeFieldContainer msg, string name, int? ordinal, IEnumerable<T> values)
+        {
+            foreach (T value in values)
+            {
+                if (value != null)
+                {
+                    msg.Add(name, ordinal, value);
+                }
+                else
+                {
+                    msg.Add(name, ordinal, IndicatorType.Instance);
+                }
             }
         }
 

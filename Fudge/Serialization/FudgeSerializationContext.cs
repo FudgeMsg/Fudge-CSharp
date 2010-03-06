@@ -20,6 +20,8 @@ using System.Linq;
 using System.Text;
 using Fudge.Types;
 using Fudge.Encodings;
+using System.Collections;
+using System.Diagnostics;
 
 namespace Fudge.Serialization
 {
@@ -38,8 +40,8 @@ namespace Fudge.Serialization
         private readonly Dictionary<Type, int> lastTypes = new Dictionary<Type, int>();     // Tracks the last object of a given type
         private readonly SerializationTypeMap typeMap;
         private readonly IFudgeTypeMappingStrategy typeMappingStrategy;
-        private readonly List<object> inlineStack = new List<object>();                     // Used to check for cycles in inlined messages - see comments in CheckForInlineCycles
-        private int currentId = 0;
+        private readonly IndexedStack<State> inlineStack = new IndexedStack<State>();       // Used to check for cycles in inlined messages and keep track of the index of the current message
+        private int currentMessageId = 0;
 
         public FudgeSerializationContext(FudgeContext context, SerializationTypeMap typeMap, IFudgeStreamWriter writer, IFudgeTypeMappingStrategy typeMappingStrategy)
         {
@@ -65,24 +67,17 @@ namespace Fudge.Serialization
             return encodeQueue.Dequeue();
         }
 
-        public int RegisterObject(object obj)
+        private int RegisterObject(object obj)
         {
-            int id;
-            if (idMap.TryGetValue(obj, out id))
-            {
-                // Already registered
-                return id;
-            }
-            id = idMap.Count;
-            idMap.Add(obj, id);
-            return id;
+            idMap[obj] = currentMessageId;      // There is the possibility that an object is serialised in-line twice - we take the later so that relative references are smaller
+            return currentMessageId;
         }
 
-        public void SerializeContents(object obj)
+        public void SerializeContents(object obj, int index, IMutableFudgeFieldContainer msg)
         {
             CheckForInlineCycles(obj);
 
-            inlineStack.Add(obj);
+            inlineStack.Push(new State(obj, index));
 
             var surrogateFactory = typeMap.GetSurrogateFactory(obj.GetType());
             if (surrogateFactory == null)
@@ -92,65 +87,43 @@ namespace Fudge.Serialization
             }
             var surrogate = surrogateFactory(context);
 
-            surrogate.Serialize(obj, this);
+            surrogate.Serialize(obj, msg, this);
 
-            inlineStack.RemoveAt(inlineStack.Count - 1);
+            inlineStack.Pop();
         }
 
         private void CheckForInlineCycles(object obj)
         {
-            // We're using a List rather than a stack because enumerating a stack is much slower
             for (int i = inlineStack.Count - 1; i >= 0; i--)
             {
-                if (obj == inlineStack[i])
+                if (inlineStack[i].Obj == obj)
+                {
                     throw new FudgeRuntimeException("Cycle detected in inlined objects at object of type " + obj.GetType());
+                }
             }
         }
 
-        public void SerializeGraph(IFudgeStreamWriter writer, object graph)
+        public void SerializeGraph(object graph)
         {
-            // Write the header message
-            // TODO 2010-02-28 t0rx -- Get rid of serialization header altogether?
-            //var header = new SerializationHeader(typeMap);
-            //writer.WriteMsg(header.ToMessage());
+            Debug.Assert(currentMessageId == 0);
 
-            // Write out all the objects
-            QueueObject(graph);
-            ProcessSerializationQueue(writer);
+            RegisterObject(graph);
 
-            // Write the end marker
-            writer.WriteMsg(context.NewMessage());
-        }
-
-        public void ProcessSerializationQueue(IFudgeStreamWriter writer)
-        {
-            object nextObj;
-            while ((nextObj = PopQueuedObject()) != null)
-            {
-                RegisterObject(nextObj);     // Must register before serialising in case of circular references
-                SerializeObject(nextObj, writer);
-                currentId++;
-            }
-        }
-
-        private void SerializeObject(object obj, IFudgeStreamWriter writer)
-        {
-            int id = currentId;
+            var msg = new StreamingMessage(this);
 
             writer.StartMessage();
-
-            // Add in the type ID for when we deserialise
-            WriteTypeInformation(obj, id, writer);
-
-            SerializeContents(obj);
-
+            WriteTypeInformation(graph, currentMessageId, msg);
+            UpdateLastTypeInfo(graph);
+            SerializeContents(graph, currentMessageId, msg);
             writer.EndMessage();
-
-            // Update where we last saw the type
-            lastTypes[obj.GetType()] = id;
         }
 
-        private void WriteTypeInformation(object obj, int id, IFudgeStreamWriter writer)
+        private void UpdateLastTypeInfo(object obj)
+        {
+            lastTypes[obj.GetType()] = currentMessageId;
+        }
+
+        private void WriteTypeInformation(object obj, int id, IMutableFudgeFieldContainer msg)
         {
             Type type = obj.GetType();
             int lastSeen;
@@ -158,7 +131,7 @@ namespace Fudge.Serialization
             {
                 // Already had something of this type
                 int offset = lastSeen - id;
-                writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, PrimitiveFieldTypes.IntType, offset);
+                msg.Add(null, FudgeSerializer.TypeIdFieldOrdinal, PrimitiveFieldTypes.IntType, offset);
             }
             else
             {
@@ -166,7 +139,7 @@ namespace Fudge.Serialization
                 for (Type currentType = type; currentType != typeof(object); currentType = currentType.BaseType)
                 {
                     string typeName = typeMappingStrategy.GetName(currentType);
-                    writer.WriteField(null, FudgeSerializer.TypeIdFieldOrdinal, StringFieldType.Instance, typeName);
+                    msg.Add(null, FudgeSerializer.TypeIdFieldOrdinal, StringFieldType.Instance, typeName);
                 }
             }
         }
@@ -180,112 +153,359 @@ namespace Fudge.Serialization
         }
 
         /// <inheritdoc/>
-        public void Write(string fieldName, int? ordinal, object value)
-        {
-            FudgeFieldType type = context.TypeHandler.DetermineTypeFromValue(value);
-            if (type == null)
-            {
-                throw new FudgeRuntimeException("Could not write field (name '" + fieldName + "') of type " + value.GetType());
-            }
-            writer.WriteField(fieldName, ordinal, type, value);
-        }
-
-        /// <inheritdoc/>
-        public void WriteSubMsg(string fieldName, int? ordinal, object obj)
+        public void WriteInline(IMutableFudgeFieldContainer msg, string fieldName, int? ordinal, object obj)
         {
             if (obj != null)
             {
-                writer.StartSubMessage(fieldName, ordinal);
-                SerializeContents(obj);
-                writer.EndSubMessage();
-            }
-        }
-
-        /// <inheritdoc/>
-        public void WriteRef(string fieldName, int? ordinal, object obj)
-        {
-            if (obj != null)
-            {
-                Write(fieldName, ordinal, GetRefId(obj));
+                WriteObject(fieldName, ordinal, obj, false, false);
             }
         }
 
         #endregion
+
+        private void Write(string fieldName, int? ordinal, FudgeFieldType type, object value)
+        {
+            // TODO 20100306 t0rx -- Have to track if the value is a message to inc the count for references
+            if (type == null)
+            {
+                type = context.TypeHandler.DetermineTypeFromValue(value);
+            }
+            if (type == null)
+            {
+                WriteObject(fieldName, ordinal, value, true, true);
+            }
+            else
+            {
+                writer.WriteField(fieldName, ordinal, type, value);
+            }
+        }
+
+        private void WriteObject(string fieldName, int? ordinal, object value, bool allowRefs, bool writeTypeInfo)
+        {
+            if (allowRefs)
+            {
+                int previousId = GetRefId(value);
+                if (previousId != -1)
+                {
+                    // Refs are relative to the containing message
+                    int diff = previousId - inlineStack.Peek().Index;
+                    writer.WriteField(fieldName, ordinal, PrimitiveFieldTypes.IntType, diff);
+                    return;
+                }
+            }
+
+            // New object
+            currentMessageId++;
+            RegisterObject(value);
+
+            var subMsg = new StreamingMessage(this);
+            writer.StartSubMessage(fieldName, ordinal);
+            if (writeTypeInfo)
+            {
+                WriteTypeInformation(value, currentMessageId, subMsg);
+            }
+            UpdateLastTypeInfo(value);
+            SerializeContents(value, currentMessageId, subMsg);
+            writer.EndSubMessage();
+        }
 
         private int GetRefId(object obj)
         {
             int id;
             if (!idMap.TryGetValue(obj, out id))
             {
-                // New object
-                id = RegisterObject(obj);
-                QueueObject(obj);
+                return -1;
             }
 
             return id;
         }
+
+        /// <summary>
+        /// StreamingMessage appears to the user like it is a normal message, but rather than adding
+        /// fields it's actually streaming them out to the writer.
+        /// </summary>
+        private sealed class StreamingMessage : IMutableFudgeFieldContainer
+        {
+            private readonly FudgeSerializationContext serializationContext;
+
+            public StreamingMessage(FudgeSerializationContext serializationContext)
+            {
+                this.serializationContext = serializationContext;
+            }
+
+            #region IMutableFudgeFieldContainer Members
+
+            public void Add(IFudgeField field)
+            {
+                serializationContext.Write(field.Name, field.Ordinal, field.Type, field.Value);
+            }
+
+            public void Add(string name, object value)
+            {
+                serializationContext.Write(name, null, null, value);
+            }
+
+            public void Add(int? ordinal, object value)
+            {
+                serializationContext.Write(null, ordinal, null, value);
+            }
+
+            public void Add(string name, int? ordinal, object value)
+            {
+                serializationContext.Write(name, ordinal, null, value);
+            }
+
+            public void Add(string name, int? ordinal, FudgeFieldType type, object value)
+            {
+                serializationContext.Write(name, ordinal, type, value);
+            }
+
+            #endregion
+
+            #region IFudgeFieldContainer Members
+
+            public short GetNumFields()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IList<IFudgeField> GetAllFields()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IList<string> GetAllFieldNames()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IFudgeField GetByIndex(int index)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IList<IFudgeField> GetAllByOrdinal(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IFudgeField GetByOrdinal(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IList<IFudgeField> GetAllByName(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IFudgeField GetByName(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object GetValue(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public T GetValue<T>(string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object GetValue(string name, Type type)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object GetValue(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public T GetValue<T>(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object GetValue(int ordinal, Type type)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object GetValue(string name, int? ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public T GetValue<T>(string name, int? ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object GetValue(string name, int? ordinal, Type type)
+            {
+                throw new NotImplementedException();
+            }
+
+            public double? GetDouble(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public double? GetDouble(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public float? GetFloat(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public float? GetFloat(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public long? GetLong(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public long? GetLong(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int? GetInt(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int? GetInt(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public short? GetShort(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public short? GetShort(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public sbyte? GetSByte(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public sbyte? GetSByte(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool? GetBoolean(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool? GetBoolean(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetString(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string GetString(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IFudgeFieldContainer GetMessage(string fieldName)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IFudgeFieldContainer GetMessage(int ordinal)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region IEnumerable<IFudgeField> Members
+
+            public IEnumerator<IFudgeField> GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
+
+            #region IEnumerable Members
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
+
+        }
+
+        /// <summary>
+        /// You can't index into Stack{T} so this gives us something that we can index but looks like a stack
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        private sealed class IndexedStack<T> : List<T>
+        {
+            public void Push(T val)
+            {
+                base.Add(val);
+            }
+
+            public T Pop()
+            {
+                int index = this.Count - 1;
+                if (index == -1)
+                    throw new InvalidOperationException();
+
+                var result = this[index];
+                this.RemoveAt(index);
+                return result;
+            }
+
+            public T Peek()
+            {
+                int index = this.Count - 1;
+                if (index == -1)
+                    throw new InvalidOperationException();
+
+                return this[index];
+            }
+        }
+
+        private struct State
+        {
+            private readonly object obj;
+            private readonly int index;
+
+            public State(object obj, int index)
+            {
+                this.obj = obj;
+                this.index = index;
+            }
+
+            public object Obj { get { return obj; } }
+            public int Index { get { return index; } }
+        }
     }
-
-    /*
-        private readonly SerializationMessage message;
-        private readonly Dictionary<object, int> idMap;     // Tracks IDs of objects that have already been serialised (or are in the process)
-        private readonly SerializationTypeMap typeMap;
-
-        public FudgeSerializationContext(FudgeSerializer serializer, SerializationMessage message)
-        {
-            this.message = message;
-            this.idMap = new Dictionary<object, int>();     // TODO t0rx 2009-10-18 -- Worry about HashCode and Equals implementations
-            this.typeMap = serializer.TypeMap;
-        }
-
-        #region IFudgeSerializationContext Members
-
-        public FudgeMsg AsSubMsg(object obj)
-        {
-            if (obj == null)
-            {
-                return null;
-            }
-
-            var msg = new FudgeMsg();
-
-            SerializeIntoMessage(obj, msg);
-            return msg;
-        }
-
-        public int AsRef(object obj)
-        {
-            if (obj == null)
-            {
-                // TODO 2009-10-18 torx -- Handle null references
-            }
-
-            int id;
-            if (idMap.TryGetValue(obj, out id))
-            {
-                // Already got it
-                return id;
-            }
-
-            // New object
-            id = RegisterObject(obj);
-            QueueObject(obj);
-            return id;
-        }
-
-        #endregion
-
-        public void SerializeIntoMessage(object obj, FudgeMsg msg)
-        {
-            var surrogate = typeMap.GetSurrogate(obj.GetType());
-            if (surrogate == null)
-            {
-                // Unknown type
-                throw new ArgumentOutOfRangeException("Type \"" + obj.GetType().FullName + "\" not registered, cannot serialize");
-            }
-
-            surrogate.Serialize(obj, msg, this);
-        }
-    }
-     */
 }

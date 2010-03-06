@@ -69,8 +69,8 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var serializer = new FudgeSerializer(context);
 
             var obj1 = new ExampleClass(7);
-            var msgs = serializer.SerializeToMsgs(obj1);
-            var obj2 = (ExampleClass)serializer.Deserialize(msgs);
+            var msg = serializer.SerializeToMsg(obj1);
+            var obj2 = (ExampleClass)serializer.Deserialize(msg);
 
             Assert.NotSame(obj1, obj2);
             Assert.Equal(obj1.Number, obj2.Number);
@@ -90,17 +90,15 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
                 get { return number; }
             }
 
-            public static ExampleClass FromFudgeMsg(IFudgeFieldContainer msg, IFudgeDeserializer deserializer, int dataVersion)
+            public static ExampleClass FromFudgeMsg(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
                 int? val = msg.GetInt("number");
                 return new ExampleClass(val ?? -1);
             }
 
-            public IFudgeFieldContainer ToFudgeMsg(IFudgeSerializer serializer)
+            public void ToFudgeMsg(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
-                var msg = serializer.Context.NewMessage();
                 msg.Add("number", number);
-                return msg;
             }
         }
 

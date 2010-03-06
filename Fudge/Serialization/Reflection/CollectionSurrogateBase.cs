@@ -26,7 +26,7 @@ namespace Fudge.Serialization.Reflection
     {
         protected readonly FudgeContext context;
         protected readonly TypeData typeData;
-        protected readonly Action<object, IFudgeSerializer> serializerDelegate;
+        protected readonly Action<object, IMutableFudgeFieldContainer, IFudgeSerializer> serializerDelegate;
         protected readonly Func<IFudgeFieldContainer, IFudgeDeserializer, object> deserializerDelegate;
 
         public CollectionSurrogateBase(FudgeContext context, TypeData typeData, string serializeMethodName, string deserializeMethodName)
@@ -34,7 +34,7 @@ namespace Fudge.Serialization.Reflection
             this.context = context;
             this.typeData = typeData;
             Type[] types = (typeData.SubType2 == null) ? new Type[] {typeData.SubType} : new Type[] {typeData.SubType, typeData.SubType2};
-            serializerDelegate = CreateMethodDelegate<Action<object, IFudgeSerializer>>(serializeMethodName, types);
+            serializerDelegate = CreateMethodDelegate<Action<object, IMutableFudgeFieldContainer, IFudgeSerializer>>(serializeMethodName, types);
             deserializerDelegate = CreateMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(deserializeMethodName, types);
         }
 
@@ -46,47 +46,34 @@ namespace Fudge.Serialization.Reflection
 
         #region IFudgeSerializationSurrogate Members
 
-        public void Serialize(object obj, IFudgeSerializer serializer)
+        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            serializerDelegate(obj, serializer);
+            serializerDelegate(obj, msg, serializer);
         }
 
-        public object BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+        public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
-            var msg = deserializer.GetUnreadFields();
             return deserializerDelegate(msg, deserializer);
-        }
-
-        public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion, object state)
-        {
-            return false;
-        }
-
-        public object EndDeserialize(IFudgeDeserializer deserializer, int dataVersion, object state)
-        {
-            return state;
         }
 
         #endregion
 
-        protected void SerializeList<T>(object obj, IFudgeSerializer serializer)    
+        protected void SerializeList<T>(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)    
         {
             var list = (IList<T>)obj;
-            SerializeList(list, serializer, typeData.SubTypeData.Kind, null);
+            SerializeList(list, msg, serializer, typeData.SubTypeData.Kind, null);
         }
 
-        protected static void SerializeList<T>(IEnumerable<T> list, IFudgeSerializer serializer, TypeData.TypeKind kind, int? ordinal)
+        protected static void SerializeList<T>(IEnumerable<T> list, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer, TypeData.TypeKind kind, int? ordinal)
         {
             switch (kind)
             {
                 case TypeData.TypeKind.FudgePrimitive:
-                    serializer.WriteAll(null, ordinal, list);
+                case TypeData.TypeKind.Reference:
+                    msg.AddAll(null, ordinal, list);
                     break;
                 case TypeData.TypeKind.Inline:
-                    serializer.WriteAllSubMsgs(null, ordinal, list);
-                    break;
-                case TypeData.TypeKind.Reference:
-                    serializer.WriteAllRefs(null, ordinal, list);
+                    serializer.WriteAllInline(msg, null, ordinal, list);
                     break;
             }
         }

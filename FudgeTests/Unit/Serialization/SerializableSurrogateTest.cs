@@ -64,22 +64,12 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IFudgeSerializer serializer)
+            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
                 throw new NotImplementedException();
             }
@@ -95,22 +85,12 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IFudgeSerializer serializer)
+            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
                 throw new NotImplementedException();
             }
@@ -126,22 +106,12 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IFudgeSerializer serializer)
+            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
 
-            public void BeginDeserialize(IFudgeDeserializer deserializer, int dataVersion)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, int dataVersion)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void EndDeserialize(IFudgeDeserializer deserializer, int dataVersion)
+            public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
             {
                 throw new NotImplementedException();
             }
