@@ -72,7 +72,7 @@
     <Compile Include="FudgeFieldPrefixCodec.cs" />
     <Compile Include="FudgeStreamElement.cs" />
     <Compile Include="FudgeStreamParser.cs" />
-    <Compile Include="FudgeStreamPipe.cs" />
+    <Compile Include="Util\FudgeStreamPipe.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />
     <Compile Include="FudgeMsg.cs" />

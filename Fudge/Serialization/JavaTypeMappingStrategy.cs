@@ -27,7 +27,7 @@ namespace Fudge.Serialization
     /// <remarks>
     /// <para>
     /// To specify a type mapper other than the default, either set this in <see cref="FudgeSerializer.TypeMappingStrategy"/>
-    /// or through <see cref="FudgeContext.SetProperty"/> using <see cref="FudgeSerializer.TypeMappingStrategyProperty"/>.
+    /// or through <see cref="FudgeContext.SetProperty"/> using <see cref="ContextProperties.TypeMappingStrategyProperty"/>.
     /// </para>
     /// <para>
     /// The following rules are used:

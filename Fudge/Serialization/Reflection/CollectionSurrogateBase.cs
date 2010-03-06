@@ -22,6 +22,9 @@ using System.Reflection;
 
 namespace Fudge.Serialization.Reflection
 {
+    /// <summary>
+    /// Base class for surrogates handling standard collection types.
+    /// </summary>
     public abstract class CollectionSurrogateBase : IFudgeSerializationSurrogate
     {
         protected readonly FudgeContext context;

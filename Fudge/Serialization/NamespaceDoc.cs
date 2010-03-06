@@ -48,8 +48,8 @@ namespace Fudge.Serialization
     /// </para>
     /// <para>
     /// To support the different naming conventions of other languages that you may be interoperating with, Fudge serialization allows you
-    /// to modify the conventions for naming types and naming fields through the <see cref="FudgeSerializer.TypeMappingStrategyProperty"/>
-    /// and <see cref="FudgeSerializer.FieldNameConventionProperty"/> context properties.  These would allow you for example to match
+    /// to modify the conventions for naming types and naming fields through the <see cref="ContextProperties.TypeMappingStrategyProperty"/>
+    /// and <see cref="ContextProperties.FieldNameConventionProperty"/> context properties.  These would allow you for example to match
     /// Java conventions by converting <c>Fudge.Serialization.FudgeSerializer</c> to <c>org.fudgemsg.serialization.FudgeSerializer</c>
     /// and make fields by default <c>camelCase</c> rather than <c>PascalCase</c> - this is implemented by the
     /// <see cref="JavaTypeMappingStrategy"/> class.

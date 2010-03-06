@@ -22,6 +22,7 @@ using System.Runtime.Serialization;
 using Fudge.Types;
 using Fudge.Encodings;
 using System.Diagnostics;
+using Fudge.Util;
 
 namespace Fudge.Serialization
 {
@@ -212,14 +213,6 @@ namespace Fudge.Serialization
         }
 
         /// <inheritdoc/>
-        public IFudgeFieldContainer GetUnreadFields()
-        {
-            var state = stack.Peek();
-
-            return state.ConvertUnreadToMessage();
-        }
-
-        /// <inheritdoc/>
         public T FromField<T>(IFudgeField field) where T : class
         {
             if (field == null)
@@ -271,7 +264,6 @@ namespace Fudge.Serialization
             private readonly FudgeContext context;
             private readonly int refId;
             private readonly Queue<IFudgeField> fields;
-            private readonly List<IFudgeField> unusedFields;
             private readonly string typeName;
 
             public State(FudgeMsg msg, int refId, string typeName)
@@ -279,7 +271,6 @@ namespace Fudge.Serialization
                 this.context = msg.Context;
                 this.fields = new Queue<IFudgeField>(msg.GetAllFields());
                 this.refId = refId;
-                this.unusedFields = new List<IFudgeField>();
                 this.typeName = typeName;
             }
 
@@ -304,23 +295,6 @@ namespace Fudge.Serialization
                     if (field.Ordinal != FudgeSerializer.TypeIdFieldOrdinal)                    // Filter out the type ID
                         return field;
                 }
-            }
-
-            public void AddToUnused(IFudgeField field)
-            {
-                unusedFields.Add(field);
-            }
-
-            internal IFudgeFieldContainer ConvertUnreadToMessage()
-            {
-                var result = context.NewMessage();
-                result.Add(unusedFields);
-
-                IFudgeField field;
-                while ((field = NextField()) != null)
-                    result.Add(field);
-
-                return result;
             }
         }
 

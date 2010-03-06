@@ -49,7 +49,7 @@ namespace Fudge.Serialization
         /// </para>
         /// <para>
         /// By default, this is <c>true</c>, i.e. types can be added automatically.  You can set the
-        /// <see cref="FudgeSerializer.AllowTypeDiscoveryProperty"/> property in the <see cref="FudgeContext"/> before
+        /// <see cref="ContextProperties.AllowTypeDiscoveryProperty"/> property in the <see cref="FudgeContext"/> before
         /// constructing a <c>FudgeSerializer</c> to override this default, or set
         /// <see cref="AllowTypeDiscovery"/> directly.
         /// </para>
@@ -65,7 +65,7 @@ namespace Fudge.Serialization
         /// </summary>
         /// <remarks>
         /// On construction, the <see cref="SerializationTypeMap"/> will pick up any default specified
-        /// using the <see cref="FudgeSerializer.FieldNameConventionProperty"/> property in the <see cref="FudgeContext"/>
+        /// using the <see cref="ContextProperties.FieldNameConventionProperty"/> property in the <see cref="FudgeContext"/>
         /// of set <see cref="FudgeFieldNameConvention"/> directly.
         /// </remarks>
         /// <seealso cref="FudgeFieldNameConvention"/>

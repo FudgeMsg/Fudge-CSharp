@@ -37,6 +37,7 @@ namespace Fudge.Serialization
         /// <summary>
         /// Writes a child object as a serialized sub-message with a given name and/or ordinal.
         /// </summary>
+        /// <param name="msg">Parent message for the sub-message.</param>
         /// <param name="fieldName">Name of field, may be <c>null</c>.</param>
         /// <param name="ordinal">Ordinal of field, may be <c>null</c>.</param>
         /// <param name="obj">Child object to write.</param>

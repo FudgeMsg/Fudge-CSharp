@@ -21,6 +21,7 @@ using System.Text;
 using Xunit;
 using System.IO;
 using Fudge.Encodings;
+using Fudge.Util;
 
 namespace Fudge.Tests.Unit.Encodings
 {

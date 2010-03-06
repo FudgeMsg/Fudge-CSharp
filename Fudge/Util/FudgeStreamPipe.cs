@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Fudge
+namespace Fudge.Util
 {
     /// <summary>
     /// <c>FudgeStreamPipe</c> is used to automatically push all data read from an input data stream via an <see cref="IFudgeStreamReader"/>

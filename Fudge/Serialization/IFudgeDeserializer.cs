@@ -32,17 +32,6 @@ namespace Fudge.Serialization
         FudgeContext Context { get; }
 
         /// <summary>
-        /// Gets any fields that have not been read by <see cref="IFudgeSerializable.DeserializeField"/> or <see cref="IFudgeSerializationSurrogate.DeserializeField"/>
-        /// as an <see cref="IFudgeFieldContainer"/>.
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks>
-        /// This can be called in <c>BeginDeserialize</c> in which case all fields are returned, or <c>EndDeserialize</c> in which case all fields that were not
-        /// handled in <c>DeserializeField</c> are returned.
-        /// </remarks>
-        IFudgeFieldContainer GetUnreadFields();
-
-        /// <summary>
         /// Deserialises an object from a Fudge field.
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -56,18 +45,23 @@ namespace Fudge.Serialization
         /// <summary>
         /// Registers a partially-constructed object in case of reference cycles.
         /// </summary>
+        /// <param name="msg">Message from which the object was deserialized.</param>
         /// <param name="obj">Object to register with the context.</param>
         /// <remarks>
         /// <para>
-        /// If there is the possibility that your object may reference another object which
-        /// may in turn directly or indirectly reference back to yours, then calling <c>Register</c>
-        /// will allow this reference to be resolved.  This will typically be performed during
-        /// <see cref="IFudgeSerializationSurrogate.BeginDeserialize"/>  immediately after construction
-        /// but before any members are initialised.
+        /// Every new object must be registered after construction, and this process is usually
+        /// performed by the surrogate (implementing <see cref="IFudgeSerializationSurrogate"/>)
+        /// which performs the deserialization.  It is essential to register the new object
+        /// before trying to deserialize any sub-objects which may potentially contain references
+        /// back to this one (i.e. where there are cycles in the object graph).  The surrogate
+        /// will usually therefore register the object immediately after construction and before any
+        /// fields are deserialized.
         /// </para>
         /// <para>
-        /// If there is no possibility of cyclic references then is is not necessary to call this
-        /// method.
+        /// Failing to register a new object will cause an exception to be thrown by the serialization
+        /// framework.  However, when using automatic (reflection-based) surrogates (e.g. when a class
+        /// has a default constructor and implements <see cref="IFudgeSerializable"/> then this is
+        /// done automatically.
         /// </para>
         /// </remarks>
         void Register(IFudgeFieldContainer msg, object obj);

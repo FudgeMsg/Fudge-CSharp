@@ -63,7 +63,7 @@ namespace Fudge.Serialization
     ///                 Name = field.GetString();
     ///                 return true;
     ///             case "mainAddress":
-    ///                 MainAddress = deserializer.FromField<Address>(field);
+    ///                 MainAddress = deserializer.FromField&lt;Address&gt;(field);
     ///                 return true;
     ///         }
     ///

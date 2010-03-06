@@ -31,12 +31,14 @@ namespace Fudge.Serialization
         /// Serializes an object as an in-line submessage field with a given name.
         /// </summary>
         /// <param name="serializer">Serializer to write the field.</param>
+        /// <param name="msg">Parent message for the sub-message.</param>
         /// <param name="name">Name of field.</param>
         /// <param name="value">Object to serialize.</param>
         /// <remarks>
         /// By serializing the object as a sub-value, it will be written multiple times if referenced
         /// multple times in the object graph, it cannot be part of a cycle of references, and it does
-        /// not support polymorphism.  If you need any of these features then use <see cref="WriteRef"/>
+        /// not support polymorphism.  If you need any of these features then use the normal
+        /// <see cref="IMutableFudgeFieldContainer.Add(string,object)"/> method.
         /// instead.
         /// </remarks>
         public static void WriteInline(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, object value)
@@ -45,26 +47,14 @@ namespace Fudge.Serialization
         }
 
         /// <summary>
-        /// Writes a field only if the given value isn't null.
-        /// </summary>
-        /// <typeparam name="T">Type of value.</typeparam>
-        /// <param name="serializer">Serializer to write the field.</param>
-        /// <param name="name">Name of the field.</param>
-        /// <param name="value">Value to write.</param>
-        public static void WriteIfNotNull<T>(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, T value) where T : class
-        {
-            if (value != null)
-                msg.Add(name, value);
-        }
-
-        /// <summary>
         /// Serializes all the values as a sequence of submessages with the same field name.
         /// </summary>
         /// <typeparam name="T">Type of objects.</typeparam>
         /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="msg">Parent message for the sub-message.</param>
         /// <param name="name">Name of the fields.</param>
         /// <param name="objects">Objects to serialize.</param>
-        /// <remarks>See the remarks in <see cref="WriteSubMsg"/> regarding the limitations of writing as an in-line sub-message.</remarks>
+        /// <remarks>See the remarks in <see cref="WriteInline"/> regarding the limitations of writing as an in-line sub-message.</remarks>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
         public static void WriteAllInline<T>(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, IEnumerable<T> objects)
         {
@@ -76,10 +66,11 @@ namespace Fudge.Serialization
         /// </summary>
         /// <typeparam name="T">Type of objects.</typeparam>
         /// <param name="serializer">Serializer to write the fields.</param>
+        /// <param name="msg">Parent message for the sub-message.</param>
         /// <param name="name">Name of the fields.</param>
         /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
         /// <param name="objects">Objects to serialize.</param>
-        /// <remarks>See the remarks in <see cref="WriteSubMsg"/> regarding the limitations of writing as an in-line sub-message.</remarks>
+        /// <remarks>See the remarks in <see cref="WriteInline"/> regarding the limitations of writing as an in-line sub-message.</remarks>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
         public static void WriteAllInline<T>(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, int? ordinal, IEnumerable<T> objects)
         {

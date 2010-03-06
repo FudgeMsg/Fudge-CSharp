@@ -27,7 +27,7 @@ namespace Fudge.Serialization.Reflection
     /// to automatically create surrogates for types rather than needing explicit implementations.
     /// </para>
     /// You would not normally use classes in this namespace directly - the framework will use them
-    /// if you have set the <see cref="FudgeSerializer.AllowTypeDiscoveryProperty"/> context
+    /// if you have set the <see cref="ContextProperties.AllowTypeDiscoveryProperty"/> context
     /// property to be <c>true</c> (which is the default).
     /// </summary>
     [CompilerGenerated]

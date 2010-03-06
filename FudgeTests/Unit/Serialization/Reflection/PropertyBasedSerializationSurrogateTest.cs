@@ -313,6 +313,11 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
                 var other = (SimpleExampleClass)obj;
                 return other.Name == this.Name && other.Age == this.Age;
             }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
         }
 
         public class SecondaryTypeClass

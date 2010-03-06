@@ -22,7 +22,7 @@ using System.Text;
 namespace Fudge.Encodings
 {
     /// <summary>
-    /// FudgeMultiWriter allows you to write to multiple writers simultaneously (e.g. from a <see cref="FudgeStreamPipe"/>.
+    /// FudgeMultiWriter allows you to write to multiple writers simultaneously (e.g. from a <see cref="Fudge.Util.FudgeStreamPipe"/>.
     /// </summary>
     public class FudgeStreamMultiwriter : IFudgeStreamWriter
     {

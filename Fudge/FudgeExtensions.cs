@@ -22,8 +22,17 @@ using Fudge.Types;
 
 namespace Fudge
 {
+    /// <summary>
+    /// Extension methods for core Fudge types.
+    /// </summary>
     public static class FudgeExtensions
     {
+        /// <summary>
+        /// Adds a field to a message, unless the value is null.
+        /// </summary>
+        /// <param name="msg">Message to contain the field.</param>
+        /// <param name="name">Name of field to add.</param>
+        /// <param name="value">Value to add.</param>
         public static void AddIfNotNull(this IMutableFudgeFieldContainer msg, string name, object value)
         {
             if (value != null)
@@ -32,6 +41,12 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Adds a field to a message, unless the value is null.
+        /// </summary>
+        /// <param name="msg">Message to contain the field.</param>
+        /// <param name="ordinal">Ordinal of field to add.</param>
+        /// <param name="value">Value to add.</param>
         public static void AddIfNotNull(this IMutableFudgeFieldContainer msg, int ordinal, object value)
         {
             if (value != null)
@@ -92,13 +107,18 @@ namespace Fudge
 
         #region IFudgeField extensions
 
+        /// <summary>
+        /// Convenience method to get any field value as a string.
+        /// </summary>
+        /// <param name="field">Field containing the value.</param>
+        /// <returns><c>null</c> if the field value is <c>null</c>, otherwise the result of calling <see cref="object.ToString"/> on the value.</returns>
         public static string GetString(this IFudgeField field)
         {
-            IConvertible value = field.Value as IConvertible;
+            object value = field.Value;
             if (value == null)
                 return null;
             else
-                return value.ToString(null);
+                return value.ToString();
         }
 
         #endregion
