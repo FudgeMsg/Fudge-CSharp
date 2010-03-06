@@ -1,5 +1,5 @@
 ﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ namespace Fudge
         /// <param name="msg">Message to contain the field.</param>
         /// <param name="name">Name of field to add.</param>
         /// <param name="value">Value to add.</param>
-        public static void AddIfNotNull(this IMutableFudgeFieldContainer msg, string name, object value)
+        public static void AddIfNotNull(this IAppendingFudgeFieldContainer msg, string name, object value)
         {
             if (value != null)
             {
@@ -47,7 +47,7 @@ namespace Fudge
         /// <param name="msg">Message to contain the field.</param>
         /// <param name="ordinal">Ordinal of field to add.</param>
         /// <param name="value">Value to add.</param>
-        public static void AddIfNotNull(this IMutableFudgeFieldContainer msg, int ordinal, object value)
+        public static void AddIfNotNull(this IAppendingFudgeFieldContainer msg, int ordinal, object value)
         {
             if (value != null)
             {
@@ -63,7 +63,7 @@ namespace Fudge
         /// <param name="name">Name of the fields.</param>
         /// <param name="values">Values to write.</param>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
-        public static void AddAll<T>(this IMutableFudgeFieldContainer msg, string name, IEnumerable<T> values)
+        public static void AddAll<T>(this IAppendingFudgeFieldContainer msg, string name, IEnumerable<T> values)
         {
             AddAll(msg, name, null, values);
         }
@@ -76,7 +76,7 @@ namespace Fudge
         /// <param name="ordinal">Ordinal of the fields.</param>
         /// <param name="values">Values to write.</param>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
-        public static void AddAll<T>(this IMutableFudgeFieldContainer msg, int ordinal, IEnumerable<T> values)
+        public static void AddAll<T>(this IAppendingFudgeFieldContainer msg, int ordinal, IEnumerable<T> values)
         {
             AddAll(msg, null, ordinal, values);
         }
@@ -90,7 +90,7 @@ namespace Fudge
         /// <param name="ordinal">Ordinal of the fields (may be <c>null</c>).</param>
         /// <param name="values">Values to write.</param>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
-        public static void AddAll<T>(this IMutableFudgeFieldContainer msg, string name, int? ordinal, IEnumerable<T> values)
+        public static void AddAll<T>(this IAppendingFudgeFieldContainer msg, string name, int? ordinal, IEnumerable<T> values)
         {
             foreach (T value in values)
             {

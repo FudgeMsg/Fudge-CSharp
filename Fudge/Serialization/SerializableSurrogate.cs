@@ -56,7 +56,7 @@ namespace Fudge.Serialization
         #region IFudgeSerializationSurrogate Members
 
         /// <inheritdoc/>
-        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             IFudgeSerializable ser = (IFudgeSerializable)obj;
             ser.Serialize(msg, serializer);

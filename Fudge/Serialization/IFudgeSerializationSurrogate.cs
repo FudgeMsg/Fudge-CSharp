@@ -39,7 +39,7 @@ namespace Fudge.Serialization
         /// <param name="obj">Object to serialize.</param>
         /// <param name="msg">Message into which the data should be serialized.</param>
         /// <param name="serializer">Serializer controlling the serialization process.</param>
-        void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer);
+        void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer);
 
         /// <summary>
         /// Deserializes a message into a new object.

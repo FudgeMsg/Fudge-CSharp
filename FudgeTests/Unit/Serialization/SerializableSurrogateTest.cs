@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
@@ -85,7 +85,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
@@ -106,7 +106,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }

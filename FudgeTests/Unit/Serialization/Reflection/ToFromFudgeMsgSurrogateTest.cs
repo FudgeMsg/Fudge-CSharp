@@ -96,7 +96,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
                 return new ExampleClass(val ?? -1);
             }
 
-            public void ToFudgeMsg(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void ToFudgeMsg(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 msg.Add("number", number);
             }

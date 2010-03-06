@@ -38,10 +38,10 @@ namespace Fudge.Serialization
         /// By serializing the object as a sub-value, it will be written multiple times if referenced
         /// multple times in the object graph, it cannot be part of a cycle of references, and it does
         /// not support polymorphism.  If you need any of these features then use the normal
-        /// <see cref="IMutableFudgeFieldContainer.Add(string,object)"/> method.
+        /// <see cref="IAppendingFudgeFieldContainer.Add(string,object)"/> method.
         /// instead.
         /// </remarks>
-        public static void WriteInline(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, object value)
+        public static void WriteInline(this IFudgeSerializer serializer, IAppendingFudgeFieldContainer msg, string name, object value)
         {
             serializer.WriteInline(msg, name, null, value);
         }
@@ -56,7 +56,7 @@ namespace Fudge.Serialization
         /// <param name="objects">Objects to serialize.</param>
         /// <remarks>See the remarks in <see cref="WriteInline"/> regarding the limitations of writing as an in-line sub-message.</remarks>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
-        public static void WriteAllInline<T>(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, IEnumerable<T> objects)
+        public static void WriteAllInline<T>(this IFudgeSerializer serializer, IAppendingFudgeFieldContainer msg, string name, IEnumerable<T> objects)
         {
             serializer.WriteAllInline(msg, name, null, objects);
         }
@@ -72,7 +72,7 @@ namespace Fudge.Serialization
         /// <param name="objects">Objects to serialize.</param>
         /// <remarks>See the remarks in <see cref="WriteInline"/> regarding the limitations of writing as an in-line sub-message.</remarks>
         /// <remarks><c>null</c>s in the sequence are written as Fudge <see cref="IndicatorType"/>s.</remarks>
-        public static void WriteAllInline<T>(this IFudgeSerializer serializer, IMutableFudgeFieldContainer msg, string name, int? ordinal, IEnumerable<T> objects)
+        public static void WriteAllInline<T>(this IFudgeSerializer serializer, IAppendingFudgeFieldContainer msg, string name, int? ordinal, IEnumerable<T> objects)
         {
             foreach (T obj in objects)
             {

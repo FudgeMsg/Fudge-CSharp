@@ -27,7 +27,7 @@ namespace Fudge.Serialization.Reflection
     /// A surrogate that works with classes providing <c>ToFudgeMsg</c> and static <c>FromFudgeMsg</c> methods.
     /// </summary>
     /// <remarks>
-    /// The full signatures of the methods are <c>public void ToFudgeMsg(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)</c> and
+    /// The full signatures of the methods are <c>public void ToFudgeMsg(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)</c> and
     /// <c>public static &lt;YourType&gt; FromFudgeMsg(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)</c>.
     /// </remarks>
     public class ToFromFudgeMsgSurrogate : IFudgeSerializationSurrogate
@@ -79,7 +79,7 @@ namespace Fudge.Serialization.Reflection
         {
             return typeData.PublicMethods.FirstOrDefault(m => m.Name == "ToFudgeMsg"
                                                            && m.ReturnType == typeof(void)
-                                                           && ParamMatch(m, new Type[] { typeof(IMutableFudgeFieldContainer), typeof(IFudgeSerializer) }));
+                                                           && ParamMatch(m, new Type[] { typeof(IAppendingFudgeFieldContainer), typeof(IFudgeSerializer) }));
         }
 
         private static MethodInfo GetFromMsg(TypeData typeData)
@@ -107,7 +107,7 @@ namespace Fudge.Serialization.Reflection
         #region IFudgeSerializationSurrogate Members
 
         /// <inheritdoc/>
-        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             toFudgeMsgMethod.Invoke(obj, new object[] { msg, serializer });
         }

@@ -38,7 +38,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public virtual void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public virtual void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 msg.Add("name", Name);
                 msg.AddIfNotNull("mainAddress", MainAddress);
@@ -84,7 +84,7 @@ namespace Fudge.Tests.Unit.Serialization
                 get { return siblings; }
             }
 
-            public override void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public override void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 // Add our parent's fields
                 base.Serialize(msg, serializer);
@@ -135,7 +135,7 @@ namespace Fudge.Tests.Unit.Serialization
         {
             #region IFudgeSerializationSurrogate Members
 
-            public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 var address = (Address)obj;
                 msg.AddIfNotNull("line1", address.Line1);
@@ -163,7 +163,7 @@ namespace Fudge.Tests.Unit.Serialization
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 msg.Add("ticker", Ticker);
                 msg.Add("bid", Bid);

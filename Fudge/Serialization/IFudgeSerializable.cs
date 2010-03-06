@@ -39,7 +39,7 @@ namespace Fudge.Serialization
     ///
     ///     #region IFudgeSerializable Members
     ///
-    ///     public virtual void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+    ///     public virtual void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
     ///     {
     ///         msg.Add("name", Name);
     ///         msg.AddIfNotNull("mainAddress", MainAddress);
@@ -82,7 +82,7 @@ namespace Fudge.Serialization
         /// </summary>
         /// <param name="msg">Message to serialize the object into.</param>
         /// <param name="serializer">Serializer to receive the data.</param>
-        void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer);
+        void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer);
 
         /// <summary>
         /// Deserializes a message into the object.

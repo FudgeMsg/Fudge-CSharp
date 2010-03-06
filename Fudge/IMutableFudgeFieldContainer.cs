@@ -1,5 +1,5 @@
 /* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,43 +23,7 @@ namespace Fudge
     /// <summary>
     /// Defines a set of fields that can be modified as well as inspected.
     /// </summary>
-    public interface IMutableFudgeFieldContainer : IFudgeFieldContainer
+    public interface IMutableFudgeFieldContainer : IFudgeFieldContainer, IAppendingFudgeFieldContainer
     {
-        /// <summary>
-        /// Adds a field to this message.
-        /// </summary>
-        /// <param name="field">field to add</param>
-        void Add(IFudgeField field);
-
-        /// <summary>
-        /// Adds a field to this message.
-        /// </summary>
-        /// <param name="name">name of the field</param>
-        /// <param name="value">value of the field</param>
-        void Add(string name, object value);
-
-        /// <summary>
-        /// Adds a field to this message.
-        /// </summary>
-        /// <param name="ordinal">ordinal index of the field</param>
-        /// <param name="value">value of the field</param>
-        void Add(int? ordinal, object value);
-
-        /// <summary>
-        /// Adds a field to this message.
-        /// </summary>
-        /// <param name="name">name of the field, or null if no name is specified</param>
-        /// <param name="ordinal">ordinal index of the field, or null if no index is specified</param>
-        /// <param name="value">value of the field</param>
-        void Add(string name, int? ordinal, object value);
-
-        /// <summary>
-        /// Adds a field to this message with an explicit type.
-        /// </summary>
-        /// <param name="name">name of the field, or null if no name is specified</param>
-        /// <param name="ordinal">ordinal index of the field, or null if no index is specified</param>
-        /// <param name="type">explicit type of the field</param>
-        /// <param name="value">value of the field</param>
-        void Add(string name, int? ordinal, FudgeFieldType type, object value);
     }
 }

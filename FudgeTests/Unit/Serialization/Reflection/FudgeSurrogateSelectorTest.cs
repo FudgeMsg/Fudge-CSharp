@@ -83,7 +83,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             #region IFudgeSerializable Members
 
-            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
@@ -104,7 +104,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
             #region IFudgeSerializable Members
 
-            public void Serialize(IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 throw new NotImplementedException();
             }
@@ -131,7 +131,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             {
                 #region IFudgeSerializationSurrogate Members
 
-                public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+                public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
                 {
                     throw new NotImplementedException();
                 }
@@ -152,7 +152,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             {
                 #region IFudgeSerializationSurrogate Members
 
-                public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+                public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
                 {
                     throw new NotImplementedException();
                 }
@@ -180,7 +180,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
                 #region IFudgeSerializationSurrogate Members
 
-                public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+                public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
                 {
                     throw new NotImplementedException();
                 }
@@ -210,7 +210,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
                 #region IFudgeSerializationSurrogate Members
 
-                public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+                public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
                 {
                     throw new NotImplementedException();
                 }

@@ -35,7 +35,6 @@ namespace Fudge.Serialization
     {
         private readonly FudgeContext context;
         private readonly IFudgeStreamWriter writer;
-        private readonly Queue<object> encodeQueue = new Queue<object>();
         private readonly Dictionary<object, int> idMap;     // Tracks IDs of objects that have already been serialised (or are in the process)
         private readonly Dictionary<Type, int> lastTypes = new Dictionary<Type, int>();     // Tracks the last object of a given type
         private readonly SerializationTypeMap typeMap;
@@ -52,20 +51,39 @@ namespace Fudge.Serialization
             this.typeMappingStrategy = typeMappingStrategy;
         }
 
-        public void QueueObject(object obj)
+        public void SerializeGraph(object graph)
         {
-            encodeQueue.Enqueue(obj);
+            Debug.Assert(currentMessageId == 0);
+
+            RegisterObject(graph);
+
+            var msg = new StreamingMessage(this);
+
+            writer.StartMessage();
+            WriteTypeInformation(graph, currentMessageId, msg);
+            UpdateLastTypeInfo(graph);
+            SerializeContents(graph, currentMessageId, msg);
+            writer.EndMessage();
         }
 
-        public object PopQueuedObject()
+        #region IFudgeSerializer Members
+
+        /// <inheritdoc/>
+        public FudgeContext Context
         {
-            if (encodeQueue.Count == 0)
+            get { return context; }
+        }
+
+        /// <inheritdoc/>
+        public void WriteInline(IAppendingFudgeFieldContainer msg, string fieldName, int? ordinal, object obj)
+        {
+            if (obj != null)
             {
-                return null;
+                WriteObject(fieldName, ordinal, obj, false, false);
             }
-
-            return encodeQueue.Dequeue();
         }
+
+        #endregion
 
         private int RegisterObject(object obj)
         {
@@ -73,7 +91,7 @@ namespace Fudge.Serialization
             return currentMessageId;
         }
 
-        public void SerializeContents(object obj, int index, IMutableFudgeFieldContainer msg)
+        private void SerializeContents(object obj, int index, IAppendingFudgeFieldContainer msg)
         {
             CheckForInlineCycles(obj);
 
@@ -103,27 +121,12 @@ namespace Fudge.Serialization
             }
         }
 
-        public void SerializeGraph(object graph)
-        {
-            Debug.Assert(currentMessageId == 0);
-
-            RegisterObject(graph);
-
-            var msg = new StreamingMessage(this);
-
-            writer.StartMessage();
-            WriteTypeInformation(graph, currentMessageId, msg);
-            UpdateLastTypeInfo(graph);
-            SerializeContents(graph, currentMessageId, msg);
-            writer.EndMessage();
-        }
-
         private void UpdateLastTypeInfo(object obj)
         {
             lastTypes[obj.GetType()] = currentMessageId;
         }
 
-        private void WriteTypeInformation(object obj, int id, IMutableFudgeFieldContainer msg)
+        private void WriteTypeInformation(object obj, int id, IAppendingFudgeFieldContainer msg)
         {
             Type type = obj.GetType();
             int lastSeen;
@@ -144,27 +147,10 @@ namespace Fudge.Serialization
             }
         }
 
-        #region IFudgeSerializer Members
-
-        /// <inheritdoc/>
-        public FudgeContext Context
-        {
-            get { return context; }
-        }
-
-        /// <inheritdoc/>
-        public void WriteInline(IMutableFudgeFieldContainer msg, string fieldName, int? ordinal, object obj)
-        {
-            if (obj != null)
-            {
-                WriteObject(fieldName, ordinal, obj, false, false);
-            }
-        }
-
-        #endregion
-
+        // Write is called from the various StreamingMessage.Add methods - rather than it storing the value
+        // we just write it out to the output stream
         private void Write(string fieldName, int? ordinal, FudgeFieldType type, object value)
-        {
+        {            
             // TODO 20100306 t0rx -- Have to track if the value is a message to inc the count for references
             if (type == null)
             {
@@ -224,7 +210,7 @@ namespace Fudge.Serialization
         /// StreamingMessage appears to the user like it is a normal message, but rather than adding
         /// fields it's actually streaming them out to the writer.
         /// </summary>
-        private sealed class StreamingMessage : IMutableFudgeFieldContainer
+        private sealed class StreamingMessage : IAppendingFudgeFieldContainer
         {
             private readonly FudgeSerializationContext serializationContext;
 
@@ -233,7 +219,7 @@ namespace Fudge.Serialization
                 this.serializationContext = serializationContext;
             }
 
-            #region IMutableFudgeFieldContainer Members
+            #region IAppendingFudgeFieldContainer Members
 
             public void Add(IFudgeField field)
             {
@@ -261,204 +247,6 @@ namespace Fudge.Serialization
             }
 
             #endregion
-
-            #region IFudgeFieldContainer Members
-
-            public short GetNumFields()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IList<IFudgeField> GetAllFields()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IList<string> GetAllFieldNames()
-            {
-                throw new NotImplementedException();
-            }
-
-            public IFudgeField GetByIndex(int index)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IList<IFudgeField> GetAllByOrdinal(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IFudgeField GetByOrdinal(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IList<IFudgeField> GetAllByName(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IFudgeField GetByName(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object GetValue(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public T GetValue<T>(string name)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object GetValue(string name, Type type)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object GetValue(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public T GetValue<T>(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object GetValue(int ordinal, Type type)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object GetValue(string name, int? ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public T GetValue<T>(string name, int? ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object GetValue(string name, int? ordinal, Type type)
-            {
-                throw new NotImplementedException();
-            }
-
-            public double? GetDouble(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public double? GetDouble(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public float? GetFloat(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public float? GetFloat(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public long? GetLong(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public long? GetLong(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int? GetInt(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public int? GetInt(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public short? GetShort(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public short? GetShort(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public sbyte? GetSByte(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public sbyte? GetSByte(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool? GetBoolean(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool? GetBoolean(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public string GetString(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public string GetString(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IFudgeFieldContainer GetMessage(string fieldName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IFudgeFieldContainer GetMessage(int ordinal)
-            {
-                throw new NotImplementedException();
-            }
-
-            #endregion
-
-            #region IEnumerable<IFudgeField> Members
-
-            public IEnumerator<IFudgeField> GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-
-            #endregion
-
-            #region IEnumerable Members
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-
-            #endregion
-
         }
 
         /// <summary>

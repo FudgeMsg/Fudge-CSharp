@@ -130,7 +130,7 @@ namespace Fudge.Serialization.Reflection
         #region IFudgeSerializationSurrogate Members
 
         /// <inheritdoc/>
-        public void Serialize(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             foreach (var entry in propMap)
             {
@@ -185,7 +185,7 @@ namespace Fudge.Serialization.Reflection
             return Delegate.CreateDelegate(typeof(T), this, method) as T;
         }
 
-        private void PrimitiveSerialize(MorePropertyData prop, object val, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        private void PrimitiveSerialize(MorePropertyData prop, object val, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             msg.Add(prop.PropertyData.SerializedName, val);
         }
@@ -196,7 +196,7 @@ namespace Fudge.Serialization.Reflection
             prop.PropertyData.Info.SetValue(obj, val, null);
         }
 
-        private void InlineSerialize(MorePropertyData prop, object val, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        private void InlineSerialize(MorePropertyData prop, object val, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             serializer.WriteInline(msg, prop.PropertyData.SerializedName, val);
         }
@@ -215,7 +215,7 @@ namespace Fudge.Serialization.Reflection
                 currentList.Add(item);
         }
 
-        private void ReferenceSerialize(MorePropertyData prop, object val, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        private void ReferenceSerialize(MorePropertyData prop, object val, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             // Serializer will in-line or not as appropriate
             msg.Add(prop.PropertyData.SerializedName, null, prop.PropertyData.TypeData.FieldType, val);
@@ -232,7 +232,7 @@ namespace Fudge.Serialization.Reflection
         private class MorePropertyData
         {
             public TypeData.PropertyData PropertyData { get; set; }
-            public Action<MorePropertyData, object, IMutableFudgeFieldContainer, IFudgeSerializer> Serializer { get; set; }
+            public Action<MorePropertyData, object, IAppendingFudgeFieldContainer, IFudgeSerializer> Serializer { get; set; }
             public Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer> Adder { get; set; }
         }
     }

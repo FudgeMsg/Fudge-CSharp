@@ -87,5 +87,16 @@ namespace Fudge.Serialization.Reflection
             elementType = null;
             return false;
         }
+
+        private object DeserializeList<T>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer) where T : class
+        {
+            var result = new List<T>(msg.GetNumFields());
+            deserializer.Register(msg, result);
+            foreach (var field in msg)
+            {
+                result.Add(DeserializeField<T>(field, deserializer, typeData.SubTypeData.Kind));
+            }
+            return result;
+        }
     }
 }

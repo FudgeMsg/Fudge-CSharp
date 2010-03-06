@@ -49,8 +49,15 @@ namespace Fudge.Serialization.Reflection
 
         private object DeserializeArray<T>(IFudgeFieldContainer msg, IFudgeDeserializer deserializer) where T : class
         {
-            var list = (IList<T>)DeserializeList<T>(msg, deserializer);
-            return list.ToArray();
+            var result = new T[msg.GetNumFields()];
+            deserializer.Register(msg, result);
+
+            int index = 0;
+            foreach (var field in msg)
+            {
+                result[index++] = DeserializeField<T>(field, deserializer, typeData.SubTypeData.Kind);
+            }
+            return result;
         }
     }
 }

@@ -93,7 +93,7 @@ namespace Fudge.Serialization.Reflection
             return false;
         }
 
-        private void SerializeDictionary<K, V>(object obj, IMutableFudgeFieldContainer msg, IFudgeSerializer serializer)
+        private void SerializeDictionary<K, V>(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             var dictionary = (IDictionary<K, V>)obj;
 
@@ -105,6 +105,9 @@ namespace Fudge.Serialization.Reflection
             where K : class
             where V : class
         {
+            var result = new Dictionary<K, V>(msg.GetNumFields());
+            deserializer.Register(msg, result);
+
             var keys = new List<K>();
             var values = new List<V>();
 
@@ -125,7 +128,6 @@ namespace Fudge.Serialization.Reflection
             }
 
             int nVals = Math.Min(keys.Count, values.Count);         // Consistent with Java implementation, rather than throwing an exception if they don't match
-            var result = new Dictionary<K, V>(nVals);
             for (int i = 0; i < nVals; i++)
             {
                 result[keys[i]] = values[i];

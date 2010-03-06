@@ -77,21 +77,14 @@ namespace Fudge.Serialization
 
         public int AutoRegister(Type type)
         {
-            string name = type.FullName;        // TODO 2010-02-02 t0rx -- Allow user to override name with either a strategy or an attribute
+            return RegisterType(type, type.FullName);        // TODO 2010-02-02 t0rx -- Allow user to override name with either a strategy or an attribute
+        }
+
+        public int RegisterType(Type type, string name)
+        {
             var surrogateFactory = surrogateSelector.GetSurrogateFactory(type, FieldNameConvention);
             Debug.Assert(surrogateFactory != null);
-            int dataVersion = 0;                // TODO 2010-02-02 t0rx -- Allow user to specify data version with an attribute
-            return RegisterType(type, name, surrogateFactory, dataVersion);
-        }
-
-        public void RegisterType(Type type, string name)
-        {
-            RegisterType(type, name, 0);
-        }
-
-        public void RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory)
-        {
-            RegisterType(type, name, surrogateFactory, 0);
+            return RegisterType(type, name, surrogateFactory);
         }
 
         /// <summary>
@@ -102,20 +95,10 @@ namespace Fudge.Serialization
         /// <param name="statelessSurrogate"></param>
         public void RegisterType(Type type, string name, IFudgeSerializationSurrogate statelessSurrogate)
         {
-            RegisterType(type, name, c => statelessSurrogate, 0);
+            RegisterType(type, name, c => statelessSurrogate);
         }
 
-        public void RegisterType(Type type, string name, int typeVersion)
-        {
-            if (typeof(IFudgeSerializable).IsAssignableFrom(type))
-            {
-                // Class implements IFudgeSerializable directly, so manufacture a surrogate (we only need one as it maintains no state)
-                var surrogate = new SerializableSurrogate(type);
-                RegisterType(type, name, context => surrogate, typeVersion);
-            }
-        }
-
-        private int RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory, int typeVersion)
+        public int RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory)
         {
             // TODO 2009-10-18 t0rx -- Handle IFudgeSerializable
             int id = typeDataList.Count;
@@ -184,17 +167,12 @@ namespace Fudge.Serialization
         /// Remap this type map into a new one based on a different ordering/set of type names.
         /// </summary>
         /// <param name="names"></param>
-        /// <param name="typeVersions"></param>
         /// <returns></returns>
-        public SerializationTypeMap Remap(string[] names, int[] typeVersions)
+        public SerializationTypeMap Remap(string[] names)
         {
             if (names == null)
             {
                 throw new ArgumentNullException("names");
-            }
-            if (typeVersions != null && names.Length != typeVersions.Length)
-            {
-                throw new ArgumentOutOfRangeException("typeVersions", "Lengths of names and type versions must match");
             }
 
             SerializationTypeMap result = new SerializationTypeMap(context);
@@ -205,10 +183,7 @@ namespace Fudge.Serialization
                 if (nameMap.TryGetValue(name, out index))
                 {
                     var data = typeDataList[index];
-                    if (typeVersions == null)
-                        result.RegisterType(data.Type, name, data.SurrogateFactory, typeVersions[i]);
-                    else
-                        result.RegisterType(data.Type, name, data.SurrogateFactory);
+                    result.RegisterType(data.Type, name, data.SurrogateFactory);
                 }
                 else
                 {
