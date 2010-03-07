@@ -93,7 +93,7 @@ namespace Fudge.Tests.Unit.Encodings
             var msg = new FudgeJSONStreamReader(context, json).ReadMsg();
 
             var numbers = msg.GetAllByName("numbers");
-            Assert.Equal(3, numbers.Count);                 // TODO 2009-12-18 t0rx -- Should JSON arrays collapse to primitive arrays where possible?
+            Assert.Equal(3, numbers.Count);                 // REVIEW 2009-12-18 t0rx -- Should JSON arrays collapse to primitive arrays where possible?
             Assert.Equal(1, (sbyte)numbers[0].Value);
             Assert.Equal(2, (sbyte)numbers[1].Value);
             Assert.Equal(4, (sbyte)numbers[2].Value);

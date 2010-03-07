@@ -60,7 +60,7 @@ namespace Fudge.Serialization
 
             if (typeMap == null)
             {
-                // TODO 2010-02-02 t0rx -- Have serialization type map as context property?
+                // REVIEW 2010-02-02 t0rx -- Have serialization type map as context property?
                 typeMap = new SerializationTypeMap(context);
             }
 

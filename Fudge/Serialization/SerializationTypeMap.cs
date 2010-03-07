@@ -27,7 +27,6 @@ namespace Fudge.Serialization
     {
         private readonly FudgeContext context;
         private readonly List<TypeData> typeDataList = new List<TypeData>();
-        private readonly Dictionary<string, int> nameMap = new Dictionary<string, int>();
         private readonly Dictionary<Type, int> typeMap = new Dictionary<Type, int>();
         private readonly FudgeSurrogateSelector surrogateSelector;
 
@@ -75,16 +74,11 @@ namespace Fudge.Serialization
             set;
         }
 
-        public int AutoRegister(Type type)
-        {
-            return RegisterType(type, type.FullName);        // TODO 2010-02-02 t0rx -- Allow user to override name with either a strategy or an attribute
-        }
-
-        public int RegisterType(Type type, string name)
+        public int RegisterType(Type type)
         {
             var surrogateFactory = surrogateSelector.GetSurrogateFactory(type, FieldNameConvention);
             Debug.Assert(surrogateFactory != null);
-            return RegisterType(type, name, surrogateFactory);
+            return RegisterType(type, surrogateFactory);
         }
 
         /// <summary>
@@ -93,18 +87,16 @@ namespace Fudge.Serialization
         /// <param name="type"></param>
         /// <param name="name"></param>
         /// <param name="statelessSurrogate"></param>
-        public void RegisterType(Type type, string name, IFudgeSerializationSurrogate statelessSurrogate)
+        public void RegisterType(Type type, IFudgeSerializationSurrogate statelessSurrogate)
         {
-            RegisterType(type, name, c => statelessSurrogate);
+            RegisterType(type, c => statelessSurrogate);
         }
 
-        public int RegisterType(Type type, string name, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory)
+        public int RegisterType(Type type, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory)
         {
-            // TODO 2009-10-18 t0rx -- Handle IFudgeSerializable
             int id = typeDataList.Count;
-            var entry = new TypeData { Name = name, SurrogateFactory = surrogateFactory, Type = type };
+            var entry = new TypeData { SurrogateFactory = surrogateFactory, Type = type };
             typeDataList.Add(entry);
-            nameMap.Add(name, id);
             typeMap.Add(type, id);
             return id;
         }
@@ -120,15 +112,10 @@ namespace Fudge.Serialization
             // Not found
             if (AllowTypeDiscovery)
             {
-                return AutoRegister(type);
+                return RegisterType(type);
             }
 
             return -1;
-        }
-
-        public IList<string> GetTypeNames()
-        {
-            return typeDataList.ConvertAll(entry => entry.Name);
         }
 
         public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type)
@@ -142,7 +129,7 @@ namespace Fudge.Serialization
             // Not found
             if (AllowTypeDiscovery)
             {
-                int typeId = AutoRegister(type);
+                int typeId = RegisterType(type);
                 if (typeId != -1)
                     return typeDataList[typeId].SurrogateFactory;
             }
@@ -158,47 +145,9 @@ namespace Fudge.Serialization
             return typeDataList[typeId].SurrogateFactory;
         }
 
-        public string GetTypeName(int typeId)
-        {
-            return typeDataList[typeId].Name;
-        }
-
-        /// <summary>
-        /// Remap this type map into a new one based on a different ordering/set of type names.
-        /// </summary>
-        /// <param name="names"></param>
-        /// <returns></returns>
-        public SerializationTypeMap Remap(string[] names)
-        {
-            if (names == null)
-            {
-                throw new ArgumentNullException("names");
-            }
-
-            SerializationTypeMap result = new SerializationTypeMap(context);
-            for (int i = 0; i < names.Length; i++)
-            {
-                string name = names[i];
-                int index;
-                if (nameMap.TryGetValue(name, out index))
-                {
-                    var data = typeDataList[index];
-                    result.RegisterType(data.Type, name, data.SurrogateFactory);
-                }
-                else
-                {
-                    // Unknown
-                    // TODO 2009-10-18 t0rx -- Handling for unknown types
-                    result.RegisterType(null, name, c => null);
-                }
-            }
-            return result;
-        }
-
         private class TypeData
         {
             public Type Type { get; set; }
-            public string Name { get; set; }
             public Func<FudgeContext, IFudgeSerializationSurrogate> SurrogateFactory { get; set; }
         }
     }

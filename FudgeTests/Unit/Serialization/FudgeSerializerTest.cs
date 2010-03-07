@@ -61,7 +61,7 @@ namespace Fudge.Tests.Unit.Serialization
         public void SimpleExampleWithSurrogate()
         {
             var typeMap = new SerializationTypeMap(context);
-            typeMap.RegisterType(typeof(Explicit.Address), "Address", c => new Explicit.AddressSerializer());
+            typeMap.RegisterType(typeof(Explicit.Address), c => new Explicit.AddressSerializer());
             var serializer = new FudgeSerializer(context, typeMap);
 
             var address = new Explicit.Address("Our House", "In the middle of our street", "MD1");
@@ -78,7 +78,7 @@ namespace Fudge.Tests.Unit.Serialization
         public void SimpleExampleWithIFudgeSerializable()
         {
             var typeMap = new SerializationTypeMap(context);
-            typeMap.RegisterType(typeof(Explicit.Tick), "Tick");
+            typeMap.RegisterType(typeof(Explicit.Tick));
             var serializer = new FudgeSerializer(context, typeMap);
 
             var tick = new Explicit.Tick { Ticker = "FOO", Bid = 12.3, Offer = 12.9 };
@@ -95,8 +95,8 @@ namespace Fudge.Tests.Unit.Serialization
         public void InlineObject()
         {
             var typeMap = new SerializationTypeMap(context);
-            typeMap.RegisterType(typeof(Explicit.Person), "Person");
-            typeMap.RegisterType(typeof(Explicit.Address), "Address", new Explicit.AddressSerializer());
+            typeMap.RegisterType(typeof(Explicit.Person));
+            typeMap.RegisterType(typeof(Explicit.Address), new Explicit.AddressSerializer());
             var serializer = new FudgeSerializer(context, typeMap);
 
             var person = new Explicit.Person { Name = "Bob", MainAddress = new Explicit.Address("Foo", "Bar", null) };
@@ -111,8 +111,8 @@ namespace Fudge.Tests.Unit.Serialization
         public void ReferencedObject()
         {
             var typeMap = new SerializationTypeMap(context);
-            typeMap.RegisterType(typeof(Explicit.Sibling), "Sibling");
-            typeMap.RegisterType(typeof(Explicit.Address), "Address", new Explicit.AddressSerializer());
+            typeMap.RegisterType(typeof(Explicit.Sibling));
+            typeMap.RegisterType(typeof(Explicit.Address), new Explicit.AddressSerializer());
             var serializer = new FudgeSerializer(context, typeMap);
 
             var bob = new Explicit.Sibling { Name = "Bob" };
@@ -132,8 +132,8 @@ namespace Fudge.Tests.Unit.Serialization
         public void CircularReference()
         {
             var typeMap = new SerializationTypeMap(context);
-            typeMap.RegisterType(typeof(Explicit.Sibling), "Sibling");
-            typeMap.RegisterType(typeof(Explicit.Address), "Address", new Explicit.AddressSerializer());
+            typeMap.RegisterType(typeof(Explicit.Sibling));
+            typeMap.RegisterType(typeof(Explicit.Address), new Explicit.AddressSerializer());
             var serializer = new FudgeSerializer(context, typeMap);
 
             var bob = new Explicit.Sibling { Name = "Bob" };

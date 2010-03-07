@@ -151,7 +151,7 @@ namespace Fudge.Serialization
         // we just write it out to the output stream
         private void Write(string fieldName, int? ordinal, FudgeFieldType type, object value)
         {            
-            // TODO 20100306 t0rx -- Have to track if the value is a message to inc the count for references
+            // TODO 2010-03-06 t0rx -- Have to track if the value is a message to inc the count for references
             if (type == null)
             {
                 type = context.TypeHandler.DetermineTypeFromValue(value);

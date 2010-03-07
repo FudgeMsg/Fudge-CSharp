@@ -27,8 +27,6 @@ namespace Fudge.Serialization
     /// </summary>
     public interface IFudgeSerializer
     {
-        // TODO 2010-01-23 t0rx -- Do we need fast versions for primitive types?
-
         /// <summary>
         /// Gets the <see cref="FudgeContext"/> for this deserializer.
         /// </summary>

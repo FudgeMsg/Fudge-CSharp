@@ -118,7 +118,7 @@ namespace Fudge.Serialization.Reflection
                         return false;
                 }
 
-                if (!prop.HasPublicSetter && !ListSurrogate.IsList(prop.Type))      // TODO 2010-02-14 t0rx -- This is a bit hideous
+                if (!prop.HasPublicSetter && !ListSurrogate.IsList(prop.Type))      // Special case for lists, which we can just append to if no setter present
                 {
                     // Not bean-style
                     return false;

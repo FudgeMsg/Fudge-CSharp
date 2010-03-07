@@ -68,7 +68,7 @@ namespace Fudge
         /// <returns></returns>
         public FudgeMsgEnvelope Parse(BinaryReader binaryReader)
         {
-            FudgeEncodedStreamReader reader = new FudgeEncodedStreamReader(FudgeContext);       // TODO 2009-11-12 t0rx -- In Fudge-Java this is retrieved from the context
+            FudgeEncodedStreamReader reader = new FudgeEncodedStreamReader(FudgeContext);
             reader.Reset(binaryReader);
             FudgeStreamElement element = reader.MoveNext();
             if (element == FudgeStreamElement.NoElement)
@@ -83,7 +83,7 @@ namespace Fudge
             FudgeMsg msg = FudgeContext.NewMessage();
             FudgeMsgEnvelope envelope = new FudgeMsgEnvelope(msg, version);
             ProcessFields(reader, msg);
-            return envelope;                                                                    // TODO 2009-11-12 t0rx -- In Fudge-Java the reader is released to the context
+            return envelope;
         }
 
         /**

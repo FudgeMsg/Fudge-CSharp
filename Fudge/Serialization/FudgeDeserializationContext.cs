@@ -133,7 +133,7 @@ namespace Fudge.Serialization
         /// </summary>
         private void WalkMessage(FudgeMsg msg)
         {
-            // TODO: Should do this as it's streaming in rather than separately
+            // REVIEW 2010-03-06 t0rx -- This would be more efficient if done at the same time as streaming in rather than separately
             MsgAndObj msgAndObj = new MsgAndObj();
             msgAndObj.Msg = msg;
             int index = objectList.Count;

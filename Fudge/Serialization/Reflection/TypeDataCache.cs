@@ -28,7 +28,7 @@ namespace Fudge.Serialization.Reflection
     /// </summary>
     public class TypeDataCache
     {
-        // TODO 2010-02-13 t0rx -- Should TypeDataCache be collapsed into SerializationTypeMap?
+        // REVIEW 2010-02-13 t0rx -- Should TypeDataCache be collapsed into SerializationTypeMap?
         private readonly FudgeContext context;
         private readonly Dictionary<Type, TypeData> cache = new Dictionary<Type, TypeData>();
 

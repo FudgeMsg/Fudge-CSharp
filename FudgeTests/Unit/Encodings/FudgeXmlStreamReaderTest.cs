@@ -50,7 +50,7 @@ namespace Fudge.Tests.Unit.Encodings
         public void AttributesAndText()
         {
             // Value should go into a field with empty name
-            // TODO 2009-12-17 t0rx -- Is this a good thing to do, or should it go in a field called "value", or just be ignored?
+            // REVIEW 2009-12-17 t0rx -- Is this a good thing to do, or should it go in a field called "value", or just be ignored?
             string xml = "<msg><name type=\"surname\">Smith</name></msg>";
 
             var reader = new FudgeXmlStreamReader(context, xml);
@@ -65,8 +65,6 @@ namespace Fudge.Tests.Unit.Encodings
         [Fact]
         public void AttributesAndSubElements()
         {
-            // Value should go into a field with empty name
-            // TODO 2009-12-17 t0rx -- Is this a good thing to do, or should it go in a field called "value", or just be ignored?
             string xml = "<msg><name type=\"surname\"><value>Smith</value></name></msg>";
 
             var reader = new FudgeXmlStreamReader(context, xml);

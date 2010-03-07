@@ -125,7 +125,6 @@
     <Compile Include="Serialization\Reflection\TypeDataCache.cs" />
     <Compile Include="Serialization\SerializableSurrogate.cs" />
     <Compile Include="Serialization\SerializationTypeMap.cs" />
-    <Compile Include="Serialization\SerializationHeader.cs" />
     <Compile Include="Types\DateTimeFieldType.cs" />
     <Compile Include="Types\FudgeArrayFieldTypeBase.cs" />
     <Compile Include="Types\FudgeDate.cs" />

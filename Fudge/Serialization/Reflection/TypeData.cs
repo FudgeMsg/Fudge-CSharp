@@ -94,7 +94,7 @@ namespace Fudge.Serialization.Reflection
 
         private static TypeKind CalcKind(FudgeContext context, TypeDataCache typeCache, Type type, FudgeFieldNameConvention fieldNameConvention, out TypeData subType, out TypeData subType2, out FudgeFieldType fieldType)
         {
-            // TODO 2010-02-14 t0rx -- There seems to be some duplication here with the FudgeSurrogateSelector, should look at joining up
+            // REVIEW 2010-02-14 t0rx -- There seems to be some duplication here with the FudgeSurrogateSelector, should look at joining up
             subType = null;
             subType2 = null;
             fieldType = context.TypeDictionary.GetByCSharpType(type);

@@ -86,7 +86,7 @@ namespace Fudge
                     throw new ArgumentNullException("value", "Every Fudge context must have a type dictionary.");
                 }
                 typeDictionary = value;
-                typeHandler.TypeDictionary = value;     // TODO 2009-12-23 t0rx -- This smells
+                typeHandler.TypeDictionary = value;
             }
         }
 
