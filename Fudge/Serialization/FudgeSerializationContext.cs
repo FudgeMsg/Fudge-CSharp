@@ -151,7 +151,6 @@ namespace Fudge.Serialization
         // we just write it out to the output stream
         private void Write(string fieldName, int? ordinal, FudgeFieldType type, object value)
         {            
-            // TODO 2010-03-06 t0rx -- Have to track if the value is a message to inc the count for references
             if (type == null)
             {
                 type = context.TypeHandler.DetermineTypeFromValue(value);
@@ -162,8 +161,26 @@ namespace Fudge.Serialization
             }
             else
             {
+                if (type == FudgeMsgFieldType.Instance)
+                {
+                    // As references are based on the number of messages, we have to update to take this one into account
+                    currentMessageId += CountMessages((IFudgeFieldContainer)value);
+                }
                 writer.WriteField(fieldName, ordinal, type, value);
             }
+        }
+
+        private int CountMessages(IFudgeFieldContainer value)
+        {
+            int count = 1;
+            foreach (var field in value)
+            {
+                if (field.Type == FudgeMsgFieldType.Instance || (field.Type == null && field.Value is IFudgeFieldContainer))
+                {
+                    count += CountMessages((IFudgeFieldContainer)field.Value);
+                }
+            }
+            return count;
         }
 
         private void WriteObject(string fieldName, int? ordinal, object value, bool allowRefs, bool writeTypeInfo)

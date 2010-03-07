@@ -89,7 +89,7 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.Equal(tick.Ticker, tick2.Ticker);
             Assert.Equal(tick.Bid, tick2.Bid);
             Assert.Equal(tick.Offer, tick2.Offer);
-        }        
+        }
 
         [Fact]
         public void InlineObject()
@@ -222,6 +222,26 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.NotNull(parent2.Out2ForcedIn);
         }
 
+        [Fact]
+        public void MessagesInObjectsOK()
+        {
+            // Case here is where a reference may be thrown out by other fields with messages in that aren't deserialized
+            var obj1 = new ClassWithMessageIn();
+            var obj2 = new ClassWithMessageIn();
+            obj2.Message = new FudgeMsg(new Field("a",
+                                            new Field("b"),
+                                            new Field("c")));   // Add in an arbitrary message
+            obj1.Other = obj2;
+            obj2.Other = obj1;                                  // We create a cycle so obj2 will refer back to obj1 past the other embedded messages
+
+            var serializer = new FudgeSerializer(context);
+            var msg = serializer.SerializeToMsg(obj1);
+
+            var result = (ClassWithMessageIn)serializer.Deserialize(msg);
+            Assert.NotSame(result, result.Other);
+            Assert.Same(result, result.Other.Other);
+        }
+
         public class TemperatureRange
         {
             public double High { get; set; }
@@ -269,6 +289,34 @@ namespace Fudge.Tests.Unit.Serialization
 
             [FudgeInline]    // Override the type
             public NotInlined Out2ForcedIn { get; set; }
+        }
+
+        private class ClassWithMessageIn : IFudgeSerializable
+        {
+            public ClassWithMessageIn()
+            {
+                Message = new FudgeMsg();
+            }
+
+            public IFudgeFieldContainer Message { get; set; }
+
+            public ClassWithMessageIn Other { get; set; }
+
+            #region IFudgeSerializable Members
+
+            public void Serialize(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
+            {
+                msg.AddIfNotNull("message", Message);
+                msg.AddIfNotNull("other", Other);
+            }
+
+            public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
+            {
+                // Skip message
+                Other = deserializer.FromField<ClassWithMessageIn>(msg.GetByName("other"));
+            }
+
+            #endregion
         }
 
         #endregion

@@ -27,6 +27,8 @@ namespace Fudge
     /// </summary>
     public static class FudgeExtensions
     {
+        #region IAppendingFudgeFieldContainer extensions
+
         /// <summary>
         /// Adds a field to a message, unless the value is null.
         /// </summary>
@@ -104,6 +106,8 @@ namespace Fudge
                 }
             }
         }
+
+        #endregion
 
         #region IFudgeField extensions
 
