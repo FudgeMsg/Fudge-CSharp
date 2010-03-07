@@ -107,6 +107,21 @@ namespace Fudge
             }
         }
 
+        /// <summary>
+        /// Adds all the fields in the enumerable to this message.
+        /// </summary>
+        /// <param name="fields">Enumerable of fields to add.</param>
+        public static void AddAll(this IAppendingFudgeFieldContainer msg, IEnumerable<IFudgeField> fields)
+        {
+            if (fields == null)
+                return; // Whatever
+
+            foreach (var field in fields)
+            {
+                msg.Add(field);
+            }
+        }
+
         #endregion
 
         #region IFudgeField extensions

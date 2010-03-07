@@ -96,7 +96,7 @@ namespace Fudge
             rwLock.AcquireWriterLock(Timeout.Infinite);
             try
             {                
-                if (!(type is ISecondaryFieldType))       // TODO 2009-09-12 t0rx -- Don't like this as a way of testing
+                if (!(type is ISecondaryFieldType))
                 {
                     int newLength = Math.Max(type.TypeId + 1, typesById.Length);
                     var newArray = new FudgeFieldType[newLength];

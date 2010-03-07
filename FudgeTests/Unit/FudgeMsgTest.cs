@@ -187,20 +187,6 @@ namespace Fudge.Tests.Unit
             Assert.Equal(5, msg.GetValue<long>("byte"));
         }
 
-        [Fact]
-        public void AsQueriesToLongNoNames()        // TODO 2009-08-31 t0rx -- This test from Fudge-Java doesn't make sense
-        {
-            FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
-
-            Assert.Null(msg.GetSByte("foobar"));
-            Assert.Null(msg.GetShort("foobar"));
-            Assert.Null(msg.GetInt("foobar"));
-            Assert.Null(msg.GetLong("foobar"));
-            Assert.Null(msg.GetFloat("foobar"));
-            Assert.Null(msg.GetDouble("foobar"));
-            Assert.Null(msg.GetString("foobar"));
-        }
-
         // ------------
 
         [Fact]

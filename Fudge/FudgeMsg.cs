@@ -180,22 +180,6 @@ namespace Fudge
         #endregion
 
         /// <summary>
-        /// Adds all the fields in the enumerable to this message.
-        /// </summary>
-        /// <param name="fields">Enumerable of fields to add.</param>
-        public void Add(IEnumerable<IFudgeField> fields)
-        {
-            // TODO 2009-10-17 t0rx -- Add this method to IMutableFudgeFieldContainer?
-            if (fields == null)
-                return; // Whatever
-
-            foreach (var field in fields)
-            {
-                Add(field);
-            }
-        }
-
-        /// <summary>
         /// Adds all the values in the enumerable to this message as fields of a given name.
         /// </summary>
         /// <param name="name">Name of the field.</param>
@@ -696,7 +680,7 @@ namespace Fudge
         private FudgeMsg CopyContainer(IFudgeFieldContainer container)
         {
             var msg = context.NewMessage();
-            msg.Add(container);
+            msg.AddAll(container);
             return msg;
         }
 

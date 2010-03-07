@@ -30,7 +30,6 @@ namespace Fudge.Encodings
     /// </summary>
     public class FudgeXmlStreamWriter : IFudgeStreamWriter
     {
-        // TODO 2009-11-14 t0rx -- Handle writing XML for ordinals
         /// <summary>Set this property in the <see cref="FudgeContext"/> to give the default behaviour for flushing messages when they are complete.</summary>
         public static readonly FudgeContextProperty AutoFlushOnMessageEndProperty = new FudgeContextProperty("FudgeXmlStreamWriter.AutoFlushOnMessageEnd", typeof(bool));
         private readonly FudgeContext context;

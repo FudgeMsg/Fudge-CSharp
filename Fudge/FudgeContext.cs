@@ -201,7 +201,6 @@ namespace Fudge
             FudgeMsgEnvelope envelope;
             try
             {
-                // TODO 2009-12-23 t0rx -- Should this now be refactored to use FudgeMsgStreamReader?
                 envelope = parser.Parse(s);
             }
             catch (IOException e)

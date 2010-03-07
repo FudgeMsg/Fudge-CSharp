@@ -46,7 +46,7 @@ namespace Fudge.Serialization
         {
             this.context = context;
             this.writer = writer;
-            this.idMap = new Dictionary<object, int>();     // TODO 2009-10-18 t0rx -- Worry about HashCode and Equals implementations
+            this.idMap = new Dictionary<object, int>();     // This will call GetHashCode and Equals on the objects, which is not ideal - see FRN-65
             this.typeMap = typeMap;
             this.typeMappingStrategy = typeMappingStrategy;
         }

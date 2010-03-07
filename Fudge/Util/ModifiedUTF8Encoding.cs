@@ -249,9 +249,8 @@ namespace Fudge.Util
         /// <summary>
         /// <c>UTFDataFormatException</c> is thrown when there is a problem encoding or decoding modified-UTF8 data.
         /// </summary>
-        public class UTFDataFormatException : Exception
+        public class UTFDataFormatException : FudgeRuntimeException
         {
-            // TODO 2009-08-30 t0rx -- Is there an existing C# exception that is more appropriate?
             /// <summary>
             /// Constructs a new <c>UTFDataFormatException</c>
             /// </summary>

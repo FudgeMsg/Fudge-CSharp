@@ -79,7 +79,10 @@ namespace Fudge.Tests.Unit.Types
             Assert.False(new FudgeDate(19990229).IsValid);
             Assert.False(new FudgeDate(19000229).IsValid);
 
-            // Need to do negatives
+            // Negatives
+            Assert.True(new FudgeDate(-00010229).IsValid);      // 1BC is the year before 1AD as there was no zero, so it's leap
+            Assert.True(new FudgeDate(-04010229).IsValid);
+            Assert.False(new FudgeDate(-01010229).IsValid);
         }
 
         [Fact]

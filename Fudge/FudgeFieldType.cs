@@ -134,9 +134,6 @@ namespace Fudge
         /// <exception cref="InvalidCastException">Thrown if the value cannot be converted</exception>
         public virtual object ConvertValueFrom(object value)
         {
-            // TODO 2009-09-12 t0rx -- Should we return null rather than throwing an exception?  This would be consistent with FudgeMsg.GetLong, etc.
-            // TODO 2009-12-14 Andrew -- I think throwing an exception is correct behaviour; FudgeMsg.GetLong might be flawed!
-
             return Convert.ChangeType(value, csharpType);
         }
 
@@ -230,8 +227,8 @@ namespace Fudge
     [Serializable]
     public class FudgeFieldType<TValue> : FudgeFieldType
     {
-        // TODO 2009-08-30 t0rx -- Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
-        // TODO 2009-12-14 Andrew -- there must be a less cumbersome approach than this that doesn't force us to end up with ReadTypedValue
+        // REVIEW 2009-08-30 t0rx -- Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
+        // REVIEW 2009-12-14 Andrew -- there must be a less cumbersome approach than this that doesn't force us to end up with ReadTypedValue
 
         private readonly FudgeValueMinimizer<TValue> minimizer;
 
@@ -293,7 +290,7 @@ namespace Fudge
         /// <remarks>This method is a typed version of <see cref="FudgeFieldType.ReadValue"/>.</remarks>
         public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            // TODO 2009-08-30 t0rx -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
+            // In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
             {
                 throw new NotSupportedException("This method must be overridden for variable size types.");

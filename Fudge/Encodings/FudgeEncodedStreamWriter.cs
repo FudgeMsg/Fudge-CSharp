@@ -290,7 +290,7 @@ namespace Fudge.Encodings
             nWritten += 1;
             bw.Write((byte)version);
             nWritten += 1;
-            bw.Write((short)taxonomy);      // TODO 2009-10-04 t0rx -- This should probably be ushort, but we'll need to change throughout
+            bw.Write((short)taxonomy);      // REVIEW 2009-10-04 t0rx -- Should this be ushort?
             nWritten += 2;
             bw.Write(messageSize);
             nWritten += 4;

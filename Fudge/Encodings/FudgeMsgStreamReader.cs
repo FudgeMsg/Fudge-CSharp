@@ -29,7 +29,6 @@ namespace Fudge.Encodings
     /// </summary>
     public class FudgeMsgStreamReader : IFudgeStreamReader
     {
-        // TODO 2009-11-13 t0rx -- What about envelopes?
         private readonly FudgeContext context;
         private Stack<State> stack = new Stack<State>();
         private State currentState;
