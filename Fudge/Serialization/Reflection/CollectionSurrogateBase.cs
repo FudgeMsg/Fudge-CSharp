@@ -27,11 +27,26 @@ namespace Fudge.Serialization.Reflection
     /// </summary>
     public abstract class CollectionSurrogateBase : IFudgeSerializationSurrogate
     {
+        /// <summary>The <see cref="FudgeContext"/> used by the surrogate.</summary>
         protected readonly FudgeContext context;
+        /// <summary>The <see cref="TypeData"/> for the type this surrogate serializes.</summary>
         protected readonly TypeData typeData;
+        /// <summary>The delegate to perform the serialization of this type.</summary>
         protected readonly Action<object, IAppendingFudgeFieldContainer, IFudgeSerializer> serializerDelegate;
+        /// <summary>The delegate to perform the deserialization of this type.</summary>
         protected readonly Func<IFudgeFieldContainer, IFudgeDeserializer, object> deserializerDelegate;
 
+        /// <summary>
+        /// Constructs a new instance.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="typeData"></param>
+        /// <param name="serializeMethodName">Name of method to use to serialize objects.</param>
+        /// <param name="deserializeMethodName">Name of method to use to deserialize objects.</param>
+        /// <remarks>
+        /// The <see cref="CollectionSurrogateBase"/> will scan for generic methods with the right names, and specialise them for
+        /// the types given within <see cref="typeData"/>.
+        /// </remarks>
         public CollectionSurrogateBase(FudgeContext context, TypeData typeData, string serializeMethodName, string deserializeMethodName)
         {
             this.context = context;
@@ -41,6 +56,13 @@ namespace Fudge.Serialization.Reflection
             deserializerDelegate = CreateMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(deserializeMethodName, types);
         }
 
+        /// <summary>
+        /// Creates a delegate for a method after specializing its generic types.
+        /// </summary>
+        /// <typeparam name="T">Type of delegate to create.</typeparam>
+        /// <param name="name">Name of method to find.</param>
+        /// <param name="genericTypes">Array of types to apply to the generic parameters of the method.</param>
+        /// <returns>Delegate that calls the specialized method.</returns>
         protected T CreateMethodDelegate<T>(string name, Type[] genericTypes) where T : class
         {
             var method = this.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericTypes);
@@ -49,11 +71,13 @@ namespace Fudge.Serialization.Reflection
 
         #region IFudgeSerializationSurrogate Members
 
+        /// <inheritdoc/>
         public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
             serializerDelegate(obj, msg, serializer);
         }
 
+        /// <inheritdoc/>
         public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
             return deserializerDelegate(msg, deserializer);
@@ -61,12 +85,28 @@ namespace Fudge.Serialization.Reflection
 
         #endregion
 
+        /// <summary>
+        /// Helper method to serialize list contents.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="msg"></param>
+        /// <param name="serializer"></param>
         protected void SerializeList<T>(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)    
         {
             var list = (IList<T>)obj;
             SerializeList(list, msg, serializer, typeData.SubTypeData.Kind, null);
         }
 
+        /// <summary>
+        /// Helper method to serialize list contents.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="msg"></param>
+        /// <param name="serializer"></param>
+        /// <param name="kind"></param>
+        /// <param name="ordinal"></param>
         protected static void SerializeList<T>(IEnumerable<T> list, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer, TypeData.TypeKind kind, int? ordinal)
         {
             switch (kind)
@@ -81,6 +121,14 @@ namespace Fudge.Serialization.Reflection
             }
         }
 
+        /// <summary>
+        /// Helper method to deserialize an individual field.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="deserializer"></param>
+        /// <param name="kind"></param>
+        /// <returns></returns>
         protected T DeserializeField<T>(IFudgeField field, IFudgeDeserializer deserializer, TypeData.TypeKind kind) where T : class
         {
             switch (kind)

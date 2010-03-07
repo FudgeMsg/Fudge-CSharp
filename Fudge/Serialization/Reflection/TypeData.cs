@@ -22,12 +22,22 @@ using System.Reflection;
 
 namespace Fudge.Serialization.Reflection
 {
+    /// <summary>
+    /// Describes reflection-based information about a type
+    /// </summary>
     public class TypeData
     {
         private readonly TypeData subType;
         private readonly TypeData subType2;
         private readonly FudgeFieldType fieldType;
 
+        /// <summary>
+        /// Constructs a new instance
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="cache"></param>
+        /// <param name="type"></param>
+        /// <param name="fieldNameConvention"></param>
         public TypeData(FudgeContext context, TypeDataCache cache, Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             Type = type;
@@ -53,20 +63,38 @@ namespace Fudge.Serialization.Reflection
             StaticPublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
         }
 
+        /// <summary>Gets the <see cref="Type"/> this <see cref="TypeData"/> describes.</summary>
         public Type Type { get; private set; }
+        /// <summary>Gets the default constructor, if present.</summary>
         public ConstructorInfo DefaultConstructor { get; private set; }
+        /// <summary>Gets all the constructors for the type.</summary>
         public ConstructorInfo[] Constructors { get; private set; }
+        /// <summary>Gets <see cref="PropertyData"/> describing the properties of the type.</summary>
         public PropertyData[] Properties { get; private set; }
+        /// <summary>Gets any custom attributes for the type.</summary>
         public object[] CustomAttributes { get; private set; }
+        /// <summary>Gets the way that this type should be serialized by default.</summary>
         public TypeKind Kind { get; private set; }
-        public TypeData SubTypeData { get { return subType; } }                      // For lists and arrays, this is the type of the elements in the list.  For dictionaries it's the key type
-        public TypeData SubType2Data { get { return subType2; } }                    // For dictionaries, this is the type of the values
+        /// <summary>For lists and arrays, this is the <see cref="TypeData"/> for the type of elements in the list.  For dictionaries it's the key type</summary>
+        public TypeData SubTypeData { get { return subType; } }
+        /// <summary>For dictionaries, this is the <see cref="TypeData"/> for the type of the values</summary>
+        public TypeData SubType2Data { get { return subType2; } }
+        /// <summary>For lists and arrays, this is the type of elements in the list.  For dictionaries it's the key type</summary>
         public Type SubType { get { return subType == null ? null : subType.Type; } }
+        /// <summary>For dictionaries, this is the type of the values</summary>
         public Type SubType2 { get { return subType2 == null ? null : subType2.Type; } }
+        /// <summary>Gets the <see cref="FudgeFieldType"/> to store this type in.</summary>
         public FudgeFieldType FieldType { get { return fieldType; } }                   // If the Kind is primitive
+        /// <summary>Gets all public instance methods of the type.</summary>
         public MethodInfo[] PublicMethods { get; private set; }
+        /// <summary>Gets all public static methods of the type</summary>
         public MethodInfo[] StaticPublicMethods { get; private set; }
 
+        /// <summary>
+        /// Gets the first custom attribute of a given type
+        /// </summary>
+        /// <typeparam name="T">Type of attribute to select</typeparam>
+        /// <returns>Matching attribute or <c>null</c>.</returns>
         public T GetCustomAttribute<T>() where T : Attribute
         {
             foreach (object attrib in CustomAttributes)
@@ -77,10 +105,16 @@ namespace Fudge.Serialization.Reflection
             return null;
         }
 
+        /// <summary>
+        /// Enunerates the different ways a type may be serialized.
+        /// </summary>
         public enum TypeKind
         {
+            /// <summary>Serialize as a fudge field.</summary>
             FudgePrimitive,
+            /// <summary>Serialize as a sub-message.</summary>
             Inline,
+            /// <summary>Serialize as a sub-message but allow references.</summary>
             Reference
         }
 
@@ -140,6 +174,9 @@ namespace Fudge.Serialization.Reflection
             Properties = list.ToArray();
         }
 
+        /// <summary>
+        /// Holds reflection-based data about a property of a type.
+        /// </summary>
         public sealed class PropertyData
         {
             private readonly PropertyInfo info;
@@ -149,6 +186,12 @@ namespace Fudge.Serialization.Reflection
             private readonly TypeData typeData;
             private readonly TypeKind kind;
 
+            /// <summary>
+            /// Contructs a new instance
+            /// </summary>
+            /// <param name="typeCache"></param>
+            /// <param name="fieldNameConvention"></param>
+            /// <param name="info"></param>
             public PropertyData(TypeDataCache typeCache, FudgeFieldNameConvention fieldNameConvention, PropertyInfo info)
             {
                 this.info = info;
@@ -197,12 +240,19 @@ namespace Fudge.Serialization.Reflection
                 }
             }
 
+            /// <summary>Gets the <see cref="PropertyInfo"/> for the property.</summary>
             public PropertyInfo Info { get { return info; } }
+            /// <summary>Gets the name of the property.</summary>
             public string Name { get { return name; } }
+            /// <summary>Gets the <see cref="TypeData"/> describing the type of the property.</summary>
             public TypeData TypeData { get { return typeData; } }
+            /// <summary>Gets the <see cref="Type"/> of the property.</summary>
             public Type Type { get { return typeData.Type; } }
+            /// <summary>Gets the way the the property should be serialized.</summary>
             public TypeKind Kind { get { return kind; } }
+            /// <summary>Gets whether the property has a public setter.</summary>
             public bool HasPublicSetter { get { return hasPublicSetter; } }
+            /// <summary>Gets the name that should be used to serialize the property after any conventions, etc. have been applied.</summary>
             public string SerializedName
             {
                 get { return serializedName; }

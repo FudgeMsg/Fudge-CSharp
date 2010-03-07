@@ -110,6 +110,7 @@ namespace Fudge
         /// <summary>
         /// Adds all the fields in the enumerable to this message.
         /// </summary>
+        /// <param name="msg">Message to add fields to.</param>
         /// <param name="fields">Enumerable of fields to add.</param>
         public static void AddAll(this IAppendingFudgeFieldContainer msg, IEnumerable<IFudgeField> fields)
         {
