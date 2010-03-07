@@ -36,7 +36,7 @@ namespace Fudge.Tests.Unit.Types
             var bytes = msg1.ToByteArray();
             var msg2 = context.Deserialize(bytes).Message;
 
-            Assert.Equal("1999-12-10 03:04:05.987654321 -01:15", msg2.GetValue<FudgeDateTime>("dt").ToString());
+            Assert.Equal("1999-12-10T03:04:05.987654321-01:15", msg2.GetValue<FudgeDateTime>("dt").ToString());
         }
 
         [Fact]

@@ -31,10 +31,10 @@ namespace Fudge.Types
     /// </remarks>
     public class FudgeDate : IComparable<FudgeDate>, IConvertible
     {
-        private readonly int rawValue;
+        private readonly long rawValue;
         private static readonly int[] monthLengths = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-        private const int MinYear = -9999;
-        private const int MaxYear = 9999;
+        private const int MinYear = -4000000;
+        private const int MaxYear = 4000000;
 
         /// <summary>
         /// Constructs a new <c>FudgeDate</c> based on a raw value in the form YYYYMMDD.
@@ -56,20 +56,20 @@ namespace Fudge.Types
         {
             if (year < MinYear || year > MaxYear)
                 throw new ArgumentOutOfRangeException("year", "FudgeDate years must be in the range " + MinYear + " to " + MaxYear);
-            if (month < 1 || month > 12)
+            if (month < 0 || month > 12)
                 throw new ArgumentOutOfRangeException("month");
-            if (day < 1 || day > 31)
+            if (day < 0 || day > 31)
                 throw new ArgumentOutOfRangeException("day");
 
             if (year >= 0)
             {
                 // Note that 0 is not a valid year as the first year was 1AD, but we handle it anyway
-                rawValue = year * 10000 + month * 100 + day;
+                rawValue = (long)year * 10000 + month * 100 + day;
             }
             else
             {
                 // We need them to be of the form -10000101 for 1 Jan 1000 BC
-                rawValue = year * 10000 - month * 100 - day;
+                rawValue = (long)year * 10000 - month * 100 - day;
             }
         }
 
@@ -92,7 +92,7 @@ namespace Fudge.Types
         /// </remarks>
         public int Year
         {
-            get { return rawValue / 10000; }
+            get { return (int)(rawValue / 10000); }
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Fudge.Types
         {
             get
             {
-                return (Math.Abs(rawValue) / 100) % 100;
+                return (int)((Math.Abs(rawValue) / 100) % 100);
             }
         }
 
@@ -113,7 +113,7 @@ namespace Fudge.Types
         {
             get
             {
-                return Math.Abs(rawValue) % 100;
+                return (int)(Math.Abs(rawValue) % 100);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Fudge.Types
         /// <summary>
         /// Returns the raw representation of this date.
         /// </summary>
-        public int RawValue
+        public long RawValue
         {
             get { return rawValue; }
         }
@@ -225,6 +225,7 @@ namespace Fudge.Types
         /// <inheritdoc/>
         public override string ToString()
         {
+            // This is ISO 8601-compatible
             return string.Format("{0:d4}-{1:d2}-{2:d2}", Year, Month, Day);
         }
 
@@ -237,6 +238,8 @@ namespace Fudge.Types
         {
             switch (precision)
             {
+                case FudgeDateTimePrecision.Millennium:
+                    return string.Format("{0:d2}000", Year / 1000);
                 case FudgeDateTimePrecision.Century:
                     return string.Format("{0:d2}00", Year / 100);
                 case FudgeDateTimePrecision.Year:
@@ -258,7 +261,7 @@ namespace Fudge.Types
                 return this.Year < other.Year ? -1 : 1;
             }
 
-            int subYearDiff = (Math.Abs(this.rawValue) % 10000) - (Math.Abs(other.rawValue) % 10000);
+            long subYearDiff = (Math.Abs(this.rawValue) % 10000) - (Math.Abs(other.rawValue) % 10000);
             return Math.Sign(subYearDiff); ;
         }
 

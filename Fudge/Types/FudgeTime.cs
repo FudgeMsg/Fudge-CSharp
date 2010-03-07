@@ -260,6 +260,7 @@ namespace Fudge.Types
                 "",
                 "",
                 "",
+                "",
                 "{0:d2}",
                 "{0:d2}:{1:d2}",
                 "{0:d2}:{1:d2}:{2:d2}",
@@ -267,11 +268,12 @@ namespace Fudge.Types
                 "{0:d2}:{1:d2}:{2:d2}.{3:d6}",
                 "{0:d2}:{1:d2}:{2:d2}.{3:d9}",
             };
-        private static readonly int[] nanoDividers = { 1, 1, 1, 1, 1, 1, 1, 1000000, 1000, 1 };
+        private static readonly int[] nanoDividers = { 1, 1, 1, 1, 1, 1, 1, 1, 1000000, 1000, 1 };
 
         /// <inheritdoc/>
         public override string ToString()
         {
+            // We match ISO 8601 format - e.g. "12:34:27.123+01:15"
             int subSecond = nanos / nanoDividers[(int)precision];
             string result = string.Format(precisionFormatters[(int)precision], Hour, Minute, Second, subSecond);
             if (timeZoneOffset.HasValue)
@@ -279,7 +281,7 @@ namespace Fudge.Types
                 int mins = Math.Abs(timeZoneOffset.Value) % 60;
                 int hours = Math.Abs(timeZoneOffset.Value) / 60;
                 char prefix = (timeZoneOffset < 0) ? '-' : '+';
-                result += string.Format(" {0}{1:d2}:{2:d2}", prefix, hours, mins);
+                result += string.Format("{0}{1:d2}:{2:d2}", prefix, hours, mins);
             }
             return result;
         }

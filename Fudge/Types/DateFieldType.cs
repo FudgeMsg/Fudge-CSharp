@@ -44,13 +44,21 @@ namespace Fudge.Types
         public override FudgeDate ReadTypedValue(BinaryReader input, int dataSize)
         {
             int rawValue = input.ReadInt32();
-            return new FudgeDate(rawValue);
+
+            int year = rawValue >> 9;
+            int month = (rawValue >> 5) & 0x0f;
+            int day = rawValue & 0x1f;
+
+            return new FudgeDate(year, month, day);
         }
 
         /// <inheritdoc/>
         public override void WriteValue(BinaryWriter output, FudgeDate value)
         {
-            output.Write(value.RawValue);
+            int data = value.Year << 9;
+            data |= (value.Month & 0x0f) << 5;
+            data |= (value.Day & 0x1f);
+            output.Write(data);
         }
     }
 }

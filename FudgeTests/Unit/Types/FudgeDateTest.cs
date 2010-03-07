@@ -39,10 +39,10 @@ namespace Fudge.Tests.Unit.Types
         [Fact]
         public void ConstructorRangeChecking()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000000, 1, 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000, 0, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(10000000, 1, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000, -1, 1));
             Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000, 13, 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000, 1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000, 1, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => new FudgeDate(1000, 1, 32));
         }
 

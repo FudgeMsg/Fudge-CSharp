@@ -35,7 +35,7 @@ namespace Fudge.Tests.Unit.Types
             Assert.Equal(123456789, t.Nanoseconds);
             Assert.Equal(-120, t.TimeZoneOffset);
             Assert.Equal(FudgeDateTimePrecision.Nanosecond, t.Precision);
-            Assert.Equal("13:04:05.123456789 -02:00", t.ToString());
+            Assert.Equal("13:04:05.123456789-02:00", t.ToString());
 
             var t2 = new FudgeTime(1, 2, 3);
             Assert.Null(t2.TimeZoneOffset);
@@ -45,21 +45,21 @@ namespace Fudge.Tests.Unit.Types
             var t3 = new FudgeTime(1, 2, 3, 60);
             Assert.Equal(60, t3.TimeZoneOffset);
             Assert.Equal(FudgeDateTimePrecision.Second, t3.Precision);
-            Assert.Equal("01:02:03 +01:00", t3.ToString());
+            Assert.Equal("01:02:03+01:00", t3.ToString());
 
             // Other variants
             Assert.Equal("04:01", new FudgeTime(4, 1).ToString());
             Assert.Equal("23", new FudgeTime(23).ToString());
             Assert.Equal("10:00:05.987654321", new FudgeTime(10, 0, 5, 987654321, FudgeDateTimePrecision.Nanosecond).ToString());
             Assert.Equal("01:01:01.000000123", new FudgeTime(FudgeDateTimePrecision.Nanosecond, 3661, 123).ToString());
-            Assert.Equal("01:01:01.000000123 +00:30", new FudgeTime(FudgeDateTimePrecision.Nanosecond, 3661, 123, 30).ToString());
+            Assert.Equal("01:01:01.000000123+00:30", new FudgeTime(FudgeDateTimePrecision.Nanosecond, 3661, 123, 30).ToString());
         }
 
         [Fact]
         public void ConstructingFromDateTime()
         {
             Assert.Equal("12:14:10.000000000", new FudgeTime(new DateTime(2000, 2, 3, 12, 14, 10, DateTimeKind.Unspecified)).ToString());
-            Assert.Equal("12:14:10.000000000 +00:00", new FudgeTime(new DateTime(2000, 2, 3, 12, 14, 10, DateTimeKind.Utc)).ToString());
+            Assert.Equal("12:14:10.000000000+00:00", new FudgeTime(new DateTime(2000, 2, 3, 12, 14, 10, DateTimeKind.Utc)).ToString());
 
             var local = new FudgeTime(new DateTime(2000, 7, 6, 12, 14, 10, DateTimeKind.Local));
             Assert.True(local.ToString().StartsWith("12:14:10"));
@@ -112,9 +112,9 @@ namespace Fudge.Tests.Unit.Types
             Assert.Equal("10:00", new FudgeTime(10, 0).ToString());
             Assert.Equal("10", new FudgeTime(10).ToString());
 
-            Assert.Equal("10:00:05 -01:15", new FudgeTime(10, 0, 5, -75).ToString());
-            Assert.Equal("10:00:05 +00:00", new FudgeTime(10, 0, 5, 0).ToString());
-            Assert.Equal("10:00:05 +04:00", new FudgeTime(10, 0, 5, 240).ToString());
+            Assert.Equal("10:00:05-01:15", new FudgeTime(10, 0, 5, -75).ToString());
+            Assert.Equal("10:00:05+00:00", new FudgeTime(10, 0, 5, 0).ToString());
+            Assert.Equal("10:00:05+04:00", new FudgeTime(10, 0, 5, 240).ToString());
         }
 
         [Fact]

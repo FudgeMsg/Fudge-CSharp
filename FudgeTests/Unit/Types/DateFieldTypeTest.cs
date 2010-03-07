@@ -45,12 +45,18 @@ namespace Fudge.Tests.Unit.Types
         [Fact]
         public void CheckActualBytes()
         {
-            var d = new FudgeDate(2003, 01, 13);
-            var stream = new MemoryStream();
-            var writer = new FudgeBinaryWriter(stream);
-            DateFieldType.Instance.WriteValue(writer, d);
+            Func<FudgeDate, string> toByteString = d =>
+            {
+                var stream = new MemoryStream();
+                var writer = new FudgeBinaryWriter(stream);
+                DateFieldType.Instance.WriteValue(writer, d);
+                return stream.ToArray().ToNiceString();
+            };
 
-            Assert.Equal("01-31-a2-a1", stream.ToArray().ToNiceString());       // That's 20030113 in hex
+            // Using examples from Confluence at http://www.fudgemsg.org/display/FDG/DateTime+encoding
+            Assert.Equal("00-0f-b4-3f", toByteString(new FudgeDate(20100131)));
+            Assert.Equal("00-0f-a1-00", toByteString(new FudgeDate(20000800)));
+            Assert.Equal("a4-72-80-00", toByteString(new FudgeDate(-3000000, 0, 0)));
         }
     }
 }

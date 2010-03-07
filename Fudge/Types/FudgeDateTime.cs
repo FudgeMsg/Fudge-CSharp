@@ -341,7 +341,7 @@ namespace Fudge.Types
         {
             string result = date.ToString(precision);
             if (precision > FudgeDateTimePrecision.Day)
-                result += " " + time.ToString();
+                result += "T" + time.ToString();            // Using T to match ISO 8601
             return result;
         }
 

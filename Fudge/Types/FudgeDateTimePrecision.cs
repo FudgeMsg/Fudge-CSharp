@@ -8,8 +8,13 @@ namespace Fudge.Types
     /// <summary>
     /// <c>FudgeDateTimePrecision</c> expresses the resolution of a <see cref="FudgeDateTime"/> or <see cref="FudgeTime"/> object.
     /// </summary>
+    /// <remarks>
+    /// The values are as defined in the specification at http://www.fudgemsg.org/display/FDG/DateTime+encoding
+    /// </remarks>
     public enum FudgeDateTimePrecision : byte
     {
+        /// <summary>The object is accurate to the nearest millennium.</summary>
+        Millennium,
         /// <summary>The object is accurate to the nearest century.</summary>
         Century,
         /// <summary>The object is accurate to the nearest year.</summary>
