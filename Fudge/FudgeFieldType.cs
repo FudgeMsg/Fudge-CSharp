@@ -69,6 +69,7 @@ namespace Fudge
         /// <summary>
         /// Gets the numeric identifier assigned to this type
         /// </summary>
+        /// <remarks>See <see cref="FudgeTypeDictionary"/> for defined identifiers.</remarks>
         public int TypeId
         {
             get { return typeId; }

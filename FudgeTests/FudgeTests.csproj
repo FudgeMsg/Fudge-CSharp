@@ -67,6 +67,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Unit\Encodings\FudgeJSONStreamWriterTest.cs" />
     <Compile Include="Unit\Serialization\DefaultTypeMappingStrategyTest.cs" />
     <Compile Include="Unit\Serialization\FudgeSerializationContextTest.cs" />
     <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
