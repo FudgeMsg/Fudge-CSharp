@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Fudge.Taxon;
+using Fudge.Types;
 
 namespace Fudge
 {
@@ -167,7 +168,7 @@ namespace Fudge
                 // One for the size prefix
                 size++;
                 // Then for the UTF Encoding
-                size += ModifiedUTF8Util.ModifiedUTF8Length(name);
+                size += StringFieldType.Encoding.GetByteCount(name);
             }
             if (type.IsVariableSize)
             {

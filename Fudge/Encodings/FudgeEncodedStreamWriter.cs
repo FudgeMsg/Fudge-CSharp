@@ -369,14 +369,14 @@ namespace Fudge.Encodings
             }
             if (name != null)
             {
-                int utf8size = ModifiedUTF8Util.ModifiedUTF8Length(name);
+                int utf8size = StringFieldType.Encoding.GetByteCount(name);
                 if (utf8size > 0xFF)
                 {
                     throw new ArgumentOutOfRangeException("UTF-8 encoded field name cannot exceed 255 characters. Name \"" + name + "\" is " + utf8size + " bytes encoded.");
                 }
                 bw.Write((byte)utf8size);
                 nWritten++;
-                nWritten += ModifiedUTF8Util.WriteModifiedUTF8(name, bw);
+                nWritten += StringFieldType.WriteString(bw, name);
             }
 
             return nWritten;

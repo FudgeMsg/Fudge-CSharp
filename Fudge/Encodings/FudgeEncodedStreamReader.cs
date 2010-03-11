@@ -22,6 +22,7 @@ using System.IO;
 using Fudge.Util;
 using System.Diagnostics;
 using Fudge.Taxon;
+using Fudge.Types;
 
 namespace Fudge.Encodings
 {
@@ -225,7 +226,7 @@ namespace Fudge.Encodings
             {
                 int nameSize = Reader.ReadByte();
                 nRead++;
-                name = ModifiedUTF8Util.ReadString(Reader, nameSize);
+                name = StringFieldType.ReadString(Reader, nameSize);
                 nRead += nameSize;
             }
             else if (ordinal != null)
