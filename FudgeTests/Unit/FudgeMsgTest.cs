@@ -19,6 +19,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Fudge.Types;
+using System.Net;
 
 namespace Fudge.Tests.Unit
 {
@@ -315,23 +316,36 @@ namespace Fudge.Tests.Unit
         }
 
         [Fact]
-        public void SecondaryTypes()
+        public void GuidsAsSecondaryTypes()
         {
-            FudgeContext context = new FudgeContext();
-
-            var guidType = new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray());
-            var typeDictionary = new FudgeTypeDictionary();
-            typeDictionary.AddType(guidType);
-            context.TypeDictionary = typeDictionary;
-
             Guid guid = Guid.NewGuid();
-            FudgeMsg msg = new FudgeMsg(context);
+            var msg = fudgeContext.NewMessage(); ;
             msg.Add("guid", guid);
 
             Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("guid").Type);
 
             Guid guid2 = msg.GetValue<Guid>("guid");
             Assert.Equal(guid, guid2);
+        }
+
+        [Fact]
+        public void IPAddressesAsSecondaryTypes()
+        {
+            var ipv6Address = IPAddress.Parse("2001:db8:85a3::8a2e:370:7334");
+            var ipv4Address = IPAddress.Parse("192.168.4.1");
+
+            var msg = fudgeContext.NewMessage();
+            msg.Add("ipv6", ipv6Address);
+            msg.Add("ipv4", ipv4Address);
+
+            Assert.Same(ByteArrayFieldType.Length16Instance, msg.GetByName("ipv6").Type);
+            Assert.Same(ByteArrayFieldType.Length4Instance, msg.GetByName("ipv4").Type);
+
+            var ipv6_2 = msg.GetValue<IPAddress>("ipv6");
+            var ipv4_2 = msg.GetValue<IPAddress>("ipv4");
+
+            Assert.Equal(ipv6Address, ipv6_2);
+            Assert.Equal(ipv4Address, ipv4_2);
         }
 
         [Fact]

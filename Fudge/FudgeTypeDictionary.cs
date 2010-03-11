@@ -20,6 +20,7 @@ using System.Text;
 using Fudge.Types;
 using System.Diagnostics;
 using System.Threading;
+using System.Net;
 
 namespace Fudge
 {
@@ -77,6 +78,7 @@ namespace Fudge
             AddType(new SecondaryFieldType<DateTime, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTime(), dt => new FudgeDateTime(dt)));
             AddType(new SecondaryFieldType<DateTimeOffset, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTimeOffset(), dto => new FudgeDateTime(dto)));
             AddType(new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray()));
+            AddType(new SecondaryFieldType<IPAddress, byte[]>(ByteArrayFieldType.VariableSizedInstance, raw => new IPAddress(raw), value => value.GetAddressBytes()));
         }
 
         /// <summary>
