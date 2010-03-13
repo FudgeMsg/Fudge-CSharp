@@ -91,7 +91,7 @@ namespace Fudge.Encodings
             {
                 // Have to start with a {
                 token = GetNextToken();
-                if (token != Token.ObjectStart)
+                if (token != Token.BeginObject)
                 {
                     throw new FudgeParseException("Expected '{' at start of JSON stream");
                 }
@@ -113,7 +113,7 @@ namespace Fudge.Encodings
             }
             else
             {
-                if (token == Token.ObjectEnd)
+                if (token == Token.EndObject)
                 {
                     HandleObjectEnd(token);
                     return CurrentElement;
@@ -125,7 +125,7 @@ namespace Fudge.Encodings
                 FieldName = token.StringData;
 
                 token = GetNextToken();
-                if (token != Token.Colon)
+                if (token != Token.NameSeparator)
                     throw new FudgeParseException("Expected ':' in JSON stream for field \"" + FieldName + "\", got " + token + "");
 
                 token = GetNextToken();
@@ -163,12 +163,12 @@ namespace Fudge.Encodings
                 HandleSimpleValue(token);
                 SkipCommaPostValue(token.ToString());
             }
-            else if (token == Token.ObjectStart)
+            else if (token == Token.BeginObject)
             {
                 stack.Push(State.InObject);
                 CurrentElement = FudgeStreamElement.SubmessageFieldStart;
             }
-            else if (token == Token.ArrayStart)
+            else if (token == Token.BeginArray)
             {
                 stack.Push(new State(FieldName));
 
@@ -225,13 +225,13 @@ namespace Fudge.Encodings
             while (true)
             {
                 var token = PeekNextToken();
-                if (token == Token.Comma)
+                if (token == Token.ValueSeparator)
                 {
                     // Skip past it
                     GetNextToken();
                     return;
                 }
-                else if (token == Token.ArrayEnd)
+                else if (token == Token.EndArray)
                 {
                     // Skip it and pop the stack as well
                     GetNextToken();
@@ -239,7 +239,7 @@ namespace Fudge.Encodings
 
                     // Go round again as there may be a comma or } next
                 }
-                else if (token == Token.ObjectEnd)
+                else if (token == Token.EndObject)
                 {
                     return;
                 }
@@ -281,20 +281,20 @@ namespace Fudge.Encodings
 
                 switch (next)
                 {
-                    case '{':
-                        return Token.ObjectStart;
-                    case '}':
-                        return Token.ObjectEnd;
-                    case '[':
-                        return Token.ArrayStart;
-                    case ']':
-                        return Token.ArrayEnd;
+                    case JSONConstants.BeginObject:
+                        return Token.BeginObject;
+                    case JSONConstants.EndObject:
+                        return Token.EndObject;
+                    case JSONConstants.BeginArray:
+                        return Token.BeginArray;
+                    case JSONConstants.EndArray:
+                        return Token.EndArray;
                     case '"':
                         return ParseString();
-                    case ':':
-                        return Token.Colon;
-                    case ',':
-                        return Token.Comma;
+                    case JSONConstants.NameSeparator:
+                        return Token.NameSeparator;
+                    case JSONConstants.ValueSeparator:
+                        return Token.ValueSeparator;
                     case ' ':
                     case '\r':
                     case '\n':
@@ -313,11 +313,11 @@ namespace Fudge.Encodings
         {
             string literal = startChar + ReadLiteral();
 
-            if (literal == "true")
+            if (literal == JSONConstants.TrueLiteral)
                 return Token.True;
-            if (literal == "false")
+            if (literal == JSONConstants.FalseLiteral)
                 return Token.False;
-            if (literal == "null")
+            if (literal == JSONConstants.NullLiteral)
                 return Token.Null;
 
             var token = ParseNumber(literal);
@@ -347,11 +347,11 @@ namespace Fudge.Encodings
                     case '\f':
                     case '\n':
                     case '\\':
-                    case '{':
-                    case '}':
-                    case ',':
-                    case '[':
-                    case ']':
+                    case JSONConstants.BeginObject:
+                    case JSONConstants.EndObject:
+                    case JSONConstants.ValueSeparator:
+                    case JSONConstants.BeginArray:
+                    case JSONConstants.EndArray:
                         done = true;
                         break;
                     default:
@@ -488,6 +488,10 @@ namespace Fudge.Encodings
                 this.toString = toString;
             }
 
+            public Token(TokenType type, char ch) : this(type, ch.ToString())
+            {
+            }
+
             public TokenType Type { get; private set; }
 
             public string StringData { get; set; }
@@ -515,15 +519,15 @@ namespace Fudge.Encodings
             }
 
             public static readonly Token EOF = new Token(TokenType.Special, "EOF");
-            public static readonly Token ObjectStart = new Token(TokenType.Special, "{");
-            public static readonly Token ObjectEnd = new Token(TokenType.Special, "}");
-            public static readonly Token ArrayStart = new Token(TokenType.Special, "[");
-            public static readonly Token ArrayEnd = new Token(TokenType.Special, "]");
-            public static readonly Token Colon = new Token(TokenType.Special, ":");
-            public static readonly Token Comma = new Token(TokenType.Special, ",");
-            public static readonly Token True = new Token(TokenType.Special, "true");
-            public static readonly Token False = new Token(TokenType.Special, "false");
-            public static readonly Token Null = new Token(TokenType.Special, "null");
+            public static readonly Token BeginObject = new Token(TokenType.Special, JSONConstants.BeginObject);
+            public static readonly Token EndObject = new Token(TokenType.Special, JSONConstants.EndObject);
+            public static readonly Token BeginArray = new Token(TokenType.Special, JSONConstants.BeginArray);
+            public static readonly Token EndArray = new Token(TokenType.Special, JSONConstants.EndArray);
+            public static readonly Token NameSeparator = new Token(TokenType.Special, JSONConstants.NameSeparator);
+            public static readonly Token ValueSeparator = new Token(TokenType.Special, JSONConstants.ValueSeparator);
+            public static readonly Token True = new Token(TokenType.Special, JSONConstants.TrueLiteral);
+            public static readonly Token False = new Token(TokenType.Special, JSONConstants.FalseLiteral);
+            public static readonly Token Null = new Token(TokenType.Special, JSONConstants.NullLiteral);
         }
 
         enum TokenType
