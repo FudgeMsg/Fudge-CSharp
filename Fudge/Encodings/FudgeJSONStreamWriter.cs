@@ -257,7 +257,7 @@ namespace Fudge.Encodings
 
         private string FormName(string name, int? ordinal)
         {
-            // TODO 20100311 t0rx -- Handle ordinals and missing names
+            // Need to handle ordinals and missing names - see FRN-69
             return name;
         }
 
