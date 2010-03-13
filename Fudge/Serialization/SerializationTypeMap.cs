@@ -88,31 +88,20 @@ namespace Fudge.Serialization
         /// <returns></returns>
         public int RegisterType(Type type)
         {
-            var surrogateFactory = surrogateSelector.GetSurrogateFactory(type, FieldNameConvention);
-            Debug.Assert(surrogateFactory != null);
-            return RegisterType(type, surrogateFactory);
+            var surrogate = surrogateSelector.GetSurrogate(type, FieldNameConvention);
+            Debug.Assert(surrogate != null);
+            return RegisterType(type, surrogate);
         }
 
         /// <summary>
-        /// Registers a type with a serialization surrogate that needs no internal state.
+        /// Registers a type with a serialization surrogate.
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="statelessSurrogate"></param>
-        public void RegisterType(Type type, IFudgeSerializationSurrogate statelessSurrogate)
-        {
-            RegisterType(type, c => statelessSurrogate);
-        }
-
-        /// <summary>
-        /// Registers a type with a factory for producing serialization surrogates.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="surrogateFactory"></param>
-        /// <returns></returns>
-        public int RegisterType(Type type, Func<FudgeContext, IFudgeSerializationSurrogate> surrogateFactory)
+        /// <param name="type">Type that the surrogate is for.</param>
+        /// <param name="surrogate">Surrogate to serialize and deserialize the type.</param>
+        public int RegisterType(Type type, IFudgeSerializationSurrogate surrogate)
         {
             int id = typeDataList.Count;
-            var entry = new TypeData { SurrogateFactory = surrogateFactory, Type = type };
+            var entry = new TypeData { Surrogate = surrogate, Type = type };
             typeDataList.Add(entry);
             typeMap.Add(type, id);
             return id;
@@ -142,16 +131,16 @@ namespace Fudge.Serialization
         }
 
         /// <summary>
-        /// Returns the surrogate factory for a type.
+        /// Returns the surrogate for a type.
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type)
+        public IFudgeSerializationSurrogate GetSurrogate(Type type)
         {
             int index;
             if (typeMap.TryGetValue(type, out index))
             {
-                return typeDataList[index].SurrogateFactory;
+                return typeDataList[index].Surrogate;
             }
 
             // Not found
@@ -159,29 +148,29 @@ namespace Fudge.Serialization
             {
                 int typeId = RegisterType(type);
                 if (typeId != -1)
-                    return typeDataList[typeId].SurrogateFactory;
+                    return typeDataList[typeId].Surrogate;
             }
 
             return null;
         }
 
         /// <summary>
-        /// Gets the surrogate factory for a given type ID
+        /// Gets the surrogate for a given type ID
         /// </summary>
         /// <param name="typeId"></param>
         /// <returns></returns>
-        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(int typeId)
+        public IFudgeSerializationSurrogate GetSurrogate(int typeId)
         {
             if (typeId < 0 || typeId >= typeDataList.Count)
                 return null;
 
-            return typeDataList[typeId].SurrogateFactory;
+            return typeDataList[typeId].Surrogate;
         }
 
         private class TypeData
         {
             public Type Type { get; set; }
-            public Func<FudgeContext, IFudgeSerializationSurrogate> SurrogateFactory { get; set; }
+            public IFudgeSerializationSurrogate Surrogate { get; set; }
         }
     }
 }

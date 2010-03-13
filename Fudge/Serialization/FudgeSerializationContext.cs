@@ -97,13 +97,12 @@ namespace Fudge.Serialization
 
             inlineStack.Push(new State(obj, index));
 
-            var surrogateFactory = typeMap.GetSurrogateFactory(obj.GetType());
-            if (surrogateFactory == null)
+            var surrogate = typeMap.GetSurrogate(obj.GetType());
+            if (surrogate == null)
             {
                 // Unknown type
                 throw new ArgumentOutOfRangeException("Type \"" + obj.GetType().FullName + "\" not registered, cannot serialize");
             }
-            var surrogate = surrogateFactory(context);
 
             surrogate.Serialize(obj, msg, this);
 

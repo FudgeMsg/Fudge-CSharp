@@ -45,11 +45,11 @@ namespace Fudge.Tests.Unit.Serialization
             var map = new SerializationTypeMap(context);
 
             map.AllowTypeDiscovery = false;
-            Assert.Null(map.GetSurrogateFactory(typeof(Reflect.Tick)));
+            Assert.Null(map.GetSurrogate(typeof(Reflect.Tick)));
             Assert.Equal(-1, map.GetTypeId(typeof(Reflect.Tick)));
 
             map.AllowTypeDiscovery = true;
-            Assert.NotNull(map.GetSurrogateFactory(typeof(Reflect.Tick)));
+            Assert.NotNull(map.GetSurrogate(typeof(Reflect.Tick)));
             Assert.NotEqual(-1, map.GetTypeId(typeof(Reflect.Person)));
         }
     }

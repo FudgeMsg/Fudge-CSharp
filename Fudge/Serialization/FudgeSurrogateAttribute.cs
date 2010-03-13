@@ -33,11 +33,9 @@ namespace Fudge.Serialization
         /// Initializes a new instance of the <see cref="FudgeSurrogateAttribute"/> class.
         /// </summary>
         /// <param name="surrogateType">Surrogate type to serialize/deserialize this class.</param>
-        /// <param name="stateless">If <c>true</c> then a single instance of the surrogate can handle multiple deserializations concurrently.</param>
-        public FudgeSurrogateAttribute(Type surrogateType, bool stateless)
+        public FudgeSurrogateAttribute(Type surrogateType)
         {
             this.SurrogateType = surrogateType;
-            this.Stateless = stateless;
         }
 
         /// <summary>
@@ -57,10 +55,5 @@ namespace Fudge.Serialization
                 surrogateType = value;
             }
         }
-
-        /// <summary>
-        /// Gets and sets whether the surrogate can handle multiple deserializations concurrently with just one instance.
-        /// </summary>
-        public bool Stateless { get; set; }
     }
 }

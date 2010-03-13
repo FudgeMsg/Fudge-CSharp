@@ -61,7 +61,7 @@ namespace Fudge.Tests.Unit.Serialization
         public void SimpleExampleWithSurrogate()
         {
             var typeMap = new SerializationTypeMap(context);
-            typeMap.RegisterType(typeof(Explicit.Address), c => new Explicit.AddressSerializer());
+            typeMap.RegisterType(typeof(Explicit.Address), new Explicit.AddressSerializer());
             var serializer = new FudgeSerializer(context, typeMap);
 
             var address = new Explicit.Address("Our House", "In the middle of our street", "MD1");

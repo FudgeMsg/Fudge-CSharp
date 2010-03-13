@@ -55,10 +55,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void SurrogateSelectorGetsIt()
         {
-            var surrogateFactory = new FudgeSerializer(context).TypeMap.GetSurrogateFactory(typeof(ExampleClass));
-            Assert.NotNull(surrogateFactory);
-
-            var surrogate = surrogateFactory(context);
+            var surrogate = new FudgeSerializer(context).TypeMap.GetSurrogate(typeof(ExampleClass));
             Assert.NotNull(surrogate);
             Assert.IsType<ToFromFudgeMsgSurrogate>(surrogate);
         }

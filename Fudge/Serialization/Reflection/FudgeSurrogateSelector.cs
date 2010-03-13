@@ -24,7 +24,7 @@ using System.Diagnostics;
 namespace Fudge.Serialization.Reflection
 {
     /// <summary>
-    /// Internal class to help choose a factory for the surrogate class that is used to serialize a given type.
+    /// Internal class to help choose a surrogate that is used to serialize a given type.
     /// </summary>
     /// <remarks>
     /// The <see cref="FudgeSurrogateSelector"/> will automatically handle lists, dictionaries and arrays, and
@@ -52,13 +52,13 @@ namespace Fudge.Serialization.Reflection
         }
 
         /// <summary>
-        /// Gets a factory to create surrogates for a given type.
+        /// Creates a surrogate for a given type.
         /// </summary>
-        /// <param name="type">Type for which to get surrogate factory.</param>
+        /// <param name="type">Type for which to get surrogate.</param>
         /// <param name="fieldNameConvention">Convention for mapping .net property names to serialized field names.</param>
-        /// <returns>Surrogate factory for the type.</returns>
-        /// <exception cref="FudgeRuntimeException">Thrown if no surrogate factory can be automatically created.</exception>
-        public Func<FudgeContext, IFudgeSerializationSurrogate> GetSurrogateFactory(Type type, FudgeFieldNameConvention fieldNameConvention)
+        /// <returns>Surrogate for the type.</returns>
+        /// <exception cref="FudgeRuntimeException">Thrown if no surrogate can be automatically created.</exception>
+        public IFudgeSerializationSurrogate GetSurrogate(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);
 
@@ -66,7 +66,7 @@ namespace Fudge.Serialization.Reflection
             var surrogateAttribute = typeData.CustomAttributes.FirstOrDefault(attrib => attrib is FudgeSurrogateAttribute);
             if (surrogateAttribute != null)
             {
-                return BuildSurrogateFactory(type, (FudgeSurrogateAttribute)surrogateAttribute);
+                return BuildSurrogate(type, (FudgeSurrogateAttribute)surrogateAttribute);
             }
 
             // For all of these known types, we only need one surrogate as it is stateless
@@ -99,10 +99,10 @@ namespace Fudge.Serialization.Reflection
             {
                 throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);
             }
-            return c => surrogate;
+            return surrogate;
         }
 
-        private Func<FudgeContext, IFudgeSerializationSurrogate> BuildSurrogateFactory(Type type, FudgeSurrogateAttribute attrib)
+        private IFudgeSerializationSurrogate BuildSurrogate(Type type, FudgeSurrogateAttribute attrib)
         {
             var surrogateType = attrib.SurrogateType;
             var constructor = surrogateType.GetConstructor(new Type[] { typeof(FudgeContext), typeof(Type) });
@@ -125,20 +125,7 @@ namespace Fudge.Serialization.Reflection
                 throw new FudgeRuntimeException("Surrogate type " + surrogateType + " does not have appropriate constructor");
             }
 
-            if (attrib.Stateless)
-            {
-                var surrogate = (IFudgeSerializationSurrogate)constructor.Invoke(args);
-                return c => surrogate;
-            }
-            else if (args.Length == 2)
-            {
-                // Have to replace the context so ignore the args we created above
-                return c => (IFudgeSerializationSurrogate)constructor.Invoke(new object[] { c, type });
-            }
-            else
-            {
-                return c => (IFudgeSerializationSurrogate)constructor.Invoke(args);
-            }
+            return (IFudgeSerializationSurrogate)constructor.Invoke(args);
         }
     }
 }

@@ -206,15 +206,10 @@ namespace Fudge.Serialization
         private IFudgeSerializationSurrogate GetSurrogate(Type objectType)
         {
             int typeId = typeMap.GetTypeId(objectType);
-            var surrogateFactory = typeMap.GetSurrogateFactory(typeId);
-            if (surrogateFactory == null)
-            {
-                throw new SerializationException("Type ID " + typeId + " not registered with serialization type map");
-            }
-            var surrogate = surrogateFactory(context);
+            var surrogate = typeMap.GetSurrogate(typeId);
             if (surrogate == null)
             {
-                throw new SerializationException("Surrogate factory for type " + objectType + " returned null surrogate.");
+                throw new SerializationException("Type ID " + typeId + " not registered with serialization type map");
             }
             return surrogate;
         }

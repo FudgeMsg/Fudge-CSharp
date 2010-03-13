@@ -33,11 +33,11 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             // Basic case
             var selector = new FudgeSurrogateSelector(context);
-            var factory = selector.GetSurrogateFactory(typeof(DirectTest), FudgeFieldNameConvention.Identity);
-            Assert.IsType<SerializableSurrogate>(factory(context));
+            var surrogate = selector.GetSurrogate(typeof(DirectTest), FudgeFieldNameConvention.Identity);
+            Assert.IsType<SerializableSurrogate>(surrogate);
 
             // Test exception thrown if no default constructor
-            Assert.Throws<FudgeRuntimeException>(() => selector.GetSurrogateFactory(typeof(DirectNoDefaultConstructorTest), FudgeFieldNameConvention.Identity));
+            Assert.Throws<FudgeRuntimeException>(() => selector.GetSurrogate(typeof(DirectNoDefaultConstructorTest), FudgeFieldNameConvention.Identity));
         }
 
         [Fact]
@@ -45,36 +45,19 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             var selector = new FudgeSurrogateSelector(context);
 
-            // SurrogateTest has a stateless surrogate, so should get back same one every time
-            var factory = selector.GetSurrogateFactory(typeof(SurrogateTest), FudgeFieldNameConvention.Identity);
-            var s1 = factory(context);
-            var s2 = factory(context);
-            Assert.IsType<SurrogateTest.SurrogateTestSurrogate>(s1);
-            Assert.Same(s1, s2);
-
-            // SurrogateTest2 is not stateless, so should get back different
-            factory = selector.GetSurrogateFactory(typeof(SurrogateTest2), FudgeFieldNameConvention.Identity);
-            s1 = factory(context);
-            s2 = factory(context);
-            Assert.IsType<SurrogateTest2.SurrogateTest2Surrogate>(s1);
-            Assert.NotSame(s1, s2);
+            var surrogate = selector.GetSurrogate(typeof(SurrogateTest), FudgeFieldNameConvention.Identity);
+            Assert.IsType<SurrogateTest.SurrogateTestSurrogate>(surrogate);
 
             // SurrogateTest3 has a constructor on the surrogate which takes type
-            factory = selector.GetSurrogateFactory(typeof(SurrogateTest3), FudgeFieldNameConvention.Identity);
-            s1 = factory(context);
-            s2 = factory(context);
-            Assert.IsType<SurrogateTest3.SurrogateTest3Surrogate>(s1);
-            Assert.NotSame(s1, s2);
-            Assert.Equal(typeof(SurrogateTest3), ((SurrogateTest3.SurrogateTest3Surrogate)s1).Type);
+            surrogate = selector.GetSurrogate(typeof(SurrogateTest3), FudgeFieldNameConvention.Identity);
+            Assert.IsType<SurrogateTest3.SurrogateTest3Surrogate>(surrogate);
+            Assert.Equal(typeof(SurrogateTest3), ((SurrogateTest3.SurrogateTest3Surrogate)surrogate).Type);
 
             // SurrogateTest4 has a constructor on the surrogate which takes context and type
-            factory = selector.GetSurrogateFactory(typeof(SurrogateTest4), FudgeFieldNameConvention.Identity);
-            s1 = factory(context);
-            s2 = factory(context);
-            Assert.IsType<SurrogateTest4.SurrogateTest4Surrogate>(s1);
-            Assert.NotSame(s1, s2);
-            Assert.Equal(typeof(SurrogateTest4), ((SurrogateTest4.SurrogateTest4Surrogate)s1).Type);
-            Assert.Same(context, ((SurrogateTest4.SurrogateTest4Surrogate)s1).Context);
+            surrogate = selector.GetSurrogate(typeof(SurrogateTest4), FudgeFieldNameConvention.Identity);
+            Assert.IsType<SurrogateTest4.SurrogateTest4Surrogate>(surrogate);
+            Assert.Equal(typeof(SurrogateTest4), ((SurrogateTest4.SurrogateTest4Surrogate)surrogate).Type);
+            Assert.Same(context, ((SurrogateTest4.SurrogateTest4Surrogate)surrogate).Context);
         }
 
         #region Test classes
@@ -117,7 +100,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             #endregion
         }
 
-        [FudgeSurrogate(typeof(SurrogateTestSurrogate), true)]
+        [FudgeSurrogate(typeof(SurrogateTestSurrogate))]
         private class SurrogateTest
         {
             public SurrogateTest(int n)
@@ -145,7 +128,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             }
         }
 
-        [FudgeSurrogate(typeof(SurrogateTest2Surrogate), false)]
+        [FudgeSurrogate(typeof(SurrogateTest2Surrogate))]
         private class SurrogateTest2
         {
             public class SurrogateTest2Surrogate : IFudgeSerializationSurrogate
@@ -166,7 +149,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             }
         }
 
-        [FudgeSurrogate(typeof(SurrogateTest3Surrogate), false)]
+        [FudgeSurrogate(typeof(SurrogateTest3Surrogate))]
         private class SurrogateTest3
         {
             public class SurrogateTest3Surrogate : IFudgeSerializationSurrogate
@@ -194,7 +177,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             }
         }
 
-        [FudgeSurrogate(typeof(SurrogateTest4Surrogate), false)]
+        [FudgeSurrogate(typeof(SurrogateTest4Surrogate))]
         private class SurrogateTest4
         {
             public class SurrogateTest4Surrogate : IFudgeSerializationSurrogate
