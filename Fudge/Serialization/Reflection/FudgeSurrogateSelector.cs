@@ -95,6 +95,10 @@ namespace Fudge.Serialization.Reflection
             {
                 surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
             }
+            else if (ImmutableSurrogate.CanHandle(typeData))
+            {
+                surrogate = new ImmutableSurrogate(context, typeData);
+            }
             else
             {
                 throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);

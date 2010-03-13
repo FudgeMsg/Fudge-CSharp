@@ -80,6 +80,12 @@ namespace Fudge.Serialization
         /// <inheritdoc/>
         public T FromField<T>(IFudgeField field) where T : class
         {
+            return (T)FromField(field, typeof(T));
+        }
+
+        /// <inheritdoc/>
+        public object FromField(IFudgeField field, Type type)
+        {
             if (field == null)
                 return null;
 
@@ -90,7 +96,7 @@ namespace Fudge.Serialization
                 int refId = msgToIndexMap[subMsg];
                 Debug.Assert(objectList[refId].Msg == subMsg);
 
-                return (T)GetFromRef(refId, typeof(T));             // It is possible that we've already deserialized this, so we call GetFromRef rather than just processing the message
+                return GetFromRef(refId, type);             // It is possible that we've already deserialized this, so we call GetFromRef rather than just processing the message
             }
             else if (field.Type == IndicatorFieldType.Instance)
             {
@@ -102,7 +108,7 @@ namespace Fudge.Serialization
                 int relativeRef = Convert.ToInt32(field.Value);
                 int refIndex = relativeRef + stack.Peek().RefId;
 
-                return (T)GetFromRef(refIndex, typeof(T));
+                return GetFromRef(refIndex, type);
             }
         }
 

@@ -74,6 +74,7 @@
     <Compile Include="FudgeStreamElement.cs" />
     <Compile Include="FudgeStreamParser.cs" />
     <Compile Include="IAppendingFudgeFieldContainer.cs" />
+    <Compile Include="Serialization\Reflection\ImmutableSurrogate.cs" />
     <Compile Include="Util\FudgeStreamPipe.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />

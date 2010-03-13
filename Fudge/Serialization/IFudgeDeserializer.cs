@@ -43,6 +43,17 @@ namespace Fudge.Serialization
         T FromField<T>(IFudgeField field) where T : class;
 
         /// <summary>
+        /// Deserialises an object from a Fudge field.
+        /// </summary>
+        /// <param name="field">Field containing either a reference to the object as an integer, or the object serialised as a <c>FudgeMsg</c></param>
+        /// <param name="type">Expected type of the object</param>
+        /// <returns>Deserialised object</returns>
+        /// <remarks>
+        /// This method allows the deserialiser to be agnostic to whether the object was serialised as a reference or in-place.
+        /// </remarks>
+        object FromField(IFudgeField field, Type type);
+
+        /// <summary>
         /// Registers a partially-constructed object in case of reference cycles.
         /// </summary>
         /// <param name="msg">Message from which the object was deserialized.</param>
