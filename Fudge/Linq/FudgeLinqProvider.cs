@@ -161,6 +161,7 @@ namespace Fudge.Linq
             private readonly int hashCode;
             private readonly Expression expression;
             private readonly Delegate compiledQuery;
+            private Func<object[], object> invoker;     // For why it's worth doing this see http://msdn.microsoft.com/en-us/magazine/cc163759.aspx#S3
 
             public CacheEntry(Expression expression)
             {
@@ -173,6 +174,7 @@ namespace Fudge.Linq
                 this.expression = other.expression;
                 this.hashCode = other.hashCode;
                 this.compiledQuery = compiledQuery;
+                this.invoker = FindInvoker(compiledQuery);
             }
 
             public Expression Expression
@@ -182,14 +184,67 @@ namespace Fudge.Linq
 
             public object Invoke(object[] args)
             {
-                // This could add some form of FastInvoke to speed this up
+                return invoker(args);
+            }
+
+            public Func<object[], object> FindInvoker(Delegate del)
+            {
+                // Calling DynamicInvoke is very slow compared to using a typed delegate, so we manufacture one if 
+                // we can - see http://msdn.microsoft.com/en-us/magazine/cc163759.aspx#S3
+
+                Debug.Assert(invoker == null);
+
+                Type delegateType = del.GetType();
+                if (delegateType.FullName.StartsWith("System.Func`"))       // Make sure it's one we understand
+                {
+                    Type[] genericArgs = delegateType.GetGenericArguments();
+                    MethodInfo method = this.GetType().GetMethod("Invoke" + genericArgs.Length, BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (method != null)
+                    {
+                        // Found a match
+                        return (Func<object[], object>) Delegate.CreateDelegate(typeof(Func<object[], object>), this, method.MakeGenericMethod(genericArgs));
+                    }
+                }
+
+                return DefaultInvoker;
+            }
+
+            #region Invokers
+
+            private object DefaultInvoker(object[] args)
+            {
+                // If we can't use a fast invoker then we have to use the slow DynamicInvoke
                 return compiledQuery.DynamicInvoke(args);
             }
 
-            public Delegate CompiledQuery
+            private object Invoke1<RType>(object[] args)
             {
-                get { return compiledQuery; }
+                return ((Func<RType>)compiledQuery)();
             }
+
+            private object Invoke2<Arg0, RType>(object[] args)
+            {
+                return ((Func<Arg0, RType>)compiledQuery)((Arg0)args[0]);
+            }
+
+            private object Invoke3<Arg0, Arg1, RType>(object[] args)
+            {
+                return ((Func<Arg0, Arg1, RType>)compiledQuery)((Arg0)args[0], (Arg1)args[1]);
+            }
+
+            private object Invoke4<Arg0, Arg1, Arg2, RType>(object[] args)
+            {
+                return ((Func<Arg0, Arg1, Arg2, RType>)compiledQuery)((Arg0)args[0], (Arg1)args[1], (Arg2)args[2]);
+            }
+
+            private object Invoke5<Arg0, Arg1, Arg2, Arg3, RType>(object[] args)
+            {
+                return ((Func<Arg0, Arg1, Arg2, Arg3, RType>)compiledQuery)((Arg0)args[0], (Arg1)args[1], (Arg2)args[2], (Arg3)args[3]);
+            }
+
+            #endregion
+
+            #region Object overrides
 
             public override bool Equals(object obj)
             {
@@ -206,6 +261,8 @@ namespace Fudge.Linq
             {
                 return hashCode;
             }
+
+            #endregion
         }
 
         /// <summary>
