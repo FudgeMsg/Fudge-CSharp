@@ -79,6 +79,17 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.Equal("foo", obj1.B);
         }
 
+        [Fact]
+        public void CycleInImmutable_FRN71()
+        {
+            var outer = new ImmutableCycle1(new ImmutableCycle2());
+            outer.Other.Other = outer;
+            var serializer = new FudgeSerializer(context);
+            var msg = serializer.SerializeToMsg(outer);
+            var outer2 = (ImmutableCycle1)serializer.Deserialize(msg);
+            Assert.Same(outer2, outer2.Other.Other);
+        }
+
         private class SimpleClass
         {
             private string val1;
@@ -120,6 +131,27 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             public int A { get { return a; } }
 
             public string B { get { return b; } }
+        }
+
+        private class ImmutableCycle1
+        {
+            private readonly ImmutableCycle2 other;
+
+            public ImmutableCycle1(ImmutableCycle2 other)
+            {
+                this.other = other;
+            }
+
+            public ImmutableCycle2 Other { get { return other; } }
+        }
+
+        private class ImmutableCycle2
+        {
+            public ImmutableCycle2()
+            {
+            }
+
+            public ImmutableCycle1 Other { get; set; }
         }
     }
 }

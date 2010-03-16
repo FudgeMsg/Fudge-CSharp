@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization.Reflection
 {
@@ -67,6 +68,11 @@ namespace Fudge.Serialization.Reflection
         /// <inheritdoc/>
         public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
+            // We create the new object without constructing it, so we can register it before trying
+            // to deserialize the parameters.  This allows us to support cycles.
+            object result = FormatterServices.GetUninitializedObject(type);
+            deserializer.Register(msg, result);
+
             var args = new object[constructorParams.Length];
             foreach (var field in msg)
             {
@@ -94,8 +100,7 @@ namespace Fudge.Serialization.Reflection
                 }
             }
 
-            var result = constructor.Invoke(args);
-            deserializer.Register(msg, result);
+            constructor.Invoke(result, args);
             return result;
         }
 
