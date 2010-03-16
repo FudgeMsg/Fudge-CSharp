@@ -242,6 +242,21 @@ namespace Fudge.Tests.Unit.Serialization
             Assert.Same(result, result.Other.Other);
         }
 
+        [Fact]
+        public void ObjectIdentityNotEquals_FRN65() 
+        {
+            // Using GetHashCode and Equals is not good enough for testing object identity
+            // FRN65Class always returns true for Equals and a constant for GetHashCode
+            var obj1 = new FRN65Class { Val = "A", Other = new FRN65Class { Val = "B" } };
+
+            var serializer = new FudgeSerializer(context);
+            var msg = serializer.SerializeToMsg(obj1);
+
+            var obj2 = (FRN65Class)serializer.Deserialize(msg);
+
+            Assert.NotSame(obj2, obj2.Other);
+        }
+
         public class TemperatureRange
         {
             public double High { get; set; }
@@ -317,6 +332,27 @@ namespace Fudge.Tests.Unit.Serialization
             }
 
             #endregion
+        }
+
+        private class FRN65Class
+        {
+            public FRN65Class()
+            {
+            }
+
+            public string Val { get; set; }
+
+            public FRN65Class Other { get; set; }
+
+            public override int GetHashCode()
+            {
+                return 16;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return true;
+            }
         }
 
         #endregion
