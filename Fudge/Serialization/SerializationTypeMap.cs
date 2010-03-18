@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using Fudge.Serialization.Reflection;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization
 {
@@ -43,6 +44,7 @@ namespace Fudge.Serialization
             this.surrogateSelector = new FudgeSurrogateSelector(context);
             this.AllowTypeDiscovery = (bool)context.GetProperty(ContextProperties.AllowTypeDiscoveryProperty, true);
             this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
+            RegisterSurrogateSelector((ISurrogateSelector)context.GetProperty(ContextProperties.DotNetSurrogateSelectorProperty));
         }
 
         /// <summary>
@@ -105,6 +107,26 @@ namespace Fudge.Serialization
             typeDataList.Add(entry);
             typeMap.Add(type, id);
             return id;
+        }
+
+        /// <summary>
+        /// Registers a .net <see cref="ISurrogateSelector"/> which provides <see cref="ISerializationSurrogate"/>s to
+        /// perform the serialization and deserialization.
+        /// </summary>
+        /// <param name="selector">Selector to register</param>
+        /// <remarks>
+        /// <para>
+        /// This allows code that has been written with the original .net <see cref="ISerializationSurrogate"/> to be
+        /// used with Fudge with little or no modification.
+        /// </para>
+        /// <para>
+        /// The default selector can be set using the <see cref="ContextProperties.DotNetSurrogateSelectorProperty"/>
+        /// context property.  Calling this will replace any previously registered selector.
+        /// </para>
+        /// </remarks>
+        public void RegisterSurrogateSelector(ISurrogateSelector selector)
+        {
+            surrogateSelector.DotNetSurrogateSelector = selector;
         }
 
         /// <summary>

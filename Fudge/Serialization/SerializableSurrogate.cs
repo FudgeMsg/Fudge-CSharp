@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Reflection;
+using Fudge.Serialization.Reflection;
 
 namespace Fudge.Serialization
 {
@@ -51,6 +52,16 @@ namespace Fudge.Serialization
             {
                 throw new FudgeRuntimeException("Type " + type.FullName + " does not have a public default constructor.");
             }
+        }
+
+        /// <summary>
+        /// Detects whether a given type can be serialized with this class.
+        /// </summary>
+        /// <param name="typeData">Type to test.</param>
+        /// <returns><c>true</c> if this class can handle the type.</returns>
+        public static bool CanHandle(TypeData typeData)
+        {
+            return typeof(IFudgeSerializable).IsAssignableFrom(typeData.Type);
         }
 
         #region IFudgeSerializationSurrogate Members

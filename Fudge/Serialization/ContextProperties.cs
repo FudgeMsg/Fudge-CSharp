@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization
 {
@@ -33,5 +34,9 @@ namespace Fudge.Serialization
         /// <summary>Property of the <see cref="FudgeContext"/> that specifies whether types can automatically by serialized or whether they must be explicitly
         /// registered in the <see cref="SerializationTypeMap"/>.  By default this is <c>true</c>, i.e. types do not need explicitly registering.</summary>
         public static readonly FudgeContextProperty AllowTypeDiscoveryProperty = new FudgeContextProperty("Serialization.AllowTypeDiscovery", typeof(bool));
+        /// <summary>Property of the <see cref="FudgeContext"/> that allows a .net <see cref="SurrogateSelector"/> to provide surrogates for serialization that implement the
+        /// <see cref="ISerializationSurrogate"/> interface.</summary>
+        /// <seealso cref="SerializationTypeMap.RegisterSurrogateSelector"/>
+        public static readonly FudgeContextProperty DotNetSurrogateSelectorProperty = new FudgeContextProperty("Serialization.DotNetSurrogateSelector", typeof(ISurrogateSelector));
     }
 }

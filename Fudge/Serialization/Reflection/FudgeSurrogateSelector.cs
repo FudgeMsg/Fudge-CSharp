@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization.Reflection
 {
@@ -37,6 +38,8 @@ namespace Fudge.Serialization.Reflection
     {
         private readonly FudgeContext context;
         private readonly TypeDataCache typeDataCache;
+        private readonly Func<FudgeContext, TypeData, IFudgeSerializationSurrogate>[] selectors;
+        private ISurrogateSelector dotNetSurrogateSelector = null;
         
         /// <summary>
         /// Constructs a new <see cref="FudgeSurrogateSelector"/>.
@@ -49,6 +52,17 @@ namespace Fudge.Serialization.Reflection
 
             this.context = context;
             this.typeDataCache = new TypeDataCache(context);
+            this.selectors = BuildSelectorList();
+        }
+
+        /// <summary>
+        /// Gets or sets an <see cref="ISurrogateSelector"/> which provides surrogates implementing
+        /// <see cref="ISerializationSurrogate"/> to allow old code to use Fudge serialization.
+        /// </summary>
+        public ISurrogateSelector DotNetSurrogateSelector
+        {
+            get { return dotNetSurrogateSelector; }
+            set { dotNetSurrogateSelector = value; }
         }
 
         /// <summary>
@@ -60,54 +74,58 @@ namespace Fudge.Serialization.Reflection
         /// <exception cref="FudgeRuntimeException">Thrown if no surrogate can be automatically created.</exception>
         public IFudgeSerializationSurrogate GetSurrogate(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
-            var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);
+            var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);            
 
-            // Look for FudgeSurrogate attribute
+            foreach (var selector in selectors)
+            {
+                IFudgeSerializationSurrogate surrogate = selector(context, typeData);
+                if (surrogate != null)
+                    return surrogate;
+            }
+
+            throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);
+        }
+
+        private Func<FudgeContext, TypeData, IFudgeSerializationSurrogate>[] BuildSelectorList()
+        {
+            // This is the list of potential surrogates, in the order that they are tested
+            return new Func<FudgeContext, TypeData, IFudgeSerializationSurrogate>[]
+            {
+                this.SurrogateFromAttribute,
+                (c, td) => SerializableSurrogate.CanHandle(td) ? new SerializableSurrogate(td.Type) : null,
+                (c, td) => ArraySurrogate.CanHandle(td) ? new ArraySurrogate(c, td) : null,
+                (c, td) => DictionarySurrogate.CanHandle(td) ? new DictionarySurrogate(c, td) : null,
+                (c, td) => ListSurrogate.CanHandle(td) ? new ListSurrogate(c, td) : null,
+                (c, td) => ToFromFudgeMsgSurrogate.CanHandle(td) ? new ToFromFudgeMsgSurrogate(c, td) : null,
+                (c, td) => DotNetSerializableSurrogate.CanHandle(td) ? new DotNetSerializableSurrogate(c, td) : null,
+                this.SurrogateFromDotNetSurrogateSelector,
+                (c, td) => PropertyBasedSerializationSurrogate.CanHandle(td) ? new PropertyBasedSerializationSurrogate(c, td) : null,
+                (c, td) => ImmutableSurrogate.CanHandle(td) ? new ImmutableSurrogate(c, td) : null,
+            };
+        }
+
+        private IFudgeSerializationSurrogate SurrogateFromDotNetSurrogateSelector(FudgeContext context, TypeData typeData)
+        {
+            if (DotNetSurrogateSelector == null)
+                return null;
+
+            ISurrogateSelector selector;
+            StreamingContext sc = new StreamingContext(StreamingContextStates.Persistence);
+            ISerializationSurrogate dotNetSurrogate = DotNetSurrogateSelector.GetSurrogate(typeData.Type, sc, out selector);
+            if (dotNetSurrogate == null)
+                return null;
+
+            return new DotNetSerializationSurrogateSurrogate(context, typeData, dotNetSurrogate, selector);
+        }
+
+        private IFudgeSerializationSurrogate SurrogateFromAttribute(FudgeContext context, TypeData typeData)
+        {
             var surrogateAttribute = typeData.CustomAttributes.FirstOrDefault(attrib => attrib is FudgeSurrogateAttribute);
             if (surrogateAttribute != null)
             {
-                return BuildSurrogate(type, (FudgeSurrogateAttribute)surrogateAttribute);
+                return BuildSurrogate(typeData.Type, (FudgeSurrogateAttribute)surrogateAttribute);
             }
-
-            // For all of these known types, we only need one surrogate as it is stateless
-            IFudgeSerializationSurrogate surrogate;
-            if (typeof(IFudgeSerializable).IsAssignableFrom(type))
-            {
-                surrogate = new SerializableSurrogate(type);
-            }
-            else if (ArraySurrogate.CanHandle(typeData))
-            {
-                surrogate = new ArraySurrogate(context, typeData);
-            }
-            else if (DictionarySurrogate.CanHandle(typeData))
-            {
-                surrogate = new DictionarySurrogate(context, typeData);
-            }
-            else if (ListSurrogate.CanHandle(typeData))
-            {
-                surrogate = new ListSurrogate(context, typeData);
-            }
-            else if (ToFromFudgeMsgSurrogate.CanHandle(typeData))
-            {
-                surrogate = new ToFromFudgeMsgSurrogate(context, typeData);
-            }
-            else if (DotNetSerializableSurrogate.CanHandle(typeData))
-            {
-                surrogate = new DotNetSerializableSurrogate(context, typeData);
-            }
-            else if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
-            {
-                surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
-            }
-            else if (ImmutableSurrogate.CanHandle(typeData))
-            {
-                surrogate = new ImmutableSurrogate(context, typeData);
-            }
-            else
-            {
-                throw new FudgeRuntimeException("Cannot automatically determine surrogate for type " + type.FullName);
-            }
-            return surrogate;
+            return null;
         }
 
         private IFudgeSerializationSurrogate BuildSurrogate(Type type, FudgeSurrogateAttribute attrib)

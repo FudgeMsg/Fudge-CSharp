@@ -24,6 +24,7 @@ using Fudge.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Xml.Serialization;
+using Fudge.Serialization.Reflection;
 
 namespace Fudge.Tests.Unit.Serialization.Reflection
 {
@@ -103,6 +104,19 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.Equal(obj1.List, obj2.List);
             Assert.Equal(obj1.String, obj2.String);
         }
+
+        [Fact]
+        public void ConstructorArgChecking()
+        {
+            var typeData = new TypeData(context, new TypeDataCache(context), GetType(), FudgeFieldNameConvention.Identity);
+            Assert.Throws<ArgumentNullException>(() => new DotNetSerializableSurrogate(null, typeData));
+            Assert.Throws<ArgumentNullException>(() => new DotNetSerializableSurrogate(context, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new DotNetSerializableSurrogate(context, typeData));
+        }
+
+
+
+        #region Test classes
 
         private class SimpleTestClass : ISerializable
         {
@@ -219,5 +233,6 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             public List<string> List { get; set; }
         }
 
+        #endregion
     }
 }
