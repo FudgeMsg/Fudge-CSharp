@@ -28,6 +28,13 @@ namespace Fudge.Serialization.Reflection
     /// <summary>
     /// Surrogate for classes implementing <see cref="ISerializable"/> from .net serialization.
     /// </summary>
+    /// <remarks>
+    /// NOTE that when deserializing data that has not been serialized through <see cref="ISerializable"/> (e.g.
+    /// recieved from another platform, fields which are <c>null</c> may have been omitted.  Using the normal
+    /// methods of <see cref="SerializationInfo"/> such as <see cref="SerializationInfo.GetString"/> will throw
+    /// an exception in this situation as the field is missing.  The only way around this is to use
+    /// <see cref="SerializationInfo.GetEnumerator"/> to process the data instead.
+    /// </remarks>
     public class DotNetSerializableSurrogate : IFudgeSerializationSurrogate
     {
         private readonly FudgeContext context;
@@ -58,7 +65,8 @@ namespace Fudge.Serialization.Reflection
         /// <summary>
         /// Detects whether a given type can be serialized with this class.
         /// </summary>
-        /// <param name="typeData">Type to test.</param>
+        /// <param
+        /// name="typeData">Type to test.</param>
         /// <returns><c>true</c> if this class can handle the type.</returns>
         public static bool CanHandle(TypeData typeData)
         {
