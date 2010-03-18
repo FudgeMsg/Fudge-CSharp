@@ -29,7 +29,7 @@ namespace Fudge.Types
     /// better precision and range, and also allows for the offset to be optional.</remarks>
     /// <seealso cref="FudgeDate"/>
     /// <seealso cref="FudgeTime"/>
-    public class FudgeDateTime
+    public class FudgeDateTime : IConvertible
     {
         private readonly FudgeDate date;
         private readonly FudgeTime time;
@@ -362,5 +362,118 @@ namespace Fudge.Types
         {
             return date.GetHashCode() ^ time.GetHashCode() ^ precision.GetHashCode();
         }
+
+        #region IConvertible Members
+
+        /// <inheritdoc/>
+        public TypeCode GetTypeCode()
+        {
+            return TypeCode.Object;
+        }
+
+        /// <inheritdoc/>
+        public bool ToBoolean(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public byte ToByte(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public char ToChar(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public DateTime ToDateTime(IFormatProvider provider)
+        {
+            return ToDateTime();
+        }
+
+        /// <inheritdoc/>
+        public decimal ToDecimal(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public double ToDouble(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public short ToInt16(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public int ToInt32(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public long ToInt64(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public sbyte ToSByte(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public float ToSingle(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public string ToString(IFormatProvider provider)
+        {
+            return ToString();
+        }
+
+        /// <inheritdoc/>
+        public object ToType(Type conversionType, IFormatProvider provider)
+        {
+            if (conversionType == typeof(DateTime))
+                return this.ToDateTime();
+            if (conversionType == typeof(DateTimeOffset))
+                return this.ToDateTimeOffset();
+            if (conversionType == typeof(string))
+                return ToString();
+
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public ushort ToUInt16(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public uint ToUInt32(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        /// <inheritdoc/>
+        public ulong ToUInt64(IFormatProvider provider)
+        {
+            throw new InvalidCastException();
+        }
+
+        #endregion
     }
 }

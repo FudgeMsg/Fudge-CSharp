@@ -91,6 +91,10 @@ namespace Fudge.Serialization.Reflection
             {
                 surrogate = new ToFromFudgeMsgSurrogate(context, typeData);
             }
+            else if (DotNetSerializableSurrogate.CanHandle(typeData))
+            {
+                surrogate = new DotNetSerializableSurrogate(context, typeData);
+            }
             else if (PropertyBasedSerializationSurrogate.CanHandle(typeData))
             {
                 surrogate = new PropertyBasedSerializationSurrogate(context, typeData);
