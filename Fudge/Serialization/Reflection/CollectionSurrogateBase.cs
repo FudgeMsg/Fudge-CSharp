@@ -52,21 +52,8 @@ namespace Fudge.Serialization.Reflection
             this.context = context;
             this.typeData = typeData;
             Type[] types = (typeData.SubType2 == null) ? new Type[] {typeData.SubType} : new Type[] {typeData.SubType, typeData.SubType2};
-            serializerDelegate = CreateMethodDelegate<Action<object, IAppendingFudgeFieldContainer, IFudgeSerializer>>(serializeMethodName, types);
-            deserializerDelegate = CreateMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(deserializeMethodName, types);
-        }
-
-        /// <summary>
-        /// Creates a delegate for a method after specializing its generic types.
-        /// </summary>
-        /// <typeparam name="T">Type of delegate to create.</typeparam>
-        /// <param name="name">Name of method to find.</param>
-        /// <param name="genericTypes">Array of types to apply to the generic parameters of the method.</param>
-        /// <returns>Delegate that calls the specialized method.</returns>
-        protected T CreateMethodDelegate<T>(string name, Type[] genericTypes) where T : class
-        {
-            var method = this.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(genericTypes);
-            return Delegate.CreateDelegate(typeof(T), this, method) as T;
+            serializerDelegate = ReflectionUtil.CreateInstanceMethodDelegate<Action<object, IAppendingFudgeFieldContainer, IFudgeSerializer>>(this, serializeMethodName, types);
+            deserializerDelegate = ReflectionUtil.CreateInstanceMethodDelegate<Func<IFudgeFieldContainer, IFudgeDeserializer, object>>(this, deserializeMethodName, types);
         }
 
         #region IFudgeSerializationSurrogate Members

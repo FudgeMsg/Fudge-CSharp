@@ -32,7 +32,7 @@ namespace Fudge.Serialization.Reflection
         private readonly FudgeContext context;
         private readonly Type type;
         private readonly ConstructorInfo constructor;
-        private readonly PropertyBasedSerializationSurrogate.PropertySerializerHelper helper;
+        private readonly PropertyBasedSerializationSurrogate.PropertySerializerMixin helper;
         private readonly ConstructorParam[] constructorParams;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Fudge.Serialization.Reflection
             this.constructor = FindConstructor(typeData.Constructors, typeData.Properties, out constructorParams);
             Debug.Assert(constructor != null);  // Else how did it pass CanHandle?
 
-            this.helper = new PropertyBasedSerializationSurrogate.PropertySerializerHelper(context, typeData);
+            this.helper = new PropertyBasedSerializationSurrogate.PropertySerializerMixin(context, typeData, typeData.Properties, new DotNetSerializableSurrogate.BeforeAfterMethodMixin(context, typeData));
         }
 
         #region IFudgeSerializationSurrogate Members

@@ -40,7 +40,7 @@ namespace Fudge.Serialization.Reflection
         private readonly FudgeContext context;
         private readonly Type type;
         private readonly ConstructorInfo constructor;
-        private readonly Helper helper;
+        private readonly SerializationMixin helper;
 
         /// <summary>
         /// Constructs a new <see cref="DotNetSerializableSurrogate"/>.
@@ -59,7 +59,7 @@ namespace Fudge.Serialization.Reflection
             this.context = context;
             this.type = typeData.Type;
             this.constructor = FindConstructor(typeData);
-            helper = new Helper(context, typeData.Type);
+            helper = new SerializationMixin(context, typeData.Type, new BeforeAfterMethodMixin(context, typeData));
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Fudge.Serialization.Reflection
         /// <inheritdoc/>
         public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            helper.Serialize(msg, (si, sc) => {((ISerializable)obj).GetObjectData(si, sc);});
+            helper.Serialize(msg, obj, (o, si, sc) => {((ISerializable)o).GetObjectData(si, sc);});
         }
 
         /// <inheritdoc/>
@@ -100,23 +100,90 @@ namespace Fudge.Serialization.Reflection
 
         #endregion
 
-        internal class Helper
+        internal sealed class BeforeAfterMethodMixin
+        {
+            private readonly StreamingContext streamingContext;
+            private readonly Action<object, StreamingContext> beforeSerialize;
+            private readonly Action<object, StreamingContext> afterSerialize;
+            private readonly Action<object, StreamingContext> beforeDeserialize;
+            private readonly Action<object, StreamingContext> afterDeserialize;
+
+            public BeforeAfterMethodMixin(FudgeContext context, TypeData typeData)
+            {
+                this.streamingContext = new StreamingContext(StreamingContextStates.Persistence, context);
+
+                var untypedDelegateCreator = ReflectionUtil.CreateStaticMethodDelegate<Func<Type, MethodInfo[], Action<object, StreamingContext>>>(GetType(), "CreateUntypedDelegate", new Type[] { typeData.Type });
+
+                beforeSerialize = untypedDelegateCreator(typeof(OnSerializingAttribute), typeData.AllInstanceMethods);
+                afterSerialize = untypedDelegateCreator(typeof(OnSerializedAttribute), typeData.AllInstanceMethods);
+                beforeDeserialize = untypedDelegateCreator(typeof(OnDeserializingAttribute), typeData.AllInstanceMethods);
+                afterDeserialize = untypedDelegateCreator(typeof(OnDeserializedAttribute), typeData.AllInstanceMethods);
+            }
+
+            public void CallBeforeSerialize(object obj)
+            {
+                beforeSerialize(obj, streamingContext);
+            }
+
+            public void CallAfterSerialize(object obj)
+            {
+                afterSerialize(obj, streamingContext);
+            }
+
+            public void CallBeforeDeserialize(object obj)
+            {
+                beforeDeserialize(obj, streamingContext);
+            }
+
+            public void CallAfterDeserialize(object obj)
+            {
+                afterDeserialize(obj, streamingContext);
+            }
+
+            private static Action<object, StreamingContext> CreateUntypedDelegate<T>(Type attribType, MethodInfo[] methods)
+            {
+                var method = GetFirstMethodWithAttribute(attribType, methods);
+                if (method == null)
+                    return (o, sc) => { };
+
+                var methodDelegate = (Action<T, StreamingContext>)Delegate.CreateDelegate(typeof(Action<T, StreamingContext>), null, method);
+
+                return (obj, sc) => { methodDelegate((T)obj, sc); };
+
+            }
+
+            private static MethodInfo GetFirstMethodWithAttribute(Type attribType, MethodInfo[] methods)
+            {
+                foreach (var method in methods)
+                {
+                    if (method.GetCustomAttributes(attribType, true).Length > 0)
+                        return method;
+                }
+                return null;
+            }
+        }
+
+        internal sealed class SerializationMixin
         {
             private readonly FormatterConverter formatterConverter = new FormatterConverter();
             private readonly StreamingContext streamingContext;
             private readonly Type type;
+            private readonly BeforeAfterMethodMixin beforeAfterMethodHelper;
 
-            public Helper(FudgeContext context, Type type)
+            public SerializationMixin(FudgeContext context, Type type, BeforeAfterMethodMixin beforeAfterMethodHelper)
             {
                 this.streamingContext = new StreamingContext(StreamingContextStates.Persistence, context);
                 this.type = type;
+                this.beforeAfterMethodHelper = beforeAfterMethodHelper;
             }
 
-            public void Serialize(IAppendingFudgeFieldContainer msg, Action<SerializationInfo, StreamingContext> serializeMethod)
+            public void Serialize(IAppendingFudgeFieldContainer msg, object obj, Action<object, SerializationInfo, StreamingContext> serializeMethod)
             {
                 var si = new SerializationInfo(type, formatterConverter);
 
-                serializeMethod(si, streamingContext);
+                beforeAfterMethodHelper.CallBeforeSerialize(obj);
+                serializeMethod(obj, si, streamingContext);
+                beforeAfterMethodHelper.CallAfterSerialize(obj);
 
                 // Pull the data out of the SerializationInfo and add to the message
                 var e = si.GetEnumerator();
@@ -148,7 +215,9 @@ namespace Fudge.Serialization.Reflection
                 var si = new SerializationInfo(this.type, converter);
                 PopulateSerializationInfo(si, msg);
 
+                beforeAfterMethodHelper.CallBeforeDeserialize(result);
                 deserializeMethod(result, si, streamingContext);
+                beforeAfterMethodHelper.CallAfterDeserialize(result);
 
                 return result;
             }

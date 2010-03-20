@@ -43,6 +43,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -73,6 +76,7 @@
     <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
     <Compile Include="Unit\Serialization\JavaTypeMappingStrategyTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\CollectionSurrogateBaseTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\DataContractSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\DotNetSerializationSurrogateSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\DotNetSerializableSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\ImmutableSurrogateTest.cs" />
@@ -80,6 +84,7 @@
     <Compile Include="Unit\Serialization\Reflection\FudgeSurrogateSelectorTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\ToFromFudgeMsgSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\TypeDataCacheTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\TypeDataTest.cs" />
     <Compile Include="Unit\Serialization\SerializableSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\SerializationExampleClasses.cs" />
     <Compile Include="Unit\FudgeContextPropertyTest.cs" />

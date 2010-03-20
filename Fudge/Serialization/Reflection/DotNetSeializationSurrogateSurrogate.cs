@@ -28,7 +28,7 @@ namespace Fudge.Serialization.Reflection
     /// </summary>
     public class DotNetSerializationSurrogateSurrogate : IFudgeSerializationSurrogate
     {
-        private readonly DotNetSerializableSurrogate.Helper helper;
+        private readonly DotNetSerializableSurrogate.SerializationMixin helper;
         private readonly ISerializationSurrogate surrogate;
         private readonly ISurrogateSelector selector;
 
@@ -49,7 +49,7 @@ namespace Fudge.Serialization.Reflection
                 throw new ArgumentNullException("surrogate");
             // Don't care if selector is null
             
-            this.helper = new DotNetSerializableSurrogate.Helper(context, typeData.Type);
+            this.helper = new DotNetSerializableSurrogate.SerializationMixin(context, typeData.Type, new DotNetSerializableSurrogate.BeforeAfterMethodMixin(context, typeData));
             this.surrogate = surrogate;
             this.selector = selector;
         }
@@ -67,7 +67,7 @@ namespace Fudge.Serialization.Reflection
         /// <inheritdoc/>
         public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            helper.Serialize(msg, (si, sc) => { surrogate.GetObjectData(obj, si, sc); });
+            helper.Serialize(msg, obj, surrogate.GetObjectData);
         }
 
         /// <inheritdoc/>

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization.Reflection
 {
@@ -57,10 +58,15 @@ namespace Fudge.Serialization.Reflection
             }
             Kind = kind;
 
-            ScanProperties(context, cache, fieldNameConvention);
+            if (kind != TypeKind.FudgePrimitive)        // If it's primitive we won't need to look inside it to serialize it
+            {
+                ScanProperties(context, cache, fieldNameConvention);
+                ScanFields(context, cache, fieldNameConvention);
 
-            PublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            StaticPublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+                PublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                AllInstanceMethods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                StaticPublicMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+            }
         }
 
         /// <summary>Gets the <see cref="Type"/> this <see cref="TypeData"/> describes.</summary>
@@ -71,6 +77,8 @@ namespace Fudge.Serialization.Reflection
         public ConstructorInfo[] Constructors { get; private set; }
         /// <summary>Gets <see cref="PropertyData"/> describing the properties of the type.</summary>
         public PropertyData[] Properties { get; private set; }
+        /// <summary>Gets <see cref="PropertyData"/> describing the fields of the type.</summary>
+        public PropertyData[] Fields { get; private set; }
         /// <summary>Gets any custom attributes for the type.</summary>
         public object[] CustomAttributes { get; private set; }
         /// <summary>Gets the way that this type should be serialized by default.</summary>
@@ -89,6 +97,8 @@ namespace Fudge.Serialization.Reflection
         public MethodInfo[] PublicMethods { get; private set; }
         /// <summary>Gets all public static methods of the type</summary>
         public MethodInfo[] StaticPublicMethods { get; private set; }
+        /// <summary>Gets all instance methods of the type, no matter the visibility.</summary>
+        public MethodInfo[] AllInstanceMethods { get; private set; }
 
         /// <summary>
         /// Gets the first custom attribute of a given type
@@ -169,9 +179,19 @@ namespace Fudge.Serialization.Reflection
         {
             var props = Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var list = from prop in props
-                       where prop.GetCustomAttributes(typeof(FudgeTransientAttribute), true).Length == 0
+                       where prop.GetIndexParameters().Length == 0              // We don't want to deal with anything with indices - e.g. this[string]
+                            && prop.GetCustomAttributes(typeof(FudgeTransientAttribute), true).Length == 0
                        select new PropertyData(cache, fieldNameConvention, prop);
             Properties = list.ToArray();
+        }
+
+        private void ScanFields(FudgeContext context, TypeDataCache cache, FudgeFieldNameConvention fieldNameConvention)
+        {
+            var fields = Type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var list = from field in fields
+                       where field.GetCustomAttributes(typeof(FudgeTransientAttribute), true).Length == 0
+                       select new PropertyData(cache, fieldNameConvention, field);
+            Fields = list.ToArray();
         }
 
         /// <summary>
@@ -179,57 +199,48 @@ namespace Fudge.Serialization.Reflection
         /// </summary>
         public sealed class PropertyData
         {
-            private readonly PropertyInfo info;
+            private readonly MemberInfo info;
             private readonly string name;
-            private readonly bool hasPublicSetter;
-            private string serializedName;
+            private readonly string serializedName;
             private readonly TypeData typeData;
             private readonly TypeKind kind;
+            private readonly Func<object, object> getter;
+            private readonly Action<object, object> setter;
 
             /// <summary>
-            /// Contructs a new instance
+            /// Contructs a new instance based on a property
             /// </summary>
             /// <param name="typeCache"></param>
             /// <param name="fieldNameConvention"></param>
             /// <param name="info"></param>
             public PropertyData(TypeDataCache typeCache, FudgeFieldNameConvention fieldNameConvention, PropertyInfo info)
+                : this(typeCache, fieldNameConvention, info, info.PropertyType)
+            {
+                this.getter = ReflectionUtil.CreateGetterDelegate(info);
+                this.setter = ReflectionUtil.CreateSetterDelegate(info);
+            }
+
+            /// <summary>
+            /// Contructs a new instance based on a field
+            /// </summary>
+            /// <param name="typeCache"></param>
+            /// <param name="fieldNameConvention"></param>
+            /// <param name="info"></param>
+            public PropertyData(TypeDataCache typeCache, FudgeFieldNameConvention fieldNameConvention, FieldInfo info)
+                : this(typeCache, fieldNameConvention, info, info.FieldType)
+            {
+                this.getter = ReflectionUtil.CreateGetterDelegate(info);
+                this.setter = ReflectionUtil.CreateSetterDelegate(info);
+            }
+
+            private PropertyData(TypeDataCache typeCache, FudgeFieldNameConvention fieldNameConvention, MemberInfo info, Type memberType)
             {
                 this.info = info;
                 this.name = info.Name;
-                this.hasPublicSetter = (info.GetSetMethod() != null);   // Can't just use CanWrite as it may be non-public
-                this.typeData = typeCache.GetTypeData(info.PropertyType, fieldNameConvention);
+                this.typeData = typeCache.GetTypeData(memberType, fieldNameConvention);
+                this.serializedName = GetSerializedName(info, fieldNameConvention);
 
-                var fieldNameAttrib = GetCustomAttribute<FudgeFieldNameAttribute>(info);
-                if (fieldNameAttrib != null)
-                {
-                    // Attribute takes priority over convention
-                    this.serializedName = fieldNameAttrib.Name;
-                }
-                else
-                {
-                    switch (fieldNameConvention)
-                    {
-                        case FudgeFieldNameConvention.Identity:
-                            this.serializedName = info.Name;
-                            break;
-                        case FudgeFieldNameConvention.AllLowerCase:
-                            this.serializedName = info.Name.ToLower();
-                            break;
-                        case FudgeFieldNameConvention.AllUpperCase:
-                            this.serializedName = info.Name.ToUpper();
-                            break;
-                        case FudgeFieldNameConvention.CamelCase:
-                            this.serializedName = info.Name.Substring(0, 1).ToLower() + info.Name.Substring(1);
-                            break;
-                        case FudgeFieldNameConvention.PascalCase:
-                            this.serializedName = info.Name.Substring(0, 1).ToUpper() + info.Name.Substring(1);
-                            break;
-                        default:
-                            throw new FudgeRuntimeException("Unknown FudgeFieldNameConvention: " + fieldNameConvention.ToString());
-                    }
-                }
-
-                var inlineAttrib = GetCustomAttribute<FudgeInlineAttribute>(info);
+                var inlineAttrib = GetCustomAttribute<FudgeInlineAttribute>();
                 if (inlineAttrib == null)
                 {
                     this.kind = typeData.Kind;
@@ -240,8 +251,6 @@ namespace Fudge.Serialization.Reflection
                 }
             }
 
-            /// <summary>Gets the <see cref="PropertyInfo"/> for the property.</summary>
-            public PropertyInfo Info { get { return info; } }
             /// <summary>Gets the name of the property.</summary>
             public string Name { get { return name; } }
             /// <summary>Gets the <see cref="TypeData"/> describing the type of the property.</summary>
@@ -250,16 +259,57 @@ namespace Fudge.Serialization.Reflection
             public Type Type { get { return typeData.Type; } }
             /// <summary>Gets the way the the property should be serialized.</summary>
             public TypeKind Kind { get { return kind; } }
+            /// <summary>Gets a delegate that calls the getter of the property</summary>
+            public Func<object, object> Getter { get { return getter; } }
+            /// <summary>Gets a delegate that calls the setter of the property</summary>
+            public Action<object, object> Setter { get { return setter; } }
             /// <summary>Gets whether the property has a public setter.</summary>
-            public bool HasPublicSetter { get { return hasPublicSetter; } }
+            public bool HasPublicSetter { get { return (setter != null); } }
             /// <summary>Gets the name that should be used to serialize the property after any conventions, etc. have been applied.</summary>
             public string SerializedName
             {
                 get { return serializedName; }
-                set { serializedName = value; }
             }
 
-            private T GetCustomAttribute<T>(PropertyInfo info) where T : Attribute
+            private string GetSerializedName(MemberInfo info, FudgeFieldNameConvention fieldNameConvention)
+            {
+                string name = info.Name;
+
+                var fieldNameAttrib = GetCustomAttribute<FudgeFieldNameAttribute>();
+                if (fieldNameAttrib != null)
+                {
+                    name = fieldNameAttrib.Name;
+                }
+                var dataMemberAttrib = GetCustomAttribute<DataMemberAttribute>();
+                if (dataMemberAttrib != null && dataMemberAttrib.Name != null)
+                {
+                    name = dataMemberAttrib.Name;
+                }
+
+                // Now apply the naming convention
+                switch (fieldNameConvention)
+                {
+                    case FudgeFieldNameConvention.Identity:
+                        return name;
+                    case FudgeFieldNameConvention.AllLowerCase:
+                        return name.ToLower();
+                    case FudgeFieldNameConvention.AllUpperCase:
+                        return name.ToUpper();
+                    case FudgeFieldNameConvention.CamelCase:
+                        return name.Substring(0, 1).ToLower() + name.Substring(1);
+                    case FudgeFieldNameConvention.PascalCase:
+                        return name.Substring(0, 1).ToUpper() + name.Substring(1);
+                    default:
+                        throw new FudgeRuntimeException("Unknown FudgeFieldNameConvention: " + fieldNameConvention.ToString());
+                }
+            }
+
+            /// <summary>
+            /// Gets the first custom attribute of a given type
+            /// </summary>
+            /// <typeparam name="T">Type of attribute to get</typeparam>
+            /// <returns>Matching attribute, or <c>null</c> if not found</returns>
+            public T GetCustomAttribute<T>() where T : Attribute
             {
                 var attribs = info.GetCustomAttributes(typeof(T), true);
                 if (attribs.Length > 0)
