@@ -79,6 +79,7 @@ namespace Fudge
             AddType(new SecondaryFieldType<DateTimeOffset, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTimeOffset(), dto => new FudgeDateTime(dto)));
             AddType(new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray()));
             AddType(new SecondaryFieldType<IPAddress, byte[]>(ByteArrayFieldType.VariableSizedInstance, raw => new IPAddress(raw), value => value.GetAddressBytes()));
+            AddType(new SecondaryFieldType<Uri, string>(StringFieldType.Instance, raw => new Uri(raw), value => value.OriginalString));
         }
 
         /// <summary>

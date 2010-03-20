@@ -349,6 +349,21 @@ namespace Fudge.Tests.Unit
         }
 
         [Fact]
+        public void URIsAsSecondaryTypes_FRN75()
+        {
+            var uri = new Uri("http://www.fudgemsg.org/dashboard.action");
+
+            var msg = fudgeContext.NewMessage();
+            msg.Add("uri", uri);
+
+            Assert.Same(StringFieldType.Instance, msg.GetByName("uri").Type);
+
+            var uri2 = msg.GetValue<Uri>("uri");
+
+            Assert.Equal(uri, uri2);
+        }
+
+        [Fact]
         public void Iterable()
         {
             FudgeMsg msg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
