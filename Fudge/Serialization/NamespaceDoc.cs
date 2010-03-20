@@ -21,6 +21,7 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using Fudge.Serialization.Reflection;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Fudge.Serialization
 {
@@ -68,6 +69,13 @@ namespace Fudge.Serialization
     /// to serialize and deserialize.</description>
     /// </item>
     /// <item>
+    /// <term>[DataContract]</term>
+    /// <description>Classes written for WCF and marked with <see cref="DataContractAttribute"/> will be serialized with <see cref="DataContractSerializer"/>
+    /// logic.  In particular, only members and properties marked with <see cref="DataMemberAttribute"/> will be serialized, and constructors will not
+    /// be called on deserialization.  Methods marked with <see cref="OnSerializingAttribute"/>, <see cref="OnSerializedAttribute"/>,
+    /// <see cref="OnDeserializingAttribute"/> and <see cref="OnDeserializedAttribute"/> will be called as normal.</description>
+    /// </item>
+    /// <item>
     /// <term>ISerializable</term>
     /// <description>Classes that have been written for the original .net serialization framework and use <see cref="ISerializable"/> to perform custom
     /// serialization may be used directly.  This is lower performance than using <see cref="IFudgeSerializable"/> because data must be marshalled via
@@ -78,6 +86,12 @@ namespace Fudge.Serialization
     /// <description>Classes written for the original .net serialization framework and using an <see cref="ISerializationSurrogate"/> are also supported with
     /// the same notes as for ISerializable above.  The <see cref="SurrogateSelector"/> is registered in the <see cref="SerializationTypeMap"/> or through
     /// the <see cref="ContextProperties.DotNetSurrogateSelectorProperty"/> context property.</description>
+    /// </item>
+    /// <item>
+    /// <term>[Serializable]</term>
+    /// <description>If a class is marked with <see cref="SerializableAttribute"/> but does not implement <see cref="ISerializable"/> and is not supported
+    /// by a registered <see cref="ISerializationSurrogate"/> then all its fields that are not marked by <see cref="NonSerializedAttribute"/> will
+    /// be serialized and deserialized in the same way as with a <see cref="BinaryFormatter"/>.</description>
     /// </item>
     /// </list>
     /// </para>

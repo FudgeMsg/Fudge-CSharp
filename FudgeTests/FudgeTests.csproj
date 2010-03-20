@@ -82,6 +82,7 @@
     <Compile Include="Unit\Serialization\Reflection\ImmutableSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\PropertyBasedSerializationSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\FudgeSurrogateSelectorTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\SerialiableAttributeSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\ToFromFudgeMsgSurrogateTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\TypeDataCacheTest.cs" />
     <Compile Include="Unit\Serialization\Reflection\TypeDataTest.cs" />

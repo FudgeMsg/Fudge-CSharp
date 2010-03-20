@@ -19,56 +19,51 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Runtime.Serialization;
-using System.Reflection;
-using System.Diagnostics;
 
 namespace Fudge.Serialization.Reflection
 {
     /// <summary>
-    /// Handles serialization and deserialization of classes that have been written with
-    /// the WCF <c>[DataContract]</c> marker.
+    /// Handles serialization and deserialization of classes that are marked with <see cref="SerializableAttribute"/>
+    /// but do not implement <see cref="ISerializable"/>.
     /// </summary>
-    public class DataContractSurrogate : IFudgeSerializationSurrogate
+    public class SerializableAttributeSurrogate : IFudgeSerializationSurrogate
     {
-        private readonly FudgeContext context;
+        private readonly PropertyBasedSerializationSurrogate.PropertySerializerMixin serializerMixin;
         private readonly Type type;
-        private readonly PropertyBasedSerializationSurrogate.PropertySerializerMixin helper;
 
         /// <summary>
-        /// Constructs a new instance for a specific type
+        /// Constructs a new <see cref="SerializableAttributeSurrogate"/>.
         /// </summary>
-        /// <param name="context"><see cref="FudgeContext"/> for this surrogate.</param>
-        /// <param name="typeData"><see cref="TypeData"/> describing the type to serialize.</param>
-        public DataContractSurrogate(FudgeContext context, TypeData typeData)
+        /// <param name="context"><see cref="FudgeContext"/> to use.</param>
+        /// <param name="typeData"><see cref="TypeData"/> for the type for this surrogate.</param>
+        public SerializableAttributeSurrogate(FudgeContext context, TypeData typeData)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
             if (typeData == null)
                 throw new ArgumentNullException("typeData");
             if (!CanHandle(typeData))
-                throw new ArgumentOutOfRangeException("typeData", "ImmutableSurrogate cannot handle " + typeData.Type.FullName);
+                throw new ArgumentOutOfRangeException("typeData", "SerializableAttributeSurrogate cannot handle " + typeData.Type.FullName);
 
-            this.context = context;
             this.type = typeData.Type;
 
-            Debug.Assert(typeData.DefaultConstructor != null);      // Should have been caught in CanHandle()
+            var fields = from field in typeData.Fields
+                         where field.GetCustomAttribute<NonSerializedAttribute>() == null
+                         select field;
 
-            var properties = from prop in typeData.Properties.Concat(typeData.Fields)
-                             where prop.GetCustomAttribute<DataMemberAttribute>() != null
-                             select prop;
-
-            this.helper = new PropertyBasedSerializationSurrogate.PropertySerializerMixin(context, typeData, properties, new DotNetSerializableSurrogate.BeforeAfterMethodMixin(context, typeData));
+            var beforeAfterMixin = new DotNetSerializableSurrogate.BeforeAfterMethodMixin(context, typeData);
+            this.serializerMixin = new PropertyBasedSerializationSurrogate.PropertySerializerMixin(context, typeData, fields, beforeAfterMixin);
         }
 
         /// <summary>
-        /// Determines whether a given type can be serialized with this class.
+        /// Detects whether a given type can be serialized with this class.
         /// </summary>
         /// <param
         /// name="typeData">Type to test.</param>
         /// <returns><c>true</c> if this class can handle the type.</returns>
         public static bool CanHandle(TypeData typeData)
         {
-            return (typeData.GetCustomAttribute<DataContractAttribute>() != null);
+            return typeData.GetCustomAttribute<SerializableAttribute>() != null;
         }
 
         #region IFudgeSerializationSurrogate Members
@@ -76,13 +71,13 @@ namespace Fudge.Serialization.Reflection
         /// <inheritdoc/>
         public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
         {
-            helper.Serialize(obj, msg, serializer);
+            serializerMixin.Serialize(obj, msg, serializer);
         }
 
         /// <inheritdoc/>
         public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
-            return helper.CreateAndDeserialize(msg, deserializer);
+            return serializerMixin.CreateAndDeserialize(msg, deserializer);
         }
 
         #endregion

@@ -133,12 +133,14 @@ namespace Fudge.Serialization.Reflection
         internal sealed class PropertySerializerMixin
         {
             private readonly FudgeContext context;
+            private readonly TypeData typeData;
             private readonly Dictionary<string, MorePropertyData> propMap = new Dictionary<string, MorePropertyData>();
             private readonly DotNetSerializableSurrogate.BeforeAfterMethodMixin beforeAfterMethodHelper;
 
             public PropertySerializerMixin(FudgeContext context, TypeData typeData, IEnumerable<TypeData.PropertyData> properties, DotNetSerializableSurrogate.BeforeAfterMethodMixin beforeAfterMethodHelper)
             {
                 this.context = context;
+                this.typeData = typeData;
                 this.beforeAfterMethodHelper = beforeAfterMethodHelper;
 
                 ExtractProperties(properties);
@@ -189,6 +191,27 @@ namespace Fudge.Serialization.Reflection
                     }
                 }
                 beforeAfterMethodHelper.CallAfterSerialize(obj);
+            }
+
+            /// <summary>
+            /// Creates the object without calling a constructor, registers it, and deserializes the message into it
+            /// </summary>
+            /// <param name="msg"></param>
+            /// <param name="deserializer"></param>
+            /// <returns>Deserialized object</returns>
+            public object CreateAndDeserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
+            {
+                // Create without construction
+                object newObj = FormatterServices.GetUninitializedObject(typeData.Type);
+
+                // Register now in case any cycles in the object graph
+                deserializer.Register(msg, newObj);
+
+                // Deserialize the message
+                Deserialize(msg, deserializer, newObj);
+
+                // And we're done
+                return newObj;
             }
 
             public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer, object obj)

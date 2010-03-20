@@ -175,7 +175,6 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             #endregion
         }
 
-        [Serializable]
         public class ClassWithInner : ISerializable
         {
             public ClassWithInner()

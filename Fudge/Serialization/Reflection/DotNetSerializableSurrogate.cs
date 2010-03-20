@@ -54,7 +54,7 @@ namespace Fudge.Serialization.Reflection
             if (typeData == null)
                 throw new ArgumentNullException("typeData");
             if (!CanHandle(typeData))
-                throw new ArgumentOutOfRangeException("typeData", "ImmutableSurrogate cannot handle " + typeData.Type.FullName);
+                throw new ArgumentOutOfRangeException("typeData", "DotNetSerializableSurrogate cannot handle " + typeData.Type.FullName);
 
             this.context = context;
             this.type = typeData.Type;

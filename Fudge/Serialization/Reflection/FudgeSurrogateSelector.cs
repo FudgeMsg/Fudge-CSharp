@@ -100,6 +100,7 @@ namespace Fudge.Serialization.Reflection
                 (c, td) => DataContractSurrogate.CanHandle(td) ? new DataContractSurrogate(c, td) : null,
                 (c, td) => DotNetSerializableSurrogate.CanHandle(td) ? new DotNetSerializableSurrogate(c, td) : null,
                 this.SurrogateFromDotNetSurrogateSelector,
+                (c, td) => SerializableAttributeSurrogate.CanHandle(td) ? new SerializableAttributeSurrogate(c, td) : null,
                 (c, td) => PropertyBasedSerializationSurrogate.CanHandle(td) ? new PropertyBasedSerializationSurrogate(c, td) : null,
                 (c, td) => ImmutableSurrogate.CanHandle(td) ? new ImmutableSurrogate(c, td) : null,
             };

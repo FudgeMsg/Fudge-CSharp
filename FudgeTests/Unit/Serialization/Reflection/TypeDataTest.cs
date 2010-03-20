@@ -30,16 +30,44 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact (Skip="Performance optimisation demonstration")]
         public void PerformanceComparison()
         {
-            var obj = new SomeClass();
+            // Demonstrating the performance difference of three approaches to getting the values of properties
+            const int iterations = 10000000;
 
+            var obj = new SomeClass();
+            var s = new Stopwatch();
+
+            // First just go through PropertyInfo.GetValue
+            Console.Out.Write("PropertyInfo.GetValue: ");
             PropertyInfo prop = obj.GetType().GetProperty("Val");
 
-            // Create a delegate to get the property
+            s.Reset();
+            s.Start();
+            for (int i = 0; i < iterations; i++)
+            {
+                prop.GetValue(obj, null);
+            }
+            s.Stop();
+            Console.Out.WriteLine(s.ElapsedMilliseconds);
+
+
+            // Second, create a delegate to get the property directly from the getter method
+            Console.Out.Write("Delegate getter: ");
             var getMethod = prop.GetGetMethod();
             Func<SomeClass, string> typedGetter = (Func<SomeClass, string>)Delegate.CreateDelegate(typeof(Func<SomeClass, string>), null, getMethod);
             Func<object, object> delegateGetter = o => typedGetter((SomeClass)o);
 
-            // Create a dynamic method to get the property
+            s.Reset();
+            s.Start();
+            for (int i = 0; i < iterations; i++)
+            {
+                delegateGetter(obj);
+            }
+            s.Stop();
+            Console.Out.WriteLine(s.ElapsedMilliseconds);
+
+            
+            // Thirdly, create a dynamic method to get the property
+            Console.Out.Write("IL getter: ");
             DynamicMethod dynamicMethod = new DynamicMethod("", typeof(object), new Type[] { typeof(object) }, typeof(SomeClass), true);
             ILGenerator ilGenerator = dynamicMethod.GetILGenerator();
             ilGenerator.Emit(OpCodes.Ldarg_0);
@@ -51,32 +79,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             ilGenerator.Emit(OpCodes.Ret);
             var ilGetter = (Func<object, object>)dynamicMethod.CreateDelegate(typeof(Func<object, object>));
 
-            const int iterations = 10000000;
-
-            var s = new Stopwatch();
-
             s.Reset();
-            Console.Out.Write("PropertyInfo.GetValue: ");
-            s.Start();
-            for (int i = 0; i < iterations; i++)
-            {
-                prop.GetValue(obj, null);
-            }
-            s.Stop();
-            Console.Out.WriteLine(s.ElapsedMilliseconds);
-
-            s.Reset();
-            Console.Out.Write("Delegate getter: ");
-            s.Start();
-            for (int i = 0; i < iterations; i++)
-            {
-                delegateGetter(obj);
-            }
-            s.Stop();
-            Console.Out.WriteLine(s.ElapsedMilliseconds);
-
-            s.Reset();
-            Console.Out.Write("IL getter: ");
             s.Start();
             for (int i = 0; i < iterations; i++)
             {

@@ -82,6 +82,7 @@
     <Compile Include="Serialization\Reflection\DotNetSerializableSurrogate.cs" />
     <Compile Include="Serialization\Reflection\ImmutableSurrogate.cs" />
     <Compile Include="Serialization\Reflection\ReflectionUtil.cs" />
+    <Compile Include="Serialization\Reflection\SerializableAttributeSurrogate.cs" />
     <Compile Include="Util\FudgeStreamPipe.cs" />
     <Compile Include="IFudgeFieldContainer.cs" />
     <Compile Include="FudgeFieldType.cs" />
