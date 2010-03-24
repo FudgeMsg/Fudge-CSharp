@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization.Reflection
 {
@@ -31,7 +32,7 @@ namespace Fudge.Serialization.Reflection
         private readonly FudgeContext context;
         private readonly Type type;
         private readonly ConstructorInfo constructor;
-        private readonly PropertyBasedSerializationSurrogate.PropertySerializerHelper helper;
+        private readonly PropertyBasedSerializationSurrogate.PropertySerializerMixin helper;
         private readonly ConstructorParam[] constructorParams;
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace Fudge.Serialization.Reflection
             this.constructor = FindConstructor(typeData.Constructors, typeData.Properties, out constructorParams);
             Debug.Assert(constructor != null);  // Else how did it pass CanHandle?
 
-            this.helper = new PropertyBasedSerializationSurrogate.PropertySerializerHelper(context, typeData);
+            this.helper = new PropertyBasedSerializationSurrogate.PropertySerializerMixin(context, typeData, typeData.Properties, new DotNetSerializableSurrogate.BeforeAfterMethodMixin(context, typeData));
         }
 
         #region IFudgeSerializationSurrogate Members
@@ -67,6 +68,11 @@ namespace Fudge.Serialization.Reflection
         /// <inheritdoc/>
         public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
         {
+            // We create the new object without constructing it, so we can register it before trying
+            // to deserialize the parameters.  This allows us to support cycles.
+            object result = FormatterServices.GetUninitializedObject(type);
+            deserializer.Register(msg, result);
+
             var args = new object[constructorParams.Length];
             foreach (var field in msg)
             {
@@ -94,8 +100,7 @@ namespace Fudge.Serialization.Reflection
                 }
             }
 
-            var result = constructor.Invoke(args);
-            deserializer.Register(msg, result);
+            constructor.Invoke(result, args);
             return result;
         }
 

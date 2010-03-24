@@ -22,6 +22,7 @@ using Fudge.Types;
 using Fudge.Encodings;
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization
 {
@@ -35,7 +36,8 @@ namespace Fudge.Serialization
     {
         private readonly FudgeContext context;
         private readonly IFudgeStreamWriter writer;
-        private readonly Dictionary<object, int> idMap;     // Tracks IDs of objects that have already been serialised (or are in the process)
+        private readonly ObjectIDGenerator objectIndexMap = new ObjectIDGenerator();
+        private readonly List<int> indexIdMap = new List<int>();
         private readonly Dictionary<Type, int> lastTypes = new Dictionary<Type, int>();     // Tracks the last object of a given type
         private readonly SerializationTypeMap typeMap;
         private readonly IFudgeTypeMappingStrategy typeMappingStrategy;
@@ -46,7 +48,6 @@ namespace Fudge.Serialization
         {
             this.context = context;
             this.writer = writer;
-            this.idMap = new Dictionary<object, int>();     // This will call GetHashCode and Equals on the objects, which is not ideal - see FRN-65
             this.typeMap = typeMap;
             this.typeMappingStrategy = typeMappingStrategy;
         }
@@ -87,7 +88,13 @@ namespace Fudge.Serialization
 
         private int RegisterObject(object obj)
         {
-            idMap[obj] = currentMessageId;      // There is the possibility that an object is serialised in-line twice - we take the later so that relative references are smaller
+            bool firstTime;
+            long index = objectIndexMap.GetId(obj, out firstTime);
+            while (indexIdMap.Count <= index)
+            {
+                indexIdMap.Add(-1);
+            }
+            indexIdMap[(int)index] = currentMessageId;       // There is the possibility that an object is serialised in-line twice - we take the later so that relative references are smaller
             return currentMessageId;
         }
 
@@ -213,13 +220,11 @@ namespace Fudge.Serialization
 
         private int GetRefId(object obj)
         {
-            int id;
-            if (!idMap.TryGetValue(obj, out id))
-            {
+            bool firstTime;
+            int index = (int)objectIndexMap.HasId(obj, out firstTime);
+            if (firstTime)
                 return -1;
-            }
-
-            return id;
+            return indexIdMap[index];
         }
 
         /// <summary>

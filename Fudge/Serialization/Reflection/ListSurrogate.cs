@@ -94,7 +94,8 @@ namespace Fudge.Serialization.Reflection
             deserializer.Register(msg, result);
             foreach (var field in msg)
             {
-                result.Add(DeserializeField<T>(field, deserializer, typeData.SubTypeData.Kind));
+                if (field.Ordinal == null && field.Name == null)
+                    result.Add(DeserializeField<T>(field, deserializer, typeData.SubTypeData.Kind));
             }
             return result;
         }

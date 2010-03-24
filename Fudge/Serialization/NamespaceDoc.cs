@@ -20,6 +20,8 @@ using System.Linq;
 using System.Text;
 using System.Runtime.CompilerServices;
 using Fudge.Serialization.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Fudge.Serialization
 {
@@ -36,14 +38,61 @@ namespace Fudge.Serialization
     /// </para>
     /// <para>
     /// Serialization of a class can be done in a number of ways:
-    /// <list type="bullet">
-    /// <item><description>If the class has properties with <c>get</c> and <c>set</c> for each, then the Fudge serialization framework will automatically
-    /// generate a <see cref="PropertyBasedSerializationSurrogate"/> to handle it.</description></item>
-    /// <item><description>The class can implement <see cref="IFudgeSerializable"/> and handle its own serialization and deserialization.  This requires it to have
-    /// a default constructor.</description></item>
-    /// <item><description>Serialization can be implemented in a separate surrogate class which implements <see cref="IFudgeSerializationSurrogate"/>.  This can
-    /// be specified either through the <see cref="FudgeSurrogateAttribute"/> attribute on the class, or by explicitly registering the surrogate with
-    /// the <see cref="FudgeSerializer.TypeMap"/>.</description></item>
+    /// <list type="table">
+    /// <item>
+    /// <term>Bean-style</term>
+    /// <description>If the class has properties with <c>get</c> and <c>set</c> for each, then the Fudge serialization framework will automatically
+    /// generate a <see cref="PropertyBasedSerializationSurrogate"/> to handle it.</description>
+    /// </item>
+    /// <item>
+    /// <term>Immutable</term>
+    /// <description>If the class has public getters but no setters, and a constructor with arguments that match the properties (ignoring case), then
+    /// a <see cref="ImmutableSurrogate"/> will automatically be generated.</description>
+    /// </item>
+    /// <item>
+    /// <term>Direct</term>
+    /// <description>The class can implement <see cref="IFudgeSerializable"/> and handle its own serialization and deserialization.  This requires it to have
+    /// a default constructor.</description>
+    /// </item>
+    /// <item>
+    /// <term>
+    /// Surrogate
+    /// </term>
+    /// <description>Serialization can be implemented in a separate surrogate class which implements <see cref="IFudgeSerializationSurrogate"/> to perform the
+    /// serialization and deserialization.  This can  be specified either through the <see cref="FudgeSurrogateAttribute"/> attribute on the class, or by
+    /// explicitly registering the surrogate with the <see cref="FudgeSerializer.TypeMap"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>Convention</term>
+    /// <description>If the class implements <c>public void ToFudgeMsg(IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)</c> and
+    /// <c>public static &lt;YourType&gt; FromFudgeMsg(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)</c> then these will be used
+    /// to serialize and deserialize.</description>
+    /// </item>
+    /// <item>
+    /// <term>[DataContract]</term>
+    /// <description>Classes written for WCF and marked with <see cref="DataContractAttribute"/> will be serialized with <see cref="DataContractSerializer"/>
+    /// logic.  In particular, only members and properties marked with <see cref="DataMemberAttribute"/> will be serialized, and constructors will not
+    /// be called on deserialization.  Methods marked with <see cref="OnSerializingAttribute"/>, <see cref="OnSerializedAttribute"/>,
+    /// <see cref="OnDeserializingAttribute"/> and <see cref="OnDeserializedAttribute"/> will be called as normal.</description>
+    /// </item>
+    /// <item>
+    /// <term>ISerializable</term>
+    /// <description>Classes that have been written for the original .net serialization framework and use <see cref="ISerializable"/> to perform custom
+    /// serialization may be used directly.  This is lower performance than using <see cref="IFudgeSerializable"/> because data must be marshalled via
+    /// a <see cref="SerializationInfo"/>.  Also note the issues with <c>null</c> described in <see cref="Reflection.DotNetSerializableSurrogate"/>.</description>
+    /// </item>
+    /// <item>
+    /// <term>ISerializationSurrogate</term>
+    /// <description>Classes written for the original .net serialization framework and using an <see cref="ISerializationSurrogate"/> are also supported with
+    /// the same notes as for ISerializable above.  The <see cref="SurrogateSelector"/> is registered in the <see cref="SerializationTypeMap"/> or through
+    /// the <see cref="ContextProperties.DotNetSurrogateSelectorProperty"/> context property.</description>
+    /// </item>
+    /// <item>
+    /// <term>[Serializable]</term>
+    /// <description>If a class is marked with <see cref="SerializableAttribute"/> but does not implement <see cref="ISerializable"/> and is not supported
+    /// by a registered <see cref="ISerializationSurrogate"/> then all its fields that are not marked by <see cref="NonSerializedAttribute"/> will
+    /// be serialized and deserialized in the same way as with a <see cref="BinaryFormatter"/>.</description>
+    /// </item>
     /// </list>
     /// </para>
     /// <para>

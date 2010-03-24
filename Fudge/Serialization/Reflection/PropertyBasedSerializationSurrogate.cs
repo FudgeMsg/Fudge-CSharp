@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Fudge.Serialization.Reflection
 {
@@ -35,7 +36,7 @@ namespace Fudge.Serialization.Reflection
         private readonly FudgeContext context;
         private readonly Type type;
         private readonly ConstructorInfo constructor;
-        private readonly PropertySerializerHelper helper;
+        private readonly PropertySerializerMixin helper;
 
         /// <summary>
         /// Constructs a new <see cref="PropertyBasedSerializationSurrogate"/>.
@@ -57,7 +58,7 @@ namespace Fudge.Serialization.Reflection
             Debug.Assert(typeData.DefaultConstructor != null);      // Should have been caught in CanHandle()
             this.constructor = typeData.DefaultConstructor;
 
-            this.helper = new PropertySerializerHelper(context, typeData);
+            this.helper = new PropertySerializerMixin(context, typeData, typeData.Properties, new DotNetSerializableSurrogate.BeforeAfterMethodMixin(context, typeData));
         }
 
         /// <summary>
@@ -115,10 +116,7 @@ namespace Fudge.Serialization.Reflection
             // Register now in case any cycles in the object graph
             deserializer.Register(msg, newObj);
 
-            foreach (var field in msg)
-            {
-                helper.DeserializeField(deserializer, field, newObj);
-            }
+            helper.Deserialize(msg, deserializer, newObj);
 
             return newObj;
         }
@@ -132,17 +130,25 @@ namespace Fudge.Serialization.Reflection
             public Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer> Adder { get; set; }
         }
 
-        internal class PropertySerializerHelper
+        internal sealed class PropertySerializerMixin
         {
             private readonly FudgeContext context;
+            private readonly TypeData typeData;
             private readonly Dictionary<string, MorePropertyData> propMap = new Dictionary<string, MorePropertyData>();
+            private readonly DotNetSerializableSurrogate.BeforeAfterMethodMixin beforeAfterMethodHelper;
 
-            public PropertySerializerHelper(FudgeContext context, TypeData typeData)
+            public PropertySerializerMixin(FudgeContext context, TypeData typeData, IEnumerable<TypeData.PropertyData> properties, DotNetSerializableSurrogate.BeforeAfterMethodMixin beforeAfterMethodHelper)
             {
                 this.context = context;
+                this.typeData = typeData;
+                this.beforeAfterMethodHelper = beforeAfterMethodHelper;
 
-                // Pull out all the properties
-                foreach (var prop in typeData.Properties)
+                ExtractProperties(properties);
+            }
+
+            private void ExtractProperties(IEnumerable<TypeData.PropertyData> properties)
+            {
+                foreach (var prop in properties)
                 {
                     var propData = new MorePropertyData { PropertyData = prop };
                     switch (prop.Kind)
@@ -157,7 +163,7 @@ namespace Fudge.Serialization.Reflection
                             else
                             {
                                 // Must be a list
-                                propData.Adder = CreateMethodDelegate<Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer>>("ListAppend", prop.TypeData.SubType);
+                                propData.Adder = ReflectionUtil.CreateInstanceMethodDelegate<Action<MorePropertyData, object, IFudgeField, IFudgeDeserializer>>(this, "ListAppend", new Type[] { prop.TypeData.SubType });
                             }
                             propData.Serializer = this.InlineSerialize;
                             break;
@@ -165,8 +171,6 @@ namespace Fudge.Serialization.Reflection
                             propData.Adder = this.ObjectAdd;
                             propData.Serializer = this.ReferenceSerialize;
                             break;
-                        default:
-                            throw new FudgeRuntimeException("Invalid property type for " + typeData.Type.FullName + "." + prop.Name);
                     }
                     propMap.Add(prop.SerializedName, propData);
                 }
@@ -174,20 +178,53 @@ namespace Fudge.Serialization.Reflection
 
             public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
+                beforeAfterMethodHelper.CallBeforeSerialize(obj);
                 foreach (var entry in propMap)
                 {
                     string name = entry.Key;
                     MorePropertyData prop = entry.Value;
-                    object val = prop.PropertyData.Info.GetValue(obj, null);
+                    object val = prop.PropertyData.Getter(obj);
 
                     if (val != null)
                     {
                         prop.Serializer(prop, val, msg, serializer);
                     }
                 }
+                beforeAfterMethodHelper.CallAfterSerialize(obj);
             }
 
-            public bool DeserializeField(IFudgeDeserializer deserializer, IFudgeField field, object obj)
+            /// <summary>
+            /// Creates the object without calling a constructor, registers it, and deserializes the message into it
+            /// </summary>
+            /// <param name="msg"></param>
+            /// <param name="deserializer"></param>
+            /// <returns>Deserialized object</returns>
+            public object CreateAndDeserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
+            {
+                // Create without construction
+                object newObj = FormatterServices.GetUninitializedObject(typeData.Type);
+
+                // Register now in case any cycles in the object graph
+                deserializer.Register(msg, newObj);
+
+                // Deserialize the message
+                Deserialize(msg, deserializer, newObj);
+
+                // And we're done
+                return newObj;
+            }
+
+            public void Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer, object obj)
+            {
+                beforeAfterMethodHelper.CallBeforeDeserialize(obj);
+                foreach (var field in msg)
+                {
+                    DeserializeField(field, deserializer, obj);
+                }
+                beforeAfterMethodHelper.CallAfterDeserialize(obj);
+            }
+
+            public bool DeserializeField(IFudgeField field, IFudgeDeserializer deserializer, object obj)
             {
                 if (field.Name == null)
                     return false;           // Can't process without a name (yet)
@@ -201,12 +238,6 @@ namespace Fudge.Serialization.Reflection
                 return false;
             }
 
-            private T CreateMethodDelegate<T>(string name, Type valueType) where T : class
-            {
-                var method = this.GetType().GetMethod(name, BindingFlags.NonPublic | BindingFlags.Instance).MakeGenericMethod(new Type[] { valueType });
-                return Delegate.CreateDelegate(typeof(T), this, method) as T;
-            }
-
             private void PrimitiveSerialize(MorePropertyData prop, object val, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
             {
                 msg.Add(prop.PropertyData.SerializedName, val);
@@ -215,7 +246,7 @@ namespace Fudge.Serialization.Reflection
             private void PrimitiveAdd(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer)
             {
                 object val = context.TypeHandler.ConvertType(field.Value, prop.PropertyData.Type);
-                prop.PropertyData.Info.SetValue(obj, val, null);
+                prop.PropertyData.Setter(obj, val);
             }
 
             private void InlineSerialize(MorePropertyData prop, object val, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
@@ -227,13 +258,13 @@ namespace Fudge.Serialization.Reflection
             {
                 // Handles both reference and inline
                 object subObject = deserializer.FromField(field, prop.PropertyData.Type);
-                prop.PropertyData.Info.SetValue(obj, subObject, null);
+                prop.PropertyData.Setter(obj, subObject);
             }
 
             private void ListAppend<T>(MorePropertyData prop, object obj, IFudgeField field, IFudgeDeserializer deserializer) where T : class
             {
                 IList<T> newList = deserializer.FromField<IList<T>>(field);
-                IList<T> currentList = (IList<T>)prop.PropertyData.Info.GetValue(obj, null);
+                IList<T> currentList = (IList<T>)prop.PropertyData.Getter(obj);
                 foreach (T item in newList)
                     currentList.Add(item);
             }
