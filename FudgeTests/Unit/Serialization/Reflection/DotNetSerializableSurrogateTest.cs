@@ -100,7 +100,10 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             var obj2 = (ClassWithSomeTypes)serializer.Deserialize(msg);
 
             Assert.Equal(obj1.Array, obj2.Array);
-            Assert.Equal(obj1.DateTime, obj2.DateTime);
+
+            // Times are deserialized into UTC, so need to convert the source for comparison
+            Assert.Equal(obj1.DateTime.ToUniversalTime(), obj2.DateTime);
+
             Assert.Equal(obj1.List, obj2.List);
             Assert.Equal(obj1.String, obj2.String);
         }
