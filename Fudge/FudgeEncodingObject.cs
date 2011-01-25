@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ namespace Fudge
                 }
                 return noTaxonomySize;
             }
-            lock (this)     // TODO 2009-09-01 t0rx -- Should this lock something internal in case someone else has us locked?
+            lock (this)
             {
                 if (sizesByTaxonomy == null)
                 {

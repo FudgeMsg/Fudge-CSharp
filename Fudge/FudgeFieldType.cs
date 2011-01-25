@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,6 +69,7 @@ namespace Fudge
         /// <summary>
         /// Gets the numeric identifier assigned to this type
         /// </summary>
+        /// <remarks>See <see cref="FudgeTypeDictionary"/> for defined identifiers.</remarks>
         public int TypeId
         {
             get { return typeId; }
@@ -134,9 +135,6 @@ namespace Fudge
         /// <exception cref="InvalidCastException">Thrown if the value cannot be converted</exception>
         public virtual object ConvertValueFrom(object value)
         {
-            // TODO 2009-09-12 t0rx -- Should we return null rather than throwing an exception?  This would be consistent with FudgeMsg.GetLong, etc.
-            // TODO 2009-12-14 Andrew -- I think throwing an exception is correct behaviour; FudgeMsg.GetLong might be flawed!
-
             return Convert.ChangeType(value, csharpType);
         }
 
@@ -198,29 +196,19 @@ namespace Fudge
         public abstract int GetVariableSize(object value, IFudgeTaxonomy taxonomy);
 
         /// <summary>
-        /// Writes an encoded value. The output must contain only the value data, no header or prefix is required.
-        /// If the type is a variable size, the number of bytes written must be equal to the value returned by
-        /// <c>GetVariableSize</c> or the resulting message will not be valid.
+        /// Writes a values to an output <see cref="BinaryWriter"/>.
         /// </summary>
-        /// <param name="output">the target to write to</param>
-        /// <param name="value">the value to write</param>
-        /// <param name="taxonomy"></param>
-        public abstract void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy);
+        /// <param name="output"><see cref="BinaryWriter"/> to write the data to.</param>
+        /// <param name="value">Value to write.</param>
+        public abstract void WriteValue(BinaryWriter output, object value);
 
         /// <summary>
-        /// Reads an encoded value. The input contains only the value data, no header or prefix is available. The
-        /// reader must read the full number of bytes available. Reading too few or too many may result in subsequent
-        /// reads to fail or the message to be corrupted.
+        /// Reads a values from an input <see cref="BinaryReader"/>.
         /// </summary>
-        /// <param name="input">the source to read from</param>
-        /// <param name="dataSize">the number of bytes available for the value</param>
-        /// <param name="typeDictionary"></param>
-        /// <returns>the decoded value</returns>
-        public abstract object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary);
-
-        // TODO 2009-12-14 Andrew -- instead of the TypeDictionary, we should pass the current FudgeContext
-        // TODO 2009-12-14 Andrew -- passing in the current taxonomy could be jolly useful too when reading a submessage, or are we happy doing the "fixup" afterwards
-        // TODO 2009-12-14 Andrew -- how about a default implementation of these that calls a simpler abstract form for the typical cases which don't require context or taxonomy data?
+        /// <param name="input"><see cref="BinaryReader"/> to read the data from.</param>
+        /// <param name="dataSize">Number of bytes for the data representation.</param>
+        /// <returns>Decoded object.</returns>
+        public abstract object ReadValue(BinaryReader input, int dataSize);
     }
 
     /// <summary>
@@ -240,16 +228,30 @@ namespace Fudge
     [Serializable]
     public class FudgeFieldType<TValue> : FudgeFieldType
     {
-        // TODO 2009-08-30 t0rx -- Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
-        // TODO 2009-12-14 Andrew -- there must be a less cumbersome approach than this that doesn't force us to end up with ReadTypedValue
+        // REVIEW 2009-08-30 t0rx -- Is this the best way of handling this - Fudge-Java can use <?> but there's no equivalent in C#...
+        // REVIEW 2009-12-14 Andrew -- there must be a less cumbersome approach than this that doesn't force us to end up with ReadTypedValue
 
         private readonly FudgeValueMinimizer<TValue> minimizer;
 
+        /// <summary>
+        /// Cosntructs a new <c>FudgeFieldType</c>.
+        /// </summary>
+        /// <param name="typeId">ID of the type, as defined at http://wiki.fudgemsg.org/display/FDG/Types</param>
+        /// <param name="isVariableSize">If true then the size of the binary representation depends upon the value (e.g. a string).</param>
+        /// <param name="fixedSize">If not variable sized, then the number of bytes to encode values of this type.</param>
         public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize)
             : this(typeId, isVariableSize, fixedSize, null)
         {
         }
 
+        /// <summary>
+        /// Cosntructs a new <c>FudgeFieldType</c> but with a minimizer function.
+        /// </summary>
+        /// <param name="typeId">ID of the type, as defined at http://wiki.fudgemsg.org/display/FDG/Types</param>
+        /// <param name="isVariableSize">If true then the size of the binary representation depends upon the value (e.g. a string).</param>
+        /// <param name="fixedSize">If not variable sized, then the number of bytes to encode values of this type.</param>
+        /// <param name="minimizer">Function used to reduce values of this type to their canonical form.</param>
+        /// <remarks>Minimization functions are used for example to reduce integers down to their smallest form.</remarks>
         public FudgeFieldType(int typeId, bool isVariableSize, int fixedSize, FudgeValueMinimizer<TValue> minimizer)
             : base(typeId, typeof(TValue), isVariableSize, fixedSize)
         {
@@ -266,8 +268,13 @@ namespace Fudge
             return FixedSize;
         }
 
-        /// <inheritdoc />
-        public virtual void WriteValue(BinaryWriter output, TValue value, IFudgeTaxonomy taxonomy) //throws IOException
+        /// <summary>
+        /// Override this method to write a typed value to an output <see cref="BinaryWriter"/>.
+        /// </summary>
+        /// <param name="output"><see cref="BinaryWriter"/> to use to output data.</param>
+        /// <param name="value">Value to write.</param>
+        /// <remarks>This method provides a typed value compared to <see cref="FudgeFieldType.WriteValue"/>.</remarks>
+        public virtual void WriteValue(BinaryWriter output, TValue value) //throws IOException
         {
             if (IsVariableSize)
             {
@@ -275,10 +282,16 @@ namespace Fudge
             }
         }
 
-        /// <inheritdoc cref="FudgeFieldType.ReadValue(System.IO.BinaryReader,System.Int32,Fudge.FudgeTypeDictionary)" />
-        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
+        /// <summary>
+        /// Override this method to read a typed value from an input <see cref="BinaryReader"/>.
+        /// </summary>
+        /// <param name="input"><see cref="BinaryReader"/> to read data from.</param>
+        /// <param name="dataSize">The number of bytes to read from the <see cref="BinaryReader"/>.</param>
+        /// <returns>Decoded object.</returns>
+        /// <remarks>This method is a typed version of <see cref="FudgeFieldType.ReadValue"/>.</remarks>
+        public virtual TValue ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            // TODO 2009-08-30 t0rx -- In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
+            // In Fudge-Java this is just readValue, but it creates problems here because the parameters are the same as the base's ReadValue
             if (IsVariableSize)
             {
                 throw new NotSupportedException("This method must be overridden for variable size types.");
@@ -310,15 +323,15 @@ namespace Fudge
         }
 
         /// <inheritdoc />
-        public sealed override void WriteValue(BinaryWriter output, object value, IFudgeTaxonomy taxonomy)
+        public sealed override void WriteValue(BinaryWriter output, object value)
         {
-            WriteValue(output, (TValue)value, taxonomy);
+            WriteValue(output, (TValue)value);
         }
 
         /// <inheritdoc />
-        public sealed override object ReadValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        public sealed override object ReadValue(BinaryReader input, int dataSize)
         {
-            return ReadTypedValue(input, dataSize, typeDictionary);
+            return ReadTypedValue(input, dataSize);
         }
         #endregion
     }

@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,9 @@ namespace Fudge.Types
     /// </summary>
     public class FudgeMsgFieldType : FudgeFieldType<FudgeMsg>
     {
+        /// <summary>
+        /// A type definition for values that are sub-messages.
+        /// </summary>
         public static readonly FudgeMsgFieldType Instance = new FudgeMsgFieldType();
 
         FudgeMsgFieldType()
@@ -42,21 +45,16 @@ namespace Fudge.Types
             return value.GetSize(taxonomy);
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
-        public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
+        /// <inheritdoc/>
+        public override FudgeMsg ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
-            FudgeMsg msg = new FudgeMsg();
-            // REVIEW kirk 2009-09-01 -- This is right. We have to use the same taxonomy,
-            // so the parent taxonomy resolver will be fixed up later on.
-            int nRead = FudgeStreamDecoder.ReadMsgFields(input, dataSize, typeDictionary, null, msg);
-            Debug.Assert(dataSize == nRead, "Sub-message reading failed in size; envelope unpacking will throw exception in prod.");
-            return msg;
+            throw new NotSupportedException("Sub-messages can only be decoded from FudgeStreamParser.");
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
-        public override void WriteValue(BinaryWriter output, FudgeMsg value, IFudgeTaxonomy taxonomy) //throws IOException
+        /// <inheritdoc/>
+        public override void WriteValue(BinaryWriter output, FudgeMsg value) //throws IOException
         {
-            FudgeStreamEncoder.WriteMsgFields(output, value, taxonomy);
+            throw new NotSupportedException("Sub-messages can only be written using FudgeStreamWriter.");
         }
     }
 }

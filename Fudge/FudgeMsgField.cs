@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Fudge.Taxon;
+using Fudge.Types;
 
 namespace Fudge
 {
@@ -98,7 +99,7 @@ namespace Fudge
 
         #region ICloneable Members
 
-        /// <inheritdoc cref="System.Object.Clone()" />
+        /// <inheritdoc cref="ICloneable.Clone" />
         public virtual object Clone()
         {
             return MemberwiseClone();
@@ -167,7 +168,7 @@ namespace Fudge
                 // One for the size prefix
                 size++;
                 // Then for the UTF Encoding
-                size += ModifiedUTF8Util.ModifiedUTF8Length(name);
+                size += StringFieldType.Encoding.GetByteCount(name);
             }
             if (type.IsVariableSize)
             {

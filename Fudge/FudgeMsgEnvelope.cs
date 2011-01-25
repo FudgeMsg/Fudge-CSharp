@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,9 @@ namespace Fudge
         private readonly FudgeMsg message;
         private readonly int version;
 
+        /// <summary>
+        /// Constructs a new envelope containing an emtpy message.
+        /// </summary>
         public FudgeMsgEnvelope()
             : this(new FudgeMsg())
         {

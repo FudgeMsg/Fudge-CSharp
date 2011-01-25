@@ -1,5 +1,5 @@
-﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+/* <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ using System.Diagnostics;
 using System.IO;
 using Fudge.Types;
 using System.Collections;
+using Fudge.Encodings;
+using Fudge.Util;
 
 namespace Fudge
 {
@@ -41,25 +43,21 @@ namespace Fudge
     /// </remarks>
     public class FudgeMsg : FudgeEncodingObject, IMutableFudgeFieldContainer
     {
-        private readonly FudgeTypeDictionary typeDictionary;
+        private readonly FudgeContext context;
         private readonly List<FudgeMsgField> fields = new List<FudgeMsgField>();
 
-        public FudgeMsg() : this(FudgeTypeDictionary.Instance)
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a given <see cref="FudgeContext"/>.
+        /// </summary>
+        /// <param name="context">Context to use for the message.</param>
+        public FudgeMsg(FudgeContext context)
         {
-        }
-
-        // TODO 2009-12-14 Andrew -- lose the constructor above; static type dictionary is not good
-
-        public FudgeMsg(FudgeTypeDictionary typeDictionary)
-        {
-            if (typeDictionary == null)
+            if (context == null)
             {
-                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided");
+                throw new ArgumentNullException("context", "Context must be provided");
             }
-            this.typeDictionary = typeDictionary;
+            this.context = context;
         }
-
-        // TODO 2009-12-14 Andrew -- construct with the context instead of the type dictionary
 
         /// <summary>
         /// Creates a new <c>FudgeMsg</c> object as a copy of another.
@@ -71,11 +69,25 @@ namespace Fudge
             {
                 throw new ArgumentNullException("Cannot initialize from a null other FudgeMsg");
             }
+            this.context = other.context;
             InitializeFromByteArray(other.ToByteArray());
-            this.typeDictionary = other.typeDictionary;
         }
 
-        public FudgeMsg(params IFudgeField[] fields) : this(FudgeTypeDictionary.Instance)
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a default context, and populates with a set of fields.
+        /// </summary>
+        /// <param name="fields">Fields to populate the message.</param>
+        public FudgeMsg(params IFudgeField[] fields) : this(new FudgeContext(), fields)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="FudgeMsg"/> using a given context, and populates with a set of fields.
+        /// </summary>
+        /// <param name="context"><see cref="FudgeContext"/> to use for the message.</param>
+        /// <param name="fields">Fields to populate the message.</param>
+        public FudgeMsg(FudgeContext context, params IFudgeField[] fields)
+            : this(context)
         {
             foreach (var field in fields)
             {
@@ -83,46 +95,23 @@ namespace Fudge
             }
         }
 
-        // TODO 2009-12-14 Andrew -- lose the constructor above
-
-        public FudgeMsg(byte[] byteArray, FudgeTypeDictionary typeDictionary, IFudgeTaxonomy taxonomy)
-        {
-            if (typeDictionary == null)
-            {
-                throw new ArgumentNullException("typeDictionary", "Type dictionary must be provided");
-            }
-            this.typeDictionary = typeDictionary;
-            InitializeFromByteArray(byteArray);
-        }
-
-        // TODO 2009-12-14 Andrew -- pass in the context instead of the dictionary. doesn't need a taxonomy reference here (the context will provider a resolver)
-
         /// <summary>
         /// Populates the message fields from the encoded data. If the array is larger than the Fudge envelope, any additional data is ignored.
         /// </summary>
         /// <param name="byteArray">the encoded data to populate this message with</param>
         protected void InitializeFromByteArray(byte[] byteArray)
         {
-            MemoryStream stream = new MemoryStream(byteArray);
-            BinaryReader bw = new BinaryReader(stream);
-            FudgeMsgEnvelope other;
-            try
-            {
-                other = FudgeStreamDecoder.ReadMsg(bw);
-            }
-            catch (IOException e)
-            {
-                throw new FudgeRuntimeException("IOException thrown using BinaryReader", e);      // TODO 2009-08-31 t0rx -- This is just RuntimeException in Fudge-Java
-            }
+            FudgeMsgEnvelope other = context.Deserialize(byteArray);
             fields.AddRange(other.Message.fields);
         }
 
-        public FudgeTypeDictionary TypeDictionary
+        /// <summary>
+        /// Gets the <see cref="FudgeContext"/> for this message.
+        /// </summary>
+        public FudgeContext Context
         {
-            get { return typeDictionary; }
+            get { return context; }
         }
-
-        // TODO 2009-12-14 Andrew -- replace the TypeDictionary with a FudgeContext reference
 
         #region IMutableFudgeFieldContainer implementation
 
@@ -139,40 +128,46 @@ namespace Fudge
         /// <inheritdoc />
         public void Add(string name, object value)
         {
-            Add(name, null, value);
+            Add(name, null, null, value);
         }
 
         /// <inheritdoc />
         public void Add(int? ordinal, object value)
         {
-            Add(null, ordinal, value);
+            Add(null, ordinal, null, value);
         }
 
         /// <inheritdoc />
         public void Add(string name, int? ordinal, object value)
         {
-            FudgeFieldType type = DetermineTypeFromValue(value, typeDictionary);
-            if (type == null)
-            {
-                throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
-            }
-            Add(name, ordinal, type, value);
+            Add(name, ordinal, null, value);
         }
 
         /// <inheritdoc />
-        public void Add(string name, int? ordinal, FudgeFieldType type, object value)
+        public virtual void Add(string name, int? ordinal, FudgeFieldType type, object value)
         {
             if (fields.Count >= short.MaxValue)
             {
                 throw new InvalidOperationException("Can only add " + short.MaxValue + " to a single message.");
             }
-            if (type == null)
-            {
-                throw new ArgumentNullException("Cannot add a field without a type specified.");
-            }
             if (ordinal.HasValue && (ordinal < short.MinValue || ordinal > short.MaxValue))
             {
                 throw new ArgumentOutOfRangeException("ordinal", "Ordinal must be within signed 16-bit range");
+            }
+            if (type == null)
+            {
+                // See if we can derive it
+                type = context.TypeHandler.DetermineTypeFromValue(value);
+                if (type == null)
+                {
+                    throw new ArgumentException("Cannot determine a Fudge type for value " + value + " of type " + value.GetType());
+                }
+            }
+
+            if (type == FudgeMsgFieldType.Instance && !(value is FudgeMsg))
+            {
+                // Copy the fields across to a new message
+                value = CopyContainer((IFudgeFieldContainer)value);
             }
 
             // Adjust values to the lowest possible representation.
@@ -182,28 +177,33 @@ namespace Fudge
             fields.Add(field);
         }
 
+        #endregion
+
         /// <summary>
-        /// Determines the <c>FudgeFieldType</c> of a C# value.
+        /// Adds all the values in the enumerable to this message as fields of a given name.
         /// </summary>
-        /// <param name="value">value whose type is to be determined</param>
-        /// <param name="typeDictionary">the <c>FudgeTypeDictionary</c> to use</param>
-        /// <returns>the appropriate <c>FudgeFieldType</c> instance</returns>
-        protected internal static FudgeFieldType DetermineTypeFromValue(object value, FudgeTypeDictionary typeDictionary)
+        /// <param name="name">Name of the field.</param>
+        /// <param name="values">Enumerable of values to add.</param>
+        public void AddAll<T>(string name, IEnumerable<T> values)
         {
-            if (value == null)
+            foreach (T val in values)
             {
-                throw new ArgumentNullException("Cannot determine type for null value.");
+                Add(name, val);
             }
-            FudgeFieldType type = typeDictionary.GetByCSharpType(value.GetType());
-            if ((type == null) && (value is UnknownFudgeFieldValue))
-            {
-                UnknownFudgeFieldValue unknownValue = (UnknownFudgeFieldValue)value;
-                type = unknownValue.Type;
-            }
-            return type;
         }
 
-        #endregion
+        /// <summary>
+        /// Adds all the values in the enumerable to this message as fields with a given ordinal.
+        /// </summary>
+        /// <param name="ordinal">Ordinal of the field.</param>
+        /// <param name="values">Enumerable of values to add.</param>
+        public void AddAll<T>(int ordinal, IEnumerable<T> values)
+        {
+            foreach (T val in values)
+            {
+                Add(ordinal, val);
+            }
+        }
 
         #region IFudgeFieldContainer implementation
 
@@ -311,7 +311,7 @@ namespace Fudge
         }
 
         /// <inheritdoc />
-        public object GetValue(string name)
+        public virtual object GetValue(string name)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -321,6 +321,42 @@ namespace Fudge
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Returns the values of all fields with a given name as a specific type.
+        /// </summary>
+        /// <typeparam name="T">Type to return values as.</typeparam>
+        /// <param name="name">Name of fields to get.</param>
+        /// <returns>List of values of the given type.</returns>
+        public IList<T> GetAllValues<T>(string name)
+        {
+            var fields = GetAllByName(name);
+            int nFields = fields.Count;
+            T[] result = new T[nFields];
+            for (int i = 0; i < nFields; i++)
+            {
+                result[i] = (T)context.TypeHandler.ConvertType(fields[i].Value, typeof(T));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the values of all fields with a given ordinal as a specific type.
+        /// </summary>
+        /// <typeparam name="T">Type to return values as.</typeparam>
+        /// <param name="ordinal">Ordinal of fields to get.</param>
+        /// <returns>List of values of the given type.</returns>
+        public IList<T> GetAllValues<T>(int ordinal)
+        {
+            var fields = GetAllByOrdinal(ordinal);
+            int nFields = fields.Count;
+            T[] result = new T[nFields];
+            for (int i = 0; i < nFields; i++)
+            {
+                result[i] = (T)context.TypeHandler.ConvertType(fields[i].Value, typeof(T));
+            }
+            return result;
         }
 
         /// <inheritdoc cref="IFudgeFieldContainer.GetValue{T}(System.String)" />
@@ -333,11 +369,11 @@ namespace Fudge
         public object GetValue(string name, Type type)
         {
             object value = GetValue(name);
-            return ConvertType(value, type);
+            return context.TypeHandler.ConvertType(value, type);
         }
 
         /// <inheritdoc />
-        public object GetValue(int ordinal)
+        public virtual object GetValue(int ordinal)
         {
             foreach (FudgeMsgField field in fields)
             {
@@ -359,24 +395,41 @@ namespace Fudge
         public object GetValue(int ordinal, Type type)
         {
             object value = GetValue(ordinal);
-            return ConvertType(value, type);
+            return context.TypeHandler.ConvertType(value, type);
         }
 
         /// <inheritdoc />
-        public object GetValue(string name, int? ordinal)
+        public virtual object GetValue(string name, int? ordinal)
         {
-            foreach (FudgeMsgField field in fields)
+            int index = GetIndex(name, ordinal);
+            return index == -1 ? null : fields[index].Value;
+        }
+
+        /// <summary>
+        /// Finds ths index of the first field with matching name or ordinal.
+        /// </summary>
+        /// <param name="name">Name of field, or <c>null</c> to match on ordinal.</param>
+        /// <param name="ordinal">Ordinal of field, or <c>null</c> to match on name.</param>
+        /// <returns>Index of first matching field, or <c>-1</c> if not found.</returns>
+        /// <remarks>If the ordinal matches, the name is not compared.</remarks>
+        protected int GetIndex(string name, int? ordinal)
+        {
+            int nFields = fields.Count;
+            for (int i = 0; i < nFields; i++)
             {
+                var field = fields[i];
                 if ((ordinal != null) && (ordinal == field.Ordinal))
                 {
-                    return field.Value;
+                    return i;
                 }
                 if ((name != null) && (name == field.Name))
                 {
-                    return field.Value;
+                    return i;
                 }
             }
-            return null;
+
+            // Not found
+            return -1;
         }
 
         /// <inheritdoc cref="IFudgeFieldContainer.GetValue{T}(System.String,System.Int32?)"/>
@@ -389,7 +442,7 @@ namespace Fudge
         public object GetValue(string name, int? ordinal, Type type)
         {
             object value = GetValue(name, ordinal);
-            return ConvertType(value, type);
+            return context.TypeHandler.ConvertType(value, type);
         }
 
         // Primitive Queries:
@@ -624,29 +677,23 @@ namespace Fudge
 
         #endregion
 
+        private FudgeMsg CopyContainer(IFudgeFieldContainer container)
+        {
+            var msg = context.NewMessage();
+            msg.AddAll(container);
+            return msg;
+        }
+
         /// <summary>
         /// Returns the Fudge encoded form of this <c>FudgeMsg</c> as a <c>byte</c> array without a taxonomy reference.
         /// </summary>
         /// <returns>an array containing the encoded message</returns>
         public byte[] ToByteArray()
         {
-            MemoryStream stream = new MemoryStream(ComputeSize(null));
-            BinaryWriter bw = new BinaryWriter(stream);
-            try
-            {
-                FudgeStreamEncoder.WriteMsg(bw, this);
-                bw.Flush();
-            }
-            catch (IOException e)
-            {
-                throw new FudgeRuntimeException("Had an IOException writing to a MemoryStream.", e);        // TODO t0rx 2009-08-30 -- In Fudge-Java this is just a RuntimeException
-            }
-
-            return stream.ToArray();
+            return context.ToByteArray(this);
         }
 
         // TODO 2009-12-14 Andrew -- should we have a ToByteArray that accepts a taxonomy ?
-        // TODO 2009-12-14 Andrew -- should we just implement as context.toByteArray(this) ?
 
         /// <inheritdoc />
         public override int ComputeSize(IFudgeTaxonomy taxonomy)
@@ -733,29 +780,6 @@ namespace Fudge
             }
         }
 
-        /// <summary>
-        /// Converts the supplied value to a base type using the corresponding FudgeFieldType definition. The supplied .NET type
-        /// is resolved to a registered FudgeFieldType. The <c>ConvertValueFrom</c> method on the registered type is then used
-        /// to convert the value.
-        /// </summary>
-        /// <param name="value">value to convert</param>
-        /// <param name="type">.NET target type</param>
-        /// <returns>the converted value</returns>
-        private object ConvertType(object value, Type type)
-        {
-            if (value == null) return null;
-
-            if (!type.IsAssignableFrom(value.GetType()))
-            {
-                FudgeFieldType fieldType = TypeDictionary.GetByCSharpType(type);
-                if (fieldType == null)
-                    throw new InvalidCastException("No registered field type for " + type.Name);
-
-                value = fieldType.ConvertValueFrom(value);
-            }
-            return value;
-        }
-
         #region IEnumerable<IFudgeField> Members
 
         /// <inheritdoc />
@@ -774,6 +798,7 @@ namespace Fudge
             var copy = new List<FudgeMsgField>(fields);
             return copy.GetEnumerator();
         }
+
 
         #endregion
 

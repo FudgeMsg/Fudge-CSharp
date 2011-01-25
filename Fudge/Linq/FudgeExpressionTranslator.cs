@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,7 +102,6 @@ namespace Fudge.Linq
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             // Translate calls to Queryable.xxx<IQueryable<dataType>(...) to Enumerable.xxx<IEnumerable<IFudgeFieldContainer>>(...)
-            // TODO t0rx 2009-10-11 -- Need to refactor this to make less copy-paste and more efficient
             Expression obj = Visit(m.Object);
             var args = VisitExpressionList(m.Arguments);
 

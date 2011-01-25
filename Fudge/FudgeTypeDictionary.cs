@@ -1,5 +1,5 @@
-﻿/* <!--
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+/* <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ using System.Text;
 using Fudge.Types;
 using System.Diagnostics;
 using System.Threading;
+using System.Net;
 
 namespace Fudge
 {
@@ -30,10 +31,6 @@ namespace Fudge
     /// </summary>
     public sealed class FudgeTypeDictionary
     {
-        internal static readonly FudgeTypeDictionary Instance = new FudgeTypeDictionary();
-
-        // TODO 2009-12-14 Andrew -- we shouldn't have a static instance of a dictionary. Everything should track through a context
-
         private volatile FudgeFieldType[] typesById = new FudgeFieldType[0];
         private volatile UnknownFudgeFieldType[] unknownTypesById = new UnknownFudgeFieldType[0];
         private readonly Dictionary<Type, FudgeFieldType> typesByCSharpType = new Dictionary<Type, FudgeFieldType>();
@@ -70,6 +67,19 @@ namespace Fudge
             AddType(ByteArrayFieldType.VariableSizedInstance);
             AddType(StringFieldType.Instance);
             AddType(FudgeMsgFieldType.Instance);
+            AddType(DateFieldType.Instance);
+            AddType(TimeFieldType.Instance);
+            AddType(DateTimeFieldType.Instance);
+            AddStandardSecondaryTypes();
+        }
+
+        private void AddStandardSecondaryTypes()
+        {
+            AddType(new SecondaryFieldType<DateTime, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTime(), dt => new FudgeDateTime(dt)));
+            AddType(new SecondaryFieldType<DateTimeOffset, FudgeDateTime>(DateTimeFieldType.Instance, fdt => fdt.ToDateTimeOffset(), dto => new FudgeDateTime(dto)));
+            AddType(new SecondaryFieldType<Guid, byte[]>(ByteArrayFieldType.Length16Instance, raw => new Guid(raw), value => value.ToByteArray()));
+            AddType(new SecondaryFieldType<IPAddress, byte[]>(ByteArrayFieldType.VariableSizedInstance, raw => new IPAddress(raw), value => value.GetAddressBytes()));
+            AddType(new SecondaryFieldType<Uri, string>(StringFieldType.Instance, raw => new Uri(raw), value => value.OriginalString));
         }
 
         /// <summary>
@@ -89,7 +99,7 @@ namespace Fudge
             rwLock.AcquireWriterLock(Timeout.Infinite);
             try
             {                
-                if (!(type is ISecondaryFieldType))       // TODO 2009-09-12 t0rx -- Don't like this as a way of testing
+                if (!(type is ISecondaryFieldType))
                 {
                     int newLength = Math.Max(type.TypeId + 1, typesById.Length);
                     var newArray = new FudgeFieldType[newLength];
@@ -232,5 +242,11 @@ namespace Fudge
         public const byte BYTE_ARR_256_TYPE_ID = 24;
         /// <summary>Predefined constant for a 512-byte array - refer to the Fudge encoding specification.</summary>
         public const byte BYTE_ARR_512_TYPE_ID = 25;
+        /// <summary>Predefined constant for a pure date - refer to the Fudge encoding specification.</summary>
+        public const byte DATE_TYPE_ID = 26;
+        /// <summary>Predefined constant for a pure time - refer to the Fudge encoding specification.</summary>
+        public const byte TIME_TYPE_ID = 27;
+        /// <summary>Predefined constant for date and time- refer to the Fudge encoding specification.</summary>
+        public const byte DATETIME_TYPE_ID = 28;
     }
 }

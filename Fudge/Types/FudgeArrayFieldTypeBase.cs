@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +55,8 @@ namespace Fudge.Types
             return value.Length * elementSize;
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
-        public override T[] ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary) //throws IOException
+        /// <inheritdoc />
+        public override T[] ReadTypedValue(BinaryReader input, int dataSize) //throws IOException
         {
             int nElements = dataSize / elementSize;
             T[] result = new T[nElements];
@@ -67,8 +67,8 @@ namespace Fudge.Types
             return result;
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
-        public override void WriteValue(BinaryWriter output, T[] value, IFudgeTaxonomy taxonomy)  //throws IOException
+        /// <inheritdoc />
+        public override void WriteValue(BinaryWriter output, T[] value)  //throws IOException
         {
             foreach (T element in value)
             {

@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,17 +23,20 @@ using System.IO;
 namespace Fudge.Types
 {
     /// <summary>
-    /// The type definition for a Modified UTF-8 encoded string.
+    /// The type definition for a UTF-8 encoded string.
     /// </summary>
     public class StringFieldType : FudgeFieldType<string>
     {
-        // Note that we ignore the encoder in the BinaryReader or BinaryWriter and just go for Modified UTF-8 anyway.
+        // Note that we ignore the encoder in the BinaryReader or BinaryWriter and just go for UTF-8 anyway.
         // This is because we don't have the writer when we are in GetVariableSize.
 
         /// <summary>
         /// A type defintion for string data.
         /// </summary>
         public static readonly StringFieldType Instance = new StringFieldType();
+
+        internal static readonly Encoding Encoding = Encoding.UTF8;                 // Keep here so we know we're consistent everywhere
+        private const int maxStringSize = 65535;
 
         /// <summary>
         /// Creates a type definition for string data.
@@ -46,19 +49,34 @@ namespace Fudge.Types
         /// <inheritdoc cref="Fudge.FudgeFieldType.GetVariableSize(System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
         public override int GetVariableSize(string value, IFudgeTaxonomy taxonomy)
         {
-            return ModifiedUTF8Util.ModifiedUTF8Length(value);
+            return Encoding.GetByteCount(value);
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
-        public override string ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        /// <inheritdoc/>
+        public override string ReadTypedValue(BinaryReader input, int dataSize)
         {
-            return ModifiedUTF8Util.ReadString(input, dataSize);
+            return ReadString(input, dataSize);
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
-        public override void WriteValue(BinaryWriter output, string value, IFudgeTaxonomy taxonomy)
+        /// <inheritdoc/>
+        public override void WriteValue(BinaryWriter output, string value)
         {
-            ModifiedUTF8Util.WriteModifiedUTF8(value, output);
+            WriteString(output, value);
+        }
+
+        internal static string ReadString(BinaryReader input, int dataSize)
+        {
+            var bytes = input.ReadBytes(dataSize);
+            return Encoding.GetString(bytes);
+        }
+
+        internal static int WriteString(BinaryWriter output, string value)
+        {
+            var bytes = Encoding.GetBytes(value);
+            if (bytes.Length > maxStringSize)      // Fudge has a maximum string size
+                throw new FudgeRuntimeException("Encoded string too long: " + bytes.Length + " bytes");
+            output.Write(bytes);
+            return bytes.Length;
         }
     }
 }

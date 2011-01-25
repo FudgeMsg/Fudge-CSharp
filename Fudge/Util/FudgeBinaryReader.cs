@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Fudge.Types;
 
 namespace Fudge.Util
 {
@@ -27,12 +28,16 @@ namespace Fudge.Util
     /// </summary>
     /// <remarks>
     /// The default <see cref="BinaryReader"/> uses little-endian integer encoding, and UTF8, whereas Fudge always
-    /// uses Network Byte Order (i.e. big-endian) and modified UTF-8
+    /// uses Network Byte Order (i.e. big-endian) and UTF-8 (note that before version 0.3 it was using modified UTF-8.
     /// </remarks>
     public class FudgeBinaryReader : BinaryNBOReader
     {
+        /// <summary>
+        /// Cosntructs a new <c>FudgeBinaryReader</c> on an input <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="input">Stream to read binary data from.</param>
         public FudgeBinaryReader(Stream input)
-            : base(input, new ModifiedUTF8Encoding())
+            : base(input, StringFieldType.Encoding)
         {
         }
     }

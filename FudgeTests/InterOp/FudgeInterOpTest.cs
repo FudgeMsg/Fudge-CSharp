@@ -31,10 +31,12 @@ namespace Fudge.Tests.Unit
     /// </summary>
     public class FudgeInterOpTest
     {
+        private static readonly FudgeContext fudgeContext = new FudgeContext();
+
         [Fact]
         public void AllNames()
         {
-            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllNames(fudgeContext);
             FudgeMsg outputMsg = CycleMessage(inputMsg, "allNames.dat");
 
             Assert.NotNull(outputMsg);
@@ -45,7 +47,7 @@ namespace Fudge.Tests.Unit
         [Fact]
         public void AllOrdinals()
         {
-            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllOrdinals();
+            FudgeMsg inputMsg = StandardFudgeMessages.CreateMessageAllOrdinals(fudgeContext);
             FudgeMsg outputMsg = CycleMessage(inputMsg, "allOrdinals.dat");
 
             Assert.NotNull(outputMsg);
@@ -59,7 +61,7 @@ namespace Fudge.Tests.Unit
             FudgeMsg inputMsg = new FudgeMsg(
                                     new Field("100", new byte[100]),
                                     new Field("1000", new byte[1000]),
-                                    new Field("10000", new byte[100000]));          // TODO t0rx 2009-10-08 -- Fix this field name in Fudge-Java and here so the interop still works
+                                    new Field("10000", new byte[100000]));          // This field name is wrong - see FRN-67
 
             FudgeMsg outputMsg = CycleMessage(inputMsg, "variableWidthColumnSizes.dat");
 
@@ -133,13 +135,12 @@ namespace Fudge.Tests.Unit
             Stream memoryStream = new MemoryStream();
             // set the last parameter of the following line to true to see the full diff report between streams and not fail at the first difference.
             BinaryWriter bw = new StreamComparingBinaryNBOWriter(referenceReader, memoryStream, false);
-            FudgeStreamEncoder.WriteMsg(bw, msg);
+            fudgeContext.Serialize(msg, bw);
             bw.Close();
 
             // Reload as closed above
             stream = assembly.GetManifestResourceStream("Fudge.Tests.Resources." + filename);
-            BinaryReader br = new FudgeBinaryReader(stream);                    // Load the message from the resource rather than our output
-            FudgeMsg outputMsg = FudgeStreamDecoder.ReadMsg(br).Message;
+            FudgeMsg outputMsg = fudgeContext.Deserialize(stream).Message;      // Load the message from the resource rather than our output
             return outputMsg;
         }
     }

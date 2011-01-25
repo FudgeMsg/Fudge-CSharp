@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{21CF7F0A-1BE0-4E54-9BDA-A31089802967}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -64,6 +64,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -88,18 +91,52 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Unit\Encodings\FudgeJSONStreamWriterTest.cs" />
+    <Compile Include="Unit\Serialization\DefaultTypeMappingStrategyTest.cs" />
+    <Compile Include="Unit\Serialization\FudgeSerializationContextTest.cs" />
+    <Compile Include="Unit\Serialization\FudgeSerializerTest.cs" />
+    <Compile Include="Unit\Serialization\JavaTypeMappingStrategyTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\CollectionSurrogateBaseTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\DataContractSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\DotNetSerializationSurrogateSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\DotNetSerializableSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\ImmutableSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\PropertyBasedSerializationSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\FudgeSurrogateSelectorTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\SerialiableAttributeSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\ToFromFudgeMsgSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\TypeDataCacheTest.cs" />
+    <Compile Include="Unit\Serialization\Reflection\TypeDataTest.cs" />
+    <Compile Include="Unit\Serialization\SerializableSurrogateTest.cs" />
+    <Compile Include="Unit\Serialization\SerializationExampleClasses.cs" />
+    <Compile Include="Unit\FudgeContextPropertyTest.cs" />
+    <Compile Include="Unit\Encodings\DebuggingWriter.cs" />
+    <Compile Include="Unit\Encodings\FudgeEncodedStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeJSONStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeMsgStreamTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamReaderTest.cs" />
+    <Compile Include="Unit\Encodings\FudgeXmlStreamWriterTest.cs" />
     <Compile Include="Unit\FudgeContextTest.cs" />
     <Compile Include="Unit\FudgeMsgCodecTest.cs" />
     <Compile Include="Unit\FudgeMsgFormatterTest.cs" />
     <Compile Include="Unit\FudgeMsgTest.cs" />
     <Compile Include="Unit\FudgeFieldPrefixCodecTest.cs" />
+    <Compile Include="Unit\FudgeStreamParserTest.cs" />
+    <Compile Include="Unit\FudgeStreamPipeTest.cs" />
     <Compile Include="Unit\FudgeUtils.cs" />
     <Compile Include="Unit\FudgeTypeDictionaryTest.cs" />
     <Compile Include="Unit\Linq\Examples.cs" />
     <Compile Include="Unit\Linq\ExpressionTreeStructureHasherTest.cs" />
+    <Compile Include="Unit\Serialization\SerializationTypeMapTest.cs" />
     <Compile Include="Unit\StandardFudgeMessages.cs" />
     <Compile Include="Unit\Types\ByteArrayFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\DateFieldTypeTest.cs" />
+    <Compile Include="Unit\Types\DateTimeFieldTypeTest.cs" />
     <Compile Include="Unit\Types\FudgeArrayFieldTypeBaseTest.cs" />
+    <Compile Include="Unit\Types\FudgeDateTest.cs" />
+    <Compile Include="Unit\Types\FudgeDateTimeTest.cs" />
+    <Compile Include="Unit\Types\FudgeTimeTest.cs" />
+    <Compile Include="Unit\Types\TimeFieldTypeTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fudge\Fudge.csproj">
@@ -111,7 +148,6 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -121,23 +157,6 @@
     <EmbeddedResource Include="Resources\subMsg.dat" />
     <EmbeddedResource Include="Resources\unknown.dat" />
     <EmbeddedResource Include="Resources\variableWidthColumnSizes.dat" />
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

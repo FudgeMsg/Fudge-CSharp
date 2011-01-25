@@ -1,5 +1,6 @@
 ﻿/**
- * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
+ * <!--
+ * Copyright (C) 2009 - 2010 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,13 +13,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * -->
  */
 using System;
+using System.Linq;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Fudge.Tests.Unit
 {
-    class FudgeUtils
+    /// <summary>
+    /// Utility methods to help testing
+    /// </summary>
+    public static class FudgeUtils
     {
         public static void AssertAllFieldsMatch(FudgeMsg expectedMsg, FudgeMsg actualMsg)
         {
@@ -59,6 +66,11 @@ namespace Fudge.Tests.Unit
                 }
             }
             Assert.False(actualIter.MoveNext());
+        }
+
+        public static string ToNiceString(this byte[] bytes)
+        {
+            return string.Join("-", bytes.Select(b => b.ToString("x2")).ToArray());
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿/* <!--
+/* <!--
  * Copyright (C) 2009 - 2009 by OpenGamma Inc. and other contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,16 +45,16 @@ namespace Fudge.Types
             return value.Contents.Length;
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType{TValue}.ReadTypedValue(BinaryReader,int,Fudge.FudgeTypeDictionary)" />
-        public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize, FudgeTypeDictionary typeDictionary)
+        /// <inheritdoc/>
+        public override UnknownFudgeFieldValue ReadTypedValue(BinaryReader input, int dataSize)
         {
             byte[] contents = new byte[dataSize];
             input.Read(contents, 0, dataSize);
             return new UnknownFudgeFieldValue(contents, this);
         }
 
-        /// <inheritdoc cref="Fudge.FudgeFieldType.WriteValue(System.IO.BinaryWriter,System.Object,Fudge.Taxon.IFudgeTaxonomy)" />
-        public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value, IFudgeTaxonomy taxonomy)
+        /// <inheritdoc/>
+        public override void WriteValue(BinaryWriter output, UnknownFudgeFieldValue value)
         {
             output.Write(value.Contents);
         }
