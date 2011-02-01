@@ -45,7 +45,7 @@ namespace Fudge.Serialization
     /// <code>
     /// var context = new FudgeContext();
     /// var mapper = new JavaTypeMappingStrategy("Fudge.Tests.Unit", "org.fudgemsg");
-    /// context.SetProperty(FudgeSerializer.TypeMappingStrategyProperty, mapper);
+    /// context.SetProperty(ContextProperties.TypeMappingStrategyProperty, mapper);
     /// </code>
     /// </example>
     public class JavaTypeMappingStrategy : DefaultTypeMappingStrategy
