@@ -126,18 +126,49 @@ namespace Fudge.Serialization
 
             // Delegate to FudgeDeserializer to do the work
             var deserializer = new FudgeDeserializationContext(context, typeMap, reader, TypeMappingStrategy);
-            return deserializer.DeserializeGraph();
+            return deserializer.DeserializeGraph(null);
         }
 
         /// <summary>
-        /// Convenience method to deserialize an object graph from a list of messages.
+        /// Deserializes an object graph from a message stream.
+        /// </summary>
+        /// <param name="reader">Reader to get messages from the underlying stream.</param>
+        /// <typeparam name="T">The type to use if not specified in the metadata.</typeparam>
+        /// <returns>Deserialized object graph.</returns>
+        public T Deserialize<T>(IFudgeStreamReader reader)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
+            // Delegate to FudgeDeserializer to do the work
+            var deserializer = new FudgeDeserializationContext(context, typeMap, reader, TypeMappingStrategy);
+            return deserializer.DeserializeGraph<T>();
+        }
+
+
+        /// <summary>
+        /// Convenience method to deserialize an object graph from a message.
         /// </summary>
         /// <param name="msg">Message containing serialized state.</param>
         /// <returns>Deserialized object graph.</returns>
         public object Deserialize(FudgeMsg msg)
         {
-            var reader = new FudgeMsgStreamReader(context, new FudgeMsg[] {msg});
+            var reader = new FudgeMsgStreamReader(context, new FudgeMsg[] { msg });
             return Deserialize(reader);
+        }
+
+        /// <summary>
+        /// Convenience method to deserialize an object graph from a message.
+        /// </summary>
+        /// <param name="msg">Message containing serialized state.</param>
+        /// <typeparam name="T">The type to use if not specified in the metadata.</typeparam>
+        /// <returns>Deserialized object graph.</returns>
+        public T Deserialize<T>(FudgeMsg msg)
+        {
+            var reader = new FudgeMsgStreamReader(context, new FudgeMsg[] { msg });
+            return Deserialize<T>(reader);
         }
     }
 }

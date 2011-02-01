@@ -58,13 +58,22 @@ namespace Fudge.Serialization
 
         public object DeserializeGraph()
         {
+            return DeserializeGraph(null);
+        }
+
+        public T DeserializeGraph<T>()
+        {
+            return (T) DeserializeGraph(typeof (T));
+        }
+        public object DeserializeGraph(Type typeHint)
+        {
             // We simply return the first object
             pipe.ProcessOne();
             var msg = msgWriter.DequeueMessage();
 
             WalkMessage(msg);
 
-            object result = GetFromRef(0, null);
+            object result = GetFromRef(0, typeHint);
 
             return result;
         }
