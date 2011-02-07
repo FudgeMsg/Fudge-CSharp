@@ -220,4 +220,12 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+
+  <Target Name="PublishAllLocal" DependsOnTargets="Build">
+        <MakeDir Directories="$(BambooPublishDir)" />
+        <ItemGroup>
+          <MySourceFiles  Include="bin\**"/>
+        </ItemGroup>
+        <Copy SourceFiles ="@(MySourceFiles)" DestinationFolder="$(BambooPublishDir)" />
+  </Target>
 </Project>
