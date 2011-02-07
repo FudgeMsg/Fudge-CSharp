@@ -166,4 +166,12 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+
+  <UsingTask AssemblyFile="..\thirdparty\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+
+  <Target Name="Test" DependsOnTargets="Build">
+    <MakeDir Directories="..\test-reports" />
+    <xunit Assembly="bin\Debug\FudgeTests.dll" Xml="..\test-reports\my.xml" /> <!-- TODO product nunit xml-->
+  </Target>
+  
 </Project>
