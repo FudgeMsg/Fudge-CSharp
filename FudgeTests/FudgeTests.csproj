@@ -168,10 +168,13 @@
   -->
 
   <UsingTask AssemblyFile="..\thirdparty\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
-
-  <Target Name="Test" DependsOnTargets="Build">
-    <MakeDir Directories="..\test-reports" />
-    <xunit Assembly="bin\Debug\FudgeTests.dll" Xml="..\test-reports\my.xml" /> <!-- TODO product nunit xml-->
-  </Target>
   
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+  
+  <Target Name="Test" DependsOnTargets="Build">
+    <MakeDir Directories="test-reports" />
+    <xunit Assembly="bin\Debug\FudgeTests.dll" Xml="test-reports\FudgeTests.xunit.xml" />
+    <MSBuild.Community.Tasks.Xslt   Inputs="test-reports\FudgeTests.xunit.xml"  Xsl="..\thirdparty\NUnitXml.xslt"  RootTag=""  RootAttributes=""  Output="test-reports\FudgeTests.NUnit.xml"/>
+  </Target>
+
 </Project>
