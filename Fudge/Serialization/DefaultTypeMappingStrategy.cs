@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
+using System.Threading;
 
 namespace Fudge.Serialization
 {
@@ -28,7 +29,8 @@ namespace Fudge.Serialization
     /// </summary>
     public class DefaultTypeMappingStrategy : IFudgeTypeMappingStrategy
     {
-        private readonly Dictionary<string, Type> typeMap = new Dictionary<string, Type>();
+        private readonly ReaderWriterLockSlim typeMapCacheLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private readonly Dictionary<string, Type> typeMapCache = new Dictionary<string, Type>();
         
         #region IFudgeTypeMappingStrategy Members
 
@@ -56,16 +58,43 @@ namespace Fudge.Serialization
         {
             string key = ignoreCase ? name.ToLower() : name;
 
-            Type result;
-            if (!typeMap.TryGetValue(key, out result))
+            return GetOrAddNonNullToDictionary(typeMapCache, typeMapCacheLock, key, k => FindType(k, ignoreCase));
+        }
+
+        /// <remarks>
+        /// TODO replace with ConcurrentDictionary when we move to .NET 4
+        /// NOTE the special null behaviour
+        /// </remarks>
+        private static TValue GetOrAddNonNullToDictionary<TKey,TValue>(Dictionary<TKey,TValue> dict, ReaderWriterLockSlim dictLock, TKey key, Func<TKey,TValue> valueFactory) where TValue : class
+        {
+            dictLock.EnterUpgradeableReadLock();
+            try
             {
-                result = FindType(name, ignoreCase);
-                if (result != null)
+                TValue result;
+                if (!dict.TryGetValue(key, out result))
                 {
-                    typeMap[key] = result;
+                    dictLock.EnterWriteLock();
+                    try
+                    {
+                        result = valueFactory(key);
+                        if (result != null)
+                        {
+                            dict[key] = result;
+                        }
+                    }
+                    finally
+                    {
+
+                        dictLock.ExitWriteLock();
+                    }
                 }
+
+                return result;
             }
-            return result;
+            finally
+            {
+                dictLock.ExitUpgradeableReadLock();
+            }
         }
 
         /// <summary>
