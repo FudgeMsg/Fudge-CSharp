@@ -38,10 +38,20 @@ namespace Fudge.Serialization
         /// Constructs a new <see cref="SerializationTypeMap"/>
         /// </summary>
         /// <param name="context"></param>
-        public SerializationTypeMap(FudgeContext context)
+        public SerializationTypeMap(FudgeContext context) : this (context, new FudgeSurrogateSelector(context))
+        {
+            
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="SerializationTypeMap"/>
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="surrogateSelector"></param>
+        public SerializationTypeMap(FudgeContext context, FudgeSurrogateSelector surrogateSelector)
         {
             this.context = context;
-            this.surrogateSelector = new FudgeSurrogateSelector(context);
+            this.surrogateSelector = surrogateSelector;
             this.AllowTypeDiscovery = (bool)context.GetProperty(ContextProperties.AllowTypeDiscoveryProperty, true);
             this.FieldNameConvention = (FudgeFieldNameConvention)context.GetProperty(ContextProperties.FieldNameConventionProperty, FudgeFieldNameConvention.Identity);
             RegisterSurrogateSelector((ISurrogateSelector)context.GetProperty(ContextProperties.DotNetSurrogateSelectorProperty));

@@ -59,7 +59,7 @@ namespace Fudge.Serialization.Reflection
         /// Gets or sets an <see cref="ISurrogateSelector"/> which provides surrogates implementing
         /// <see cref="ISerializationSurrogate"/> to allow old code to use Fudge serialization.
         /// </summary>
-        public ISurrogateSelector DotNetSurrogateSelector
+        public virtual ISurrogateSelector DotNetSurrogateSelector
         {
             get { return dotNetSurrogateSelector; }
             set { dotNetSurrogateSelector = value; }
@@ -72,7 +72,7 @@ namespace Fudge.Serialization.Reflection
         /// <param name="fieldNameConvention">Convention for mapping .net property names to serialized field names.</param>
         /// <returns>Surrogate for the type.</returns>
         /// <exception cref="FudgeRuntimeException">Thrown if no surrogate can be automatically created.</exception>
-        public IFudgeSerializationSurrogate GetSurrogate(Type type, FudgeFieldNameConvention fieldNameConvention)
+        public virtual  IFudgeSerializationSurrogate GetSurrogate(Type type, FudgeFieldNameConvention fieldNameConvention)
         {
             var typeData = typeDataCache.GetTypeData(type, fieldNameConvention);            
 
