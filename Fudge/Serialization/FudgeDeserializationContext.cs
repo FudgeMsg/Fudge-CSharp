@@ -202,6 +202,10 @@ namespace Fudge.Serialization
             objectList[index].Msg = null;                           // Just making sure we don't try to process the same one twice
 
             Type objectType = GetObjectType(index, hintType, message);
+            if (objectType == null)
+            {
+                throw new FudgeRuntimeException(string.Format("Failed to find type for {0}", message));
+            }
             var surrogate = GetSurrogate(objectType);
 
             var state = new State(message, index);
