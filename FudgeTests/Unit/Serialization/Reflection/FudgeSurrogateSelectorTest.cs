@@ -15,9 +15,6 @@
  * -->
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Xunit;
 using Fudge.Serialization;
 using Fudge.Serialization.Reflection;
@@ -58,6 +55,13 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
             Assert.IsType<SurrogateTest4.SurrogateTest4Surrogate>(surrogate);
             Assert.Equal(typeof(SurrogateTest4), ((SurrogateTest4.SurrogateTest4Surrogate)surrogate).Type);
             Assert.Same(context, ((SurrogateTest4.SurrogateTest4Surrogate)surrogate).Context);
+            
+            //ISurrogateTest is an interface
+
+            surrogate = selector.GetSurrogate(typeof(ISurrogateTest), FudgeFieldNameConvention.Identity);
+            Assert.IsType<InterfaceSurrogateTestSurrogate>(surrogate);
+            Assert.Equal(typeof(ISurrogateTest), ((InterfaceSurrogateTestSurrogate)surrogate).Type);
+            Assert.Same(context, ((InterfaceSurrogateTestSurrogate)surrogate).Context);
         }
 
         #region Test classes
@@ -205,6 +209,38 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
 
                 #endregion
             }
+        }
+
+        [FudgeSurrogate(typeof(InterfaceSurrogateTestSurrogate))]
+        private interface ISurrogateTest
+        {
+           int Number { get;}
+        }
+
+        private class InterfaceSurrogateTestSurrogate : IFudgeSerializationSurrogate
+        {
+            public Type Type { get; set; }
+            public FudgeContext Context { get; set; }
+
+            public InterfaceSurrogateTestSurrogate(FudgeContext context, Type type)
+            {
+                this.Context = context;
+                this.Type = type;
+            }
+
+            #region IFudgeSerializationSurrogate Members
+
+            public void Serialize(object obj, IAppendingFudgeFieldContainer msg, IFudgeSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public object Deserialize(IFudgeFieldContainer msg, IFudgeDeserializer deserializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            #endregion
         }
 
         #endregion
