@@ -59,6 +59,17 @@ namespace Fudge.Tests.Unit
             return msg;
         }
 
+        internal static FudgeMsg CreateLargeMessage(FudgeContext context)
+        {
+            FudgeMsg msg = context.NewMessage();
+            for (int i = short.MinValue - 1; i <= short.MaxValue + 1; i++)
+            {
+                msg.Add(string.Format("field{0}", i), "FRN-91");
+            }
+            return msg;
+        }
+
+
         internal static FudgeMsg CreateMessageAllOrdinals(FudgeContext context)
         {
             FudgeMsg msg = context.NewMessage();

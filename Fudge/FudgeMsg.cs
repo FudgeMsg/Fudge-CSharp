@@ -146,10 +146,6 @@ namespace Fudge
         /// <inheritdoc />
         public virtual void Add(string name, int? ordinal, FudgeFieldType type, object value)
         {
-            if (fields.Count >= short.MaxValue)
-            {
-                throw new InvalidOperationException("Can only add " + short.MaxValue + " to a single message.");
-            }
             if (ordinal.HasValue && (ordinal < short.MinValue || ordinal > short.MaxValue))
             {
                 throw new ArgumentOutOfRangeException("ordinal", "Ordinal must be within signed 16-bit range");
@@ -208,11 +204,9 @@ namespace Fudge
         #region IFudgeFieldContainer implementation
 
         /// <inheritdoc />
-        public short GetNumFields()
+        public int GetNumFields()
         {
-            int size = fields.Count;
-            Debug.Assert(size <= short.MaxValue);
-            return (short)size;
+            return fields.Count;
         }
 
         /// <inheritdoc />
@@ -221,7 +215,7 @@ namespace Fudge
             // Fudge-Java just returns a read-only wrapper, but we can't do that in a typed way in .net 3.5
             //var copy = new List<IFudgeField>(fields.Cast<IFudgeField>()); // Cast is specific to the linq namespace
             //return copy;
-            return fields.ConvertAll<IFudgeField>(new Converter<FudgeMsgField, IFudgeField>(FudgeMsgField.toIFudgeField));
+            return fields.ConvertAll(FudgeMsgField.toIFudgeField);
         }
 
         /// <inheritdoc />

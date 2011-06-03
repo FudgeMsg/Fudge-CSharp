@@ -148,9 +148,9 @@ namespace Fudge
 
             #region IFudgeFieldContainer Members
 
-            public short GetNumFields()
+            public int GetNumFields()
             {
-                return (short)fields.Length;
+                return fields.Length;
             }
 
             public IList<IFudgeField> GetAllFields()

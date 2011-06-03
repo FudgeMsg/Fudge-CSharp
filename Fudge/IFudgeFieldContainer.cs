@@ -31,7 +31,7 @@ namespace Fudge
         /// Returns the number of fields currently in this message.
         /// </summary>
         /// <returns>number of fields</returns>
-        short GetNumFields();
+        int GetNumFields();
 
         /// <summary>
         /// Return an unmodifiable list of all the fields in this message, in the index

@@ -15,10 +15,8 @@
  * limitations under the License.
  * -->
  */
-using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using Xunit;
 using Fudge.Encodings;
 using Fudge.Types;
@@ -143,6 +141,19 @@ namespace Fudge.Tests.Unit.Encodings
             Assert.Equal(2, writer.PeekAllMessages().Count);
             Assert.Equal("fred", writer.DequeueMessage().GetString("name"));
             Assert.Equal(17, writer.DequeueMessage().GetInt("number"));
+        }
+
+        [Fact]
+        public void LargeMsg()
+        {
+            var stringWriter = new StringWriter();
+            var streamWriter = new FudgeJSONStreamWriter(context, stringWriter);
+            FudgeMsg inMsg = StandardFudgeMessages.CreateLargeMessage(context);
+            streamWriter.WriteMsg(inMsg);
+            
+            var msg = new FudgeJSONStreamReader(context, stringWriter.GetStringBuilder().ToString()).ReadMsg();
+
+            FudgeUtils.AssertAllFieldsMatch(inMsg, msg);
         }
     }
 }

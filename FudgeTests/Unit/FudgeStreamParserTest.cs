@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Xunit;
 using System.IO;
 
@@ -55,6 +51,13 @@ namespace Fudge.Tests.Unit
         }
 
         [Fact]
+        public void LargeMessage()
+        { // FRN-91
+            FudgeMsg msg = StandardFudgeMessages.CreateLargeMessage(fudgeContext);
+            CheckResultsMatch(msg);
+        }
+
+        [Fact]
         public void AllMessagesSameContext()
         {
             FudgeContext fudgeContext = new FudgeContext();
@@ -67,6 +70,8 @@ namespace Fudge.Tests.Unit
             CheckResultsMatch(msg, fudgeContext);
             msg = StandardFudgeMessages.CreateMessageWithSubMsgs(fudgeContext);
             CheckResultsMatch(msg, fudgeContext);
+            msg = StandardFudgeMessages.CreateLargeMessage(fudgeContext);
+            CheckResultsMatch(msg);
         }
 
         protected void CheckResultsMatch(FudgeMsg msg)

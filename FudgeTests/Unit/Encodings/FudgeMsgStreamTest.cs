@@ -61,5 +61,22 @@ namespace Fudge.Tests.Unit.Encodings
             FudgeUtils.AssertAllFieldsMatch(msg1, writer.DequeueMessage());
             FudgeUtils.AssertAllFieldsMatch(msg2, writer.DequeueMessage());
         }
+
+        [Fact]
+        public void BigMessage()
+        {
+            var context = new FudgeContext();
+
+            var msg = StandardFudgeMessages.CreateLargeMessage(context);
+            var reader = new FudgeMsgStreamReader(context, msg);
+            var writer = new FudgeMsgStreamWriter();
+
+            var pipe = new FudgeStreamPipe(reader, writer);
+            pipe.Process();
+
+            var newMsg = writer.DequeueMessage();
+
+            FudgeUtils.AssertAllFieldsMatch(msg, newMsg);
+        }
     }
 }

@@ -115,5 +115,20 @@ namespace Fudge.Tests.Unit.Encodings
 
             Assert.Equal(inputXml, outputXml);
         }
+
+        [Fact]
+        public void LargeMsg()
+        {
+            var stringWriter = new StringWriter();
+            var xmlWriter = new XmlTextWriter(stringWriter);
+            var streamWriter = new FudgeXmlStreamWriter(context, xmlWriter, "msg");
+            FudgeMsg inMsg = StandardFudgeMessages.CreateLargeMessage(context);
+            streamWriter.WriteMsg(inMsg);
+
+            string msgString = stringWriter.GetStringBuilder().ToString();
+            var msg = new FudgeXmlStreamReader(context, msgString).ReadMsg();
+
+            FudgeUtils.AssertAllFieldsMatch(inMsg, msg);
+        }
     }
 }
