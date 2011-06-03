@@ -96,7 +96,7 @@ namespace Fudge.Serialization.Reflection
                 (c, td) => ArraySurrogate.CanHandle(td) ? new ArraySurrogate(c, td) : null,
                 (c, td) => DictionarySurrogate.CanHandle(td) ? new DictionarySurrogate(c, td) : null,
                 (c, td) => ListSurrogate.CanHandle(td) ? new ListSurrogate(c, td) : null,
-                (c, td) => ToFromFudgeMsgSurrogateFactory.CanHandle(td) ? ToFromFudgeMsgSurrogateFactory.Create(td) : null,
+                (c, td) => ToFromFudgeMsgSurrogate.CanHandle(td) ? new ToFromFudgeMsgSurrogate(c, td) : null,
                 (c, td) => DataContractSurrogate.CanHandle(td) ? new DataContractSurrogate(c, td) : null,
                 (c, td) => DotNetSerializableSurrogate.CanHandle(td) ? new DotNetSerializableSurrogate(c, td) : null,
                 this.SurrogateFromDotNetSurrogateSelector,

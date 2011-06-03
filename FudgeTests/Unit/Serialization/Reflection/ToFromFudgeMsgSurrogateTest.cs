@@ -37,18 +37,19 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         [Fact]
         public void CanHandle()
         {
-            Assert.True(ToFromFudgeMsgSurrogateFactory.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(ExampleClass)));
-            Assert.False(ToFromFudgeMsgSurrogateFactory.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus1)));
-            Assert.False(ToFromFudgeMsgSurrogateFactory.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus2)));
-            Assert.False(ToFromFudgeMsgSurrogateFactory.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus3)));
-            Assert.False(ToFromFudgeMsgSurrogateFactory.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus4)));
+            Assert.True(ToFromFudgeMsgSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(ExampleClass)));
+            Assert.False(ToFromFudgeMsgSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus1)));
+            Assert.False(ToFromFudgeMsgSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus2)));
+            Assert.False(ToFromFudgeMsgSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus3)));
+            Assert.False(ToFromFudgeMsgSurrogate.CanHandle(typeDataCache, FudgeFieldNameConvention.Identity, typeof(Bogus4)));
         }
 
         [Fact]
         public void ConstuctorRangeChecking()
         {
-            Assert.Throws<ArgumentNullException>(() => ToFromFudgeMsgSurrogateFactory.Create(null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => ToFromFudgeMsgSurrogateFactory.Create(typeDataCache.GetTypeData(typeof(Bogus1), FudgeFieldNameConvention.Identity)));
+            Assert.Throws<ArgumentNullException>(() => new ToFromFudgeMsgSurrogate(null, typeDataCache.GetTypeData(typeof(ExampleClass), FudgeFieldNameConvention.Identity)));
+            Assert.Throws<ArgumentNullException>(() => new ToFromFudgeMsgSurrogate(context, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ToFromFudgeMsgSurrogate(context, typeDataCache.GetTypeData(typeof(Bogus1), FudgeFieldNameConvention.Identity)));
         }
 
         [Fact]
@@ -56,7 +57,7 @@ namespace Fudge.Tests.Unit.Serialization.Reflection
         {
             var surrogate = new FudgeSerializer(context).TypeMap.GetSurrogate(typeof(ExampleClass));
             Assert.NotNull(surrogate);
-            Assert.IsAssignableFrom(typeof(ToFromFudgeMsgSurrogateFactory.EmittedFudgeSerializationSurrogateBase), surrogate);
+            Assert.IsType<ToFromFudgeMsgSurrogate>(surrogate);
         }
 
         [Fact]
